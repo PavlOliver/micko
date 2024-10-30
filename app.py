@@ -1,12 +1,6 @@
-from flask import Flask, render_template
+from files import create_app
 
-app = Flask(__name__)
-
-
-@app.route('/')
-def hello_world():  # put application's code here
-    return render_template('home.html', title='Hollo')
-
+app = create_app()
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
