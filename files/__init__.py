@@ -3,8 +3,6 @@ import json
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-
-
 db = SQLAlchemy()
 
 
@@ -19,7 +17,10 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     from .views import views
+    from .auth import auth
+
     app.register_blueprint(views)
+    app.register_blueprint(auth)
 
     db.init_app(app)
     with app.app_context():

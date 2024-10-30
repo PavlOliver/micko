@@ -1,5 +1,7 @@
 from flask import Blueprint
 from .queries import select_test
+from .models import Diagnoza, db
+import csv
 
 views = Blueprint('views', __name__)
 
@@ -8,3 +10,6 @@ views = Blueprint('views', __name__)
 def index():
     names = select_test()
     return names
+
+
+
