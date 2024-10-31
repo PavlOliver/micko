@@ -1,6 +1,6 @@
 import csv
 
-from flask import Blueprint
+from flask import Blueprint, jsonify
 
 from .models import Diagnoza, db
 from .queries import select_test
@@ -32,3 +32,14 @@ def load():
         db.session.commit()
 
     return 'load'
+@views.route('/test')
+def test():
+    premena = Diagnoza.query.all()
+    print("test")
+    print(premena)
+    return 'test'
+@views.route('/vek')
+def vek():
+
+    print("te54st")
+    return jsonify(5)
