@@ -3,15 +3,12 @@ import csv
 from flask import Blueprint, jsonify
 
 from .models import Diagnoza, db
-from .queries import select_test
-
 views = Blueprint('views', __name__)
 
 
 @views.route('/')
 def index():
-    names = select_test()
-    return names
+    return 'Hello, World!'
 
 
 @views.route('/load')
