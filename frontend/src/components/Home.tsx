@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 
-// Definovanie typu pre dáta, ktoré očakávaš z API
 interface Data {
     Name: string;
     Age: string;
