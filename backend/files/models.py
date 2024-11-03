@@ -1,3 +1,6 @@
+from uuid import uuid4
+
+from flask_login import UserMixin
 from sqlalchemy.dialects.oracle import VARCHAR2, CHAR, DATE, NUMBER
 from sqlalchemy.types import CLOB, UserDefinedType
 
@@ -120,13 +123,16 @@ class Zamestnanec(db.Model):
     fotka = db.Column(VARCHAR2(20), nullable=True)
 
 
-class Pouzivatel(db.Model):
+class Pouzivatel(db.Model, UserMixin):
     __tablename__ = 'm_pouzivatel'
 
     id_zamestnanca = db.Column(CHAR(6), db.ForeignKey('m_zamestnanec.id_zamestnanca'), primary_key=True)
-    login = db.Column(VARCHAR2(50), primary_key=True)
+    login = db.Column(VARCHAR2(50), nullable=False)
     heslo = db.Column(VARCHAR2(50), nullable=False)
     rola = db.Column(CHAR(1), nullable=False)
+
+    def get_id(self):
+        return str(self.id_zamestnanca)
 
 
 class ZdravotnyZaznam(db.Model):
@@ -217,5 +223,4 @@ class SkladLiekov(db.Model):
     datum_dodania = db.Column(DATE, nullable=False)
     expiracia = db.Column(DATE, nullable=False)
     faktura_scan = db.Column(VARCHAR2(20), nullable=False)
-    pohyb = db.Column(CHAR(1), nullable=False) # P - prichod, V - vydanie
-
+    pohyb = db.Column(CHAR(1), nullable=False)  # P - prichod, V - vydanie
