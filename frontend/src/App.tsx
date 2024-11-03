@@ -5,6 +5,7 @@ import Domaca from "./components/Domaca";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Login from "./components/Login";
 import axios from 'axios';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 axios.defaults.baseURL = 'http://localhost:5000';
 axios.defaults.withCredentials = true;
