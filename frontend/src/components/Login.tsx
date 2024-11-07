@@ -17,7 +17,7 @@ const Login: React.FC = () => {
             });
 
             if (response.status === 200) {
-                navigate('/');
+                navigate('/home');
             }
         } catch (error) {
             setError('Invalid username or password');
