@@ -47,3 +47,4 @@ def get_time():
 @test_routes.route('/xx')
 def xx():
     return jsonify({'username': 'current_user.login'})
+
