@@ -15,19 +15,19 @@ def login():
     else:
         login_user(user, remember=True)
         session['user'] = user.id_zamestnanca
-        return jsonify({"access_token": 'xxxx', "status": "success"}), 200
+        return jsonify({"message": "Logged in", "status": "success"}), 200
+
+
+@auth.route('/logout', methods=['POST'])
+def logout():
+    logout_user()
+    return jsonify({"message": "Logged out", "status": "success"}), 200
 
 
 @auth.route('/x')
 def x():
     session['user'] = Pouzivatel.query.first().id_zamestnanca
     return 'x'
-
-
-@auth.route('/logout')
-def logout():
-    logout_user()
-    return redirect(url_for('auth.login'))
 
 
 @auth.route('/xx')

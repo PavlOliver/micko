@@ -42,3 +42,8 @@ def get_time():
         "Date": datetime.datetime.now(),
         "programming": "python"
     }
+
+
+@test_routes.route('/xx')
+def xx():
+    return jsonify({'username': 'current_user.login'})

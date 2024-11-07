@@ -16,7 +16,7 @@ def create_app():
     CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
     app.config['SECRET_KEY'] = "our secret key"
     app.config['SQLALCHEMY_DATABASE_URI'] = (
-        f'oracle+oracledb://{config["username"]}:{config["password"]}@{config["hostname"]}/{config["sid"]}')
+        f'oracle+oracledb://{config["username"]}:{config["password"]}@{config["hostname"]}:{config["port"]}/{config["sid"]}')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     from .views import views
