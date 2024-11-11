@@ -5,6 +5,7 @@ import Domaca from "./components/Domaca";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Login from "./components/Login";
 import Profile from "./components/Profile";
+import Order from "./components/Order";
 import axios from 'axios';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import Pacients from "./components/Patients";
@@ -20,6 +21,7 @@ const App: React.FC = () => {
                 <Route path="/home" element={<Domaca/>} />
                 <Route path="/login" element={<Login/>} />
                 <Route path={"/profile"} element={<Profile/>} />
+                <Route path={"/orders"} element={<Order/>} />
                 <Route path={"/patients"} element={<Pacients/>} />
             </Routes>
         </Router>

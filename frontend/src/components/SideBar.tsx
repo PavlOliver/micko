@@ -78,7 +78,7 @@ const SideBar: React.FC<SidebarProps> = ({isOpen, toggleSidebar, username}) => {
                     <i className="bi bi-calendar"></i>
                     {isOpen && <span className="ms-2">Rozvrh miestností</span>}
                 </Nav.Link>
-                <Nav.Link href="/patient-appointment" className={`text-nowrap ${isOpen ? '' : 'text-center'}`}>
+                <Nav.Link href="/orders" className={`text-nowrap ${isOpen ? '' : 'text-center'}`}>
                     <i className="bi bi-file-earmark-medical"></i>
                     {isOpen && <span className="ms-2">Objednávky</span>}
                 </Nav.Link>
