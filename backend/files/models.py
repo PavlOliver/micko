@@ -58,14 +58,14 @@ class TNudzovyKontakt(UserDefinedType):
         return process
 
 
-class MNTAtc(UserDefinedType):
+class TAtc(UserDefinedType):
     def get_col_spec(self):
-        return "m_nt_atc"
+        return "m_t_atc"
 
     def bind_processor(self, dialect):
         def process(value):
             if value is not None:
-                return [f"{item['kod_atc']},{item['nazov_atc']}" for item in value]
+                return f"{value['kod']},{value['nazov']}"
             return value
 
         return process
@@ -73,7 +73,10 @@ class MNTAtc(UserDefinedType):
     def result_processor(self, dialect, coltype):
         def process(value):
             if value is not None:
-                return [{'kod_atc': item.KOD_ATC, 'nazov_atc': item.NAZOV_ATC} for item in value]
+                return {
+                    'kod': value.KOD,
+                    'nazov': value.NAZOV
+                }
             return value
 
         return process
@@ -82,9 +85,9 @@ class MNTAtc(UserDefinedType):
 class Diagnoza(db.Model):
     __tablename__ = 'm_diagnoza'
 
-    kod_diagnozy = db.Column(CHAR(6), primary_key=True)
+    kod_diagnozy = db.Column(CHAR(9), primary_key=True)
     nazov_diagnozy = db.Column(VARCHAR2(255), nullable=False)
-    doplnujuce_info = db.Column(VARCHAR2(700), nullable=True)
+    doplnujuce_info = db.Column(CLOB, nullable=True)
 
 
 class Osoba(db.Model):
@@ -104,6 +107,10 @@ class Pacient(db.Model):
     rod_cislo = db.Column(VARCHAR2(10), db.ForeignKey('m_osoba.rod_cislo'), nullable=False)
     datum_od = db.Column(DATE, nullable=False)
     nudzovy_kontakt = db.Column(TNudzovyKontakt, nullable=True)
+
+    def get_name(self):
+        osoba = Osoba.query.filter(Osoba.rod_cislo == self.rod_cislo).first()
+        return f"{osoba.meno} {osoba.priezvisko}" if osoba else None
 
 
 class Specializacia(db.Model):
@@ -168,11 +175,26 @@ class Zmena(db.Model):
 class Objednavka(db.Model):
     __tablename__ = 'm_objednavka'
 
-    id_objednavky = db.Column(NUMBER(38, 0), primary_key=True)
+    id_objednavky = db.Column(NUMBER(38, 0), primary_key=True, autoincrement=True)
+    dovod = db.Column(VARCHAR2(50), nullable=True)
     datum_objednavky = db.Column(DATE, nullable=False)
+    pocet_blokov = db.Column(NUMBER(38, 0), nullable=False)
     miesnost = db.Column(CHAR(5), db.ForeignKey('m_miestnost.cislo_miestnosti'), nullable=False)
     pacient = db.Column(VARCHAR2(10), db.ForeignKey('m_pacient.id_poistenca'), nullable=False)
     lekar = db.Column(CHAR(6), db.ForeignKey('m_zamestnanec.id_zamestnanca'), nullable=False)
+
+    def to_dic(self):
+        pacient = Pacient.query.filter(Pacient.id_poistenca == self.pacient).first()
+        return {
+            'reason': self.dovod,
+            'date': self.datum_objednavky.strftime('%d.%m.%Y'),
+            'time': self.datum_objednavky.strftime('%H:%M'),
+            'blocks': self.pocet_blokov,
+            'room': self.miesnost,
+            'patient': pacient.get_name(),
+            'doctor': self.lekar,
+            'day': self.datum_objednavky.strftime('%A')
+        }
 
 
 class Hospitalizacia(db.Model):
@@ -191,17 +213,19 @@ class Liek(db.Model):
     __tablename__ = 'm_liek'
 
     kod_lieku = db.Column(CHAR(5), primary_key=True)
-    reg_cislo = db.Column(VARCHAR2(50), nullable=False)
-    doplnok = db.Column(VARCHAR2(50), nullable=True)
-    stav = db.Column(CHAR(1), nullable=False)
-    typ_reg_proc = db.Column(VARCHAR2(50), nullable=False)
-    drzitel = db.Column(VARCHAR2(50), nullable=False)
-    indikacna_skupina = db.Column(NUMBER(38, 0), nullable=False)
-    atc_kol = db.Column(MNTAtc, nullable=True)
-    expiracia = db.Column(NUMBER(38, 0), nullable=False)
-    podanie = db.Column(VARCHAR2(50), nullable=True)
-    vydaj = db.Column(VARCHAR2(50), nullable=False)
-    vydanie = db.Column(DATE, nullable=False)
+    nazov = db.Column(VARCHAR2(255), nullable=False)
+    reg_cislo = db.Column(VARCHAR2(16), nullable=False)
+    doplnok = db.Column(VARCHAR2(120), nullable=False)
+    typ_reg = db.Column(VARCHAR2(3), nullable=False)
+    drzitel = db.Column(VARCHAR2(12), nullable=False)
+    indikacna_skupina = db.Column(NUMBER(38, 0), nullable=True)
+    atc = db.Column(TAtc, nullable=True)
+    expiracia = db.Column(VARCHAR2(14), nullable=False)
+    vydaj = db.Column(VARCHAR2(2), nullable=False)
+    kod_statu = db.Column(VARCHAR2(2), nullable=False)
+    platnost = db.Column(CHAR(1), nullable=True)
+    bezp_prvok = db.Column(CHAR(1), nullable=True)
+    datum_reg = db.Column(DATE, nullable=True)
 
 
 class Recept(db.Model):

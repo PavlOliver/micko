@@ -4,7 +4,10 @@ import Home from "./components/Home";
 import Domaca from "./components/Domaca";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Login from "./components/Login";
+import Profile from "./components/Profile";
+import Order from "./components/Order";
 import axios from 'axios';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 axios.defaults.baseURL = 'http://localhost:5000';
 axios.defaults.withCredentials = true;
@@ -16,6 +19,8 @@ const App: React.FC = () => {
                 <Route path="/" element={<Home/>} />
                 <Route path="/home" element={<Domaca/>} />
                 <Route path="/login" element={<Login/>} />
+                <Route path={"/profile"} element={<Profile/>} />
+                <Route path={"/orders"} element={<Order/>} />
             </Routes>
         </Router>
     );
