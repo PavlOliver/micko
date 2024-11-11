@@ -54,7 +54,7 @@ const SideBar: React.FC<SidebarProps> = ({isOpen, toggleSidebar, username}) => {
             </Button>
 
             <Nav defaultActiveKey="/home" className="flex-column">
-                <Nav.Link href="/" className={`text-nowrap ${isOpen ? '' : 'text-center'}`}>
+                <Nav.Link href="/home" className={`text-nowrap ${isOpen ? '' : 'text-center'}`}>
                     <i className="bi bi-house"></i>
                     {isOpen && <span className="ms-2">Domov</span>}
                 </Nav.Link>

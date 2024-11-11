@@ -4,9 +4,10 @@ from flask import Flask
 from flask_cors import CORS
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import MetaData
 
-db = SQLAlchemy()
-
+metadata = MetaData(schema='pavlanin2')
+db = SQLAlchemy(metadata=metadata)
 
 def create_app():
     with open('backend/static/config.json') as config_file:

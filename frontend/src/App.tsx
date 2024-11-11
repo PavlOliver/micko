@@ -7,6 +7,7 @@ import Login from "./components/Login";
 import Profile from "./components/Profile";
 import axios from 'axios';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import Pacients from "./components/Patients";
 
 axios.defaults.baseURL = 'http://localhost:5000';
 axios.defaults.withCredentials = true;
@@ -19,6 +20,7 @@ const App: React.FC = () => {
                 <Route path="/home" element={<Domaca/>} />
                 <Route path="/login" element={<Login/>} />
                 <Route path={"/profile"} element={<Profile/>} />
+                <Route path={"/patients"} element={<Pacients/>} />
             </Routes>
         </Router>
     );
