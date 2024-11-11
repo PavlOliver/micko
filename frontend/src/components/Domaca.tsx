@@ -28,12 +28,11 @@ const Home: React.FC = () => {
     if (username) {
         return (
             <Container fluid>
-                <Row style={{height: '100vh'}}>
-                    <Col md={3} className="p-0">
+                <Row>
+                    <Col md={isSideBarOpen ? 2 : 1} className="p-0">
                         <SideBar isOpen={isSideBarOpen} toggleSidebar={toggleSidebar} username={username}/>
                     </Col>
-                    <Col md={9} className="p-4"
-                         style={{marginLeft: isSideBarOpen ? '250px' : '60px', transition: 'margin-left 0.3s'}}>
+                    <Col md={isSideBarOpen ? 10 : 11} className="content-column">
                         <Row className="mb-4">
                             <Col>
                                 <h1>Vitajte v Nemocničnom Informačnom Systéme</h1>
