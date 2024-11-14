@@ -2,7 +2,8 @@ from flask import Blueprint, jsonify, request
 from flask_login import login_required
 
 from . import db
-from .queries import select_current_user, select_current_doctor_schedule, insert_new_order, select_last_order
+from .queries import select_current_user, select_current_doctor_orders, insert_new_order, select_last_order, \
+    update_order, delete_order
 
 views = Blueprint('views', __name__)
 
@@ -15,34 +16,33 @@ def home():
     return jsonify({'error': 'User not found'})
 
 
-@views.route('/orders', methods=['GET', 'POST'])
+@views.route('/orders', methods=['GET', 'PUT', 'DELETE', 'POST'])
 @login_required
 def orders():
+    """This route is used for managing orders
+    GET - returns all orders of the current user (doctor)
+    POST - creates a new order
+    PUT - updates an order
+    DELETE - deletes an order"""
     if request.method == 'GET':
         if select_current_user():
-            objednavky = select_current_doctor_schedule()
+            objednavky = select_current_doctor_orders()
             return jsonify({'username': select_current_user().login, 'appointments': objednavky})
-        return jsonify({'error': 'User not found'})
-    else:
-        print(request.json)
-        insert_new_order(request.json['reason'], request.json['patient'], request.json['doctor'], request.json['room'],
-                         request.json['blocks'], request.json['date'], request.json['time'])
-        return jsonify({'message': 'Order created'})
-
-
-@views.route('/last_order', methods=['GET', 'POST'])
-@login_required
-def last_order():
-    if request.method == 'GET':
-        if select_current_user():
-            objednavka = select_last_order()
-            return jsonify({'last_order': objednavka.to_dic()})
-        return jsonify({'error': 'User not found'})
-    else:
+    elif request.method == 'POST':
         new_order = insert_new_order(request.json['reason'], request.json['patient'], request.json['doctor'],
                                      request.json['room'],
                                      request.json['blocks'], request.json['date'], request.json['time'])
         return jsonify({'last_order': new_order.to_dic()})
+    elif request.method == 'PUT':
+        edited_order = update_order(request.json['id'], request.json['reason'], request.json['patient'],
+                                    request.json['doctor'],
+                                    request.json['room'],
+                                    request.json['blocks'], request.json['date'], request.json['time'])
+        return jsonify({'updated_order': edited_order.to_dic()})
+    elif request.method == 'DELETE':
+        delete_order(request.json['id'])
+        return jsonify({'message': 'Order deleted'})
+    return jsonify({'error': 'User not found'})
 
 
 @views.route('/profile', methods=['GET', 'POST'])
