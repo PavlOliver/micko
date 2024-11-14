@@ -108,9 +108,21 @@ class Pacient(db.Model):
     datum_od = db.Column(DATE, nullable=False)
     nudzovy_kontakt = db.Column(TNudzovyKontakt, nullable=True)
 
-    def get_name(self):
+    def get_full_name(self):
         osoba = Osoba.query.filter(Osoba.rod_cislo == self.rod_cislo).first()
         return f"{osoba.meno} {osoba.priezvisko}" if osoba else None
+
+    def get_name(self):
+        osoba = Osoba.query.filter(Osoba.rod_cislo == self.rod_cislo).first()
+        return osoba.meno if osoba else None
+
+    def get_surename(self):
+        osoba = Osoba.query.filter(Osoba.rod_cislo == self.rod_cislo).first()
+        return osoba.priezvisko if osoba else None
+
+    def get_fullname_and_id(self):
+        osoba = Osoba.query.filter(Osoba.rod_cislo == self.rod_cislo).first()
+        return f"{osoba.meno} {osoba.priezvisko} - {self.id_poistenca}" if osoba else None
 
 
 class Specializacia(db.Model):
@@ -128,6 +140,11 @@ class Zamestnanec(db.Model):
     rod_cislo = db.Column(VARCHAR2(10), db.ForeignKey('m_osoba.rod_cislo'), nullable=False)
     specializacia = db.Column(NUMBER(38, 0), db.ForeignKey('m_specializacia.kod_specializacie'), nullable=False)
     fotka = db.Column(VARCHAR2(20), nullable=True)
+
+    def get_full_name_and_login(self):
+        osoba = Osoba.query.filter(Osoba.rod_cislo == self.rod_cislo).first()
+        pouzivatel = Pouzivatel.query.filter(Pouzivatel.id_zamestnanca == self.id_zamestnanca).first()
+        return f"{osoba.meno} {osoba.priezvisko} - {pouzivatel.login}" if osoba else None
 
 
 class Pouzivatel(db.Model, UserMixin):
@@ -154,9 +171,13 @@ class ZdravotnyZaznam(db.Model):
 
 
 class Miestnost(db.Model):
+    """Model for the table m_miestnost
+    Attributes:
+
+        """
     __tablename__ = 'm_miestnost'
 
-    cislo_miestnosti = db.Column(CHAR(5), primary_key=True)
+    cislo_miestnosti = db.Column(CHAR(4), primary_key=True)
     typ = db.Column(VARCHAR2(50), nullable=False)
     kapacita = db.Column(NUMBER(38, 0), nullable=False)
     stav = db.Column(CHAR(1), nullable=False)
@@ -186,12 +207,13 @@ class Objednavka(db.Model):
     def to_dic(self):
         pacient = Pacient.query.filter(Pacient.id_poistenca == self.pacient).first()
         return {
+            'id': self.id_objednavky,
             'reason': self.dovod,
             'date': self.datum_objednavky.strftime('%d.%m.%Y'),
             'time': self.datum_objednavky.strftime('%H:%M'),
             'blocks': self.pocet_blokov,
             'room': self.miesnost,
-            'patient': pacient.get_name(),
+            'patient': pacient.get_fullname_and_id(),
             'doctor': self.lekar,
             'day': self.datum_objednavky.strftime('%A')
         }
