@@ -85,7 +85,7 @@ class TAtc(UserDefinedType):
 class Diagnoza(db.Model):
     __tablename__ = 'm_diagnoza'
 
-    kod_diagnozy = db.Column(CHAR(9), primary_key=True)
+    kod_diagnozy = db.Column(VARCHAR2(9), primary_key=True)
     nazov_diagnozy = db.Column(VARCHAR2(255), nullable=False)
     doplnujuce_info = db.Column(CLOB, nullable=True)
 
