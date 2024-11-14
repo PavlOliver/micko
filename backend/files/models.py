@@ -124,6 +124,14 @@ class Pacient(db.Model):
         osoba = Osoba.query.filter(Osoba.rod_cislo == self.rod_cislo).first()
         return f"{osoba.meno} {osoba.priezvisko} - {self.id_poistenca}" if osoba else None
 
+    def to_dic(self):
+        osoba = Osoba.query.filter(Osoba.rod_cislo == self.rod_cislo).first()
+        return {
+            'id_poistenca': self.id_poistenca,
+            'rodne_cislo': self.rod_cislo,
+            'meno': osoba.meno,
+            'priezvisko': osoba.priezvisko,
+        }
 
 class Specializacia(db.Model):
     __tablename__ = 'm_specializacia'

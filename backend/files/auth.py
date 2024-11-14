@@ -8,6 +8,7 @@ auth = Blueprint('auth', __name__)
 
 @auth.route('/login', methods=['POST'])
 def login():
+    print(request.json)
     user = Pouzivatel.query.filter_by(login=request.json['username']).first()
     if user is None or user.heslo != request.json['password']:
         return jsonify({"message": "Invalid username or password", "status": "fail"}), 401

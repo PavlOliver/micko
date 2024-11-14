@@ -91,3 +91,47 @@ def add_recept(id_poistenca):
                 })
             return jsonify({'error': 'Pacient not found'})
     return jsonify({'error': 'Invalid request method'})
+
+@views.route('/patients', methods=['GET'])
+@login_required
+def patients():
+    if select_patients():
+        return jsonify({'patients': select_patients()})
+    return jsonify({'error': 'Patients not found'})
+
+@views.route('/search_patients', methods=['GET'])
+@login_required
+def search_patients():
+    try:
+        ID_Poistenca = request.args.get('ID_Poistenca')
+        rodne_cislo = request.args.get('rodne_cislo')
+        vek = request.args.get('vek')
+        adresa = request.args.get('adresa')
+
+        # Logovanie parametrov
+        print(f"Received parameters: meno={ID_Poistenca}, rodne_cislo={rodne_cislo}, vek={vek}, adresa={adresa}")
+
+        # Vyhľadávacie filtre na základe parametrov
+        query = Pacient.query
+        if ID_Poistenca:
+            query = query.filter(Pacient.id_poistenca.ilike(f'%{ID_Poistenca}%'))
+        if rodne_cislo:
+            query = query.filter(Pacient.rod_cislo.ilike(f'%{rodne_cislo}%'))
+        if vek:
+            query = query.filter(Pacient.vek == vek)
+        if adresa:
+            query = query.filter(Pacient.adresa.ilike(f'%{adresa}%'))
+
+        # Získanie pacientov
+        patients = query.all()
+
+        # Logovanie odpovede
+        print(f"Found patients: {patients}")
+
+        # Vrátenie pacientov ako JSON
+        return jsonify({'patients': [patient.to_dic() for patient in patients]})
+
+    except Exception as e:
+        # Logovanie chyby
+        print(f"Error: {e}")
+        return jsonify({'error': 'An internal error occurred'}), 500
