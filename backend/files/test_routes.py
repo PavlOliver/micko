@@ -2,10 +2,9 @@ import csv
 import datetime
 import re
 
-import chardet
 
 from flask import Blueprint, jsonify
-from telegram._files import file
+
 
 from backend.files import db
 from backend.files.models import Diagnoza
