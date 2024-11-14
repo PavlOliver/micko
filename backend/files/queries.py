@@ -46,3 +46,10 @@ def insert_new_order(reason, patient, doctor, room, blocks, date, time):
     print(new_order)
     db.session.commit()
     return new_order
+
+def select_patients():
+    patients = Pacient.query.all()
+    to_return = []
+    for patient in patients:
+        to_return.append(patient.to_dic())
+    return to_return
