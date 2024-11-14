@@ -8,7 +8,8 @@ import Profile from "./components/Profile";
 import Order from "./components/Order";
 import axios from 'axios';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import Pacients from "./components/Patients";
+import Recept from "./components/Recept";
+//import Pacients from "./components/Patients";<Route path={"/patients"} element={<Pacients/>} />
 
 axios.defaults.baseURL = 'http://localhost:5000';
 axios.defaults.withCredentials = true;
@@ -22,7 +23,8 @@ const App: React.FC = () => {
                 <Route path="/login" element={<Login/>} />
                 <Route path={"/profile"} element={<Profile/>} />
                 <Route path={"/orders"} element={<Order/>} />
-                <Route path={"/patients"} element={<Pacients/>} />
+                <Route path="/pacient/:id_poistenca/recepty" element={<Recept/>} />
+
             </Routes>
         </Router>
     );

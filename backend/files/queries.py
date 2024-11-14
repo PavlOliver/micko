@@ -2,7 +2,7 @@ from datetime import datetime
 
 from flask_login import current_user
 from . import db
-from .models import Objednavka, Pouzivatel, Pacient
+from .models import Objednavka, Pouzivatel, Pacient, Recept
 
 
 def select_current_user():
@@ -68,3 +68,25 @@ def update_order(id, reason, patient, doctor, room, blocks, date, time):
     order.dovod = reason
     db.session.commit()
     return order
+
+
+
+def insert_new_recept(liek, pacient, lekar, pocet, poznamka, vystavenie):
+    """creates a new recept"""
+    if pocet <= 0:
+        raise ValueError("Pocet must be greater than 0")
+
+    if not liek or not pacient or not lekar:
+        raise ValueError("All not-nullable fields must be filled")
+
+    new_recept = Recept(
+        liek=liek,
+        vystavenie=vystavenie,
+        pacient=pacient,
+        lekar=lekar,
+        pocet=pocet,
+        poznamka=poznamka
+    )
+    db.session.add(new_recept)
+    db.session.commit()
+    return new_recept

@@ -146,6 +146,10 @@ class Zamestnanec(db.Model):
         pouzivatel = Pouzivatel.query.filter(Pouzivatel.id_zamestnanca == self.id_zamestnanca).first()
         return f"{osoba.meno} {osoba.priezvisko} - {pouzivatel.login}" if osoba else None
 
+    def get_full_name(self):
+        osoba = Osoba.query.filter(Osoba.rod_cislo == self.rod_cislo).first()
+        return f"{osoba.meno} {osoba.priezvisko}" if osoba else None
+
 
 class Pouzivatel(db.Model, UserMixin):
     __tablename__ = 'm_pouzivatel'
@@ -255,9 +259,27 @@ class Recept(db.Model):
 
     id_receptu = db.Column(NUMBER(38, 0), primary_key=True)
     liek = db.Column(CHAR(5), db.ForeignKey('m_liek.kod_lieku'), primary_key=True)
-    vybrane = db.Column(DATE, nullable=False)
+    vybrane = db.Column(DATE, nullable=True)
+    vystavenie = db.Column(DATE, nullable=False)
     pacient = db.Column(VARCHAR2(10), db.ForeignKey('m_pacient.id_poistenca'), primary_key=True)
     lekar = db.Column(CHAR(6), db.ForeignKey('m_zamestnanec.id_zamestnanca'), primary_key=True)
+    pocet = db.Column(NUMBER(38, 0), nullable=False)
+    poznamka = db.Column(VARCHAR2(255), nullable=True)
+
+    def to_dic(self):
+        pacient = Pacient.query.filter(Pacient.id_poistenca == self.pacient).first()
+        liek = Liek.query.filter(Liek.kod_lieku == self.liek).first()
+        lekar = Zamestnanec.query.filter(Zamestnanec.id_zamestnanca == self.lekar).first()
+        return {
+            'id_receptu': self.id_receptu,
+            'liek': liek.nazov if liek else None,
+            'vybrane': self.vybrane.strftime('%H:%M %d.%m.%Y'),
+            'vystavenie': self.vybrane.strftime('%H:%M %d.%m.%Y'),
+            'pacient': pacient.get_full_name() if pacient else None,
+            'lekar': lekar.get_full_name_and_login() if lekar else None,
+            'pocet': self.pocet,
+            'poznamka': self.poznamka
+        }
 
 
 class SkladLiekov(db.Model):

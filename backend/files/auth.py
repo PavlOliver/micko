@@ -1,5 +1,4 @@
 from flask import Blueprint, request, jsonify, url_for, redirect, session
-from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_login import login_user, current_user, logout_user, login_required
 
 from .models import Pouzivatel
@@ -37,10 +36,3 @@ def xx():
         return jsonify({'username': current_user.login})
     return jsonify({'error': 'error'})
 
-
-@auth.route('/tst')
-@jwt_required()
-def tst():
-    current_user_id = get_jwt_identity()
-    user = Pouzivatel.query.get(current_user_id)
-    return 'tst'
