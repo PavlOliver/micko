@@ -61,7 +61,7 @@ const Patients: React.FC = () => {
 
     const handleAddRecept = (id_poistenca: number) => {
         console.log('Add recept');
-        navigate(`/patient/${id_poistenca}/recept`);
+        navigate(`/pacient/${id_poistenca}/recepty`);
     }
 
     function handleShowZdravotnaKarta(id_poistenca: number) {
