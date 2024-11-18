@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from flask import Blueprint, jsonify, request
 from flask_login import login_required
 
@@ -26,14 +28,27 @@ def orders():
     DELETE - deletes an order"""
     if request.method == 'GET':
         if select_current_user():
-            objednavky = select_current_doctor_orders()
-            return jsonify({'username': select_current_user().login, 'appointments': objednavky})
+            if request.args.get('week'):
+                this_week = int(request.args.get('week'))
+            else:
+                this_week = datetime.now().isocalendar().week
+            current_year = datetime.now().year
+            monday = datetime.strptime(f"{current_year}-W{this_week}-1", "%Y-W%W-%w").date()
+            sunday = monday + timedelta(days=6)
+            objednavky = select_current_doctor_orders(this_week)
+            return jsonify(
+                {'username': select_current_user().login,
+                 'appointments': objednavky,
+                 'week': this_week,
+                 'monday': monday.strftime('%d.%m.%Y'),
+                 'sunday': sunday.strftime('%d.%m.%Y')})
     elif request.method == 'POST':
         new_order = insert_new_order(request.json['reason'], request.json['patient'], request.json['doctor'],
                                      request.json['room'],
                                      request.json['blocks'], request.json['date'], request.json['time'])
         return jsonify({'last_order': new_order.to_dic()})
     elif request.method == 'PUT':
+        print(request.json)
         edited_order = update_order(request.json['id'], request.json['reason'], request.json['patient'],
                                     request.json['doctor'],
                                     request.json['room'],
@@ -58,6 +73,7 @@ def profile():
         db.session.commit()
         return jsonify({'message': 'Profile updated'})
 
+
 @views.route('/pacient/<id_poistenca>/recepty', methods=['GET', 'POST'])
 @login_required
 def add_recept(id_poistenca):
@@ -81,7 +97,8 @@ def add_recept(id_poistenca):
             pacient_meno = pacient.get_full_name()
             pacient_id = pacient.id_poistenca
             lekar_login = select_current_user().login
-            lekar_meno = Zamestnanec.query.filter_by(id_zamestnanca=select_current_user().id_zamestnanca).first().get_full_name()
+            lekar_meno = Zamestnanec.query.filter_by(
+                id_zamestnanca=select_current_user().id_zamestnanca).first().get_full_name()
             lekar_id = select_current_user().id_zamestnanca
             if pacient:
                 return jsonify({
@@ -92,12 +109,14 @@ def add_recept(id_poistenca):
             return jsonify({'error': 'Pacient not found'})
     return jsonify({'error': 'Invalid request method'})
 
+
 @views.route('/patients', methods=['GET'])
 @login_required
 def patients():
     if select_patients():
-        return jsonify({'patients': select_patients()})
+        return jsonify({'patients': select_patients(), 'username': select_current_user().login})
     return jsonify({'error': 'Patients not found'})
+
 
 @views.route('/search_patients', methods=['GET'])
 @login_required

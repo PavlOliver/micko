@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_required
-from .models import Pacient, Osoba, Pouzivatel, Zamestnanec, Liek
+from .models import Pacient, Osoba, Pouzivatel, Zamestnanec, Liek, Miestnost
 from . import db
 
 api = Blueprint('api', __name__)
@@ -42,3 +42,13 @@ def get_drug_suggestions():
         drugs = Liek.query.filter(Liek.nazov.ilike(f'%{query}%')).all()
         return jsonify({'drugs': [drug.nazov for drug in drugs]})
     return jsonify({'drugs': []})
+
+
+@api.route('/rooms_list')
+def rooms_list():
+    query_filter = request.args.get('query')
+    rooms = Miestnost.query.filter(
+        Miestnost.cislo_miestnosti.ilike(f'%{query_filter}%') |
+        Miestnost.typ.ilike(f'%{query_filter}%')
+    ).all()
+    return {'rooms': [room.cislo_miestnosti for room in rooms]}
