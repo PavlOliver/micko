@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 from flask_login import login_required
-from .models import Pacient, Osoba, Pouzivatel, Zamestnanec
+from .models import Pacient, Osoba, Pouzivatel, Zamestnanec, Miestnost
 from . import db
 
 api = Blueprint('api', __name__)
@@ -31,3 +31,13 @@ def doctors_list():
     print([doctor.get_full_name_and_login() for doctor in doctors])
 
     return {'doctors': [doctor.get_full_name_and_login() for doctor in doctors]}
+
+
+@api.route('/rooms_list')
+def rooms_list():
+    query_filter = request.args.get('query')
+    rooms = Miestnost.query.filter(
+        Miestnost.cislo_miestnosti.ilike(f'%{query_filter}%') |
+        Miestnost.typ.ilike(f'%{query_filter}%')
+    ).all()
+    return {'rooms': [room.cislo_miestnosti for room in rooms]}
