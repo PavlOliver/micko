@@ -70,7 +70,7 @@ const Patients: React.FC = () => {
     }
 
     return (
-        <Container fluid>
+        <Container fluid className="ms-2">
             <Row>
                 <Col md={isSideBarOpen ? 2 : 1} className="p-0">
                     <SideBar isOpen={isSideBarOpen} toggleSidebar={toggleSidebar} username={username}/>
@@ -142,10 +142,10 @@ const Patients: React.FC = () => {
                                                 </Card.Text>
                                             </Col>
                                             <Col md={4} className="d-flex align-items-center justify-content-end">
-                                                <Button variant="outline-primary" className="me-2" onClick={() => handleShowZdravotnaKarta(patient.id_poistenca)}>
+                                                <Button variant="outline-primary" className="custom-button me-2" onClick={() => handleShowZdravotnaKarta(patient.id_poistenca)}>
                                                     <i className="bi bi-info-circle me-1"></i> Detail
                                                 </Button>
-                                                <Button variant="outline-success" onClick={() => handleAddRecept(patient.id_poistenca)}>
+                                                <Button variant="outline-success" className="custom-button" onClick={() => handleAddRecept(patient.id_poistenca)}>
                                                     <i className="bi bi-plus-circle me-1"></i> Pridať recept
                                                 </Button>
                                             </Col>
