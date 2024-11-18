@@ -65,7 +65,7 @@ class TAtc(UserDefinedType):
     def bind_processor(self, dialect):
         def process(value):
             if value is not None:
-                return f"{value['kod']},{value['nazov']}"
+                return f"{value['kod_atc']},{value['nazov_atc']}"
             return value
 
         return process
@@ -74,8 +74,8 @@ class TAtc(UserDefinedType):
         def process(value):
             if value is not None:
                 return {
-                    'kod': value.KOD,
-                    'nazov': value.NAZOV
+                    'kod_atc': value.KOD_ATC,
+                    'nazov_atc': value.NAZOV_ATC
                 }
             return value
 
@@ -246,7 +246,7 @@ class Hospitalizacia(db.Model):
 class Liek(db.Model):
     __tablename__ = 'm_liek'
 
-    kod_lieku = db.Column(CHAR(5), primary_key=True)
+    kod = db.Column(CHAR(5), primary_key=True)
     nazov = db.Column(VARCHAR2(255), nullable=False)
     reg_cislo = db.Column(VARCHAR2(16), nullable=False)
     doplnok = db.Column(VARCHAR2(120), nullable=False)
