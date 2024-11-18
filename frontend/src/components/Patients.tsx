@@ -20,7 +20,7 @@ const Patients: React.FC = () => {
     const [vek, setVek] = useState<number | ''>('');
     const [adresa, setAdresa] = useState('');
     const navigate = useNavigate();
-    const username = "Doktor";
+    const [username, setUsername] = useState('');
 
     const toggleSidebar = () => {
         setIsSideBarOpen(!isSideBarOpen);
@@ -31,6 +31,7 @@ const Patients: React.FC = () => {
             .then(response => {
                 console.log('Patients:', response.data);
                 setPatients(response.data.patients);
+                setUsername(response.data.username);
                 console.log('Patients25:', patients);
             })
             .catch(error => {

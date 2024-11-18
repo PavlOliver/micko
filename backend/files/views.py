@@ -73,6 +73,7 @@ def profile():
         db.session.commit()
         return jsonify({'message': 'Profile updated'})
 
+
 @views.route('/pacient/<id_poistenca>/recepty', methods=['GET', 'POST'])
 @login_required
 def add_recept(id_poistenca):
@@ -96,7 +97,8 @@ def add_recept(id_poistenca):
             pacient_meno = pacient.get_full_name()
             pacient_id = pacient.id_poistenca
             lekar_login = select_current_user().login
-            lekar_meno = Zamestnanec.query.filter_by(id_zamestnanca=select_current_user().id_zamestnanca).first().get_full_name()
+            lekar_meno = Zamestnanec.query.filter_by(
+                id_zamestnanca=select_current_user().id_zamestnanca).first().get_full_name()
             lekar_id = select_current_user().id_zamestnanca
             if pacient:
                 return jsonify({
@@ -107,12 +109,14 @@ def add_recept(id_poistenca):
             return jsonify({'error': 'Pacient not found'})
     return jsonify({'error': 'Invalid request method'})
 
+
 @views.route('/patients', methods=['GET'])
 @login_required
 def patients():
     if select_patients():
-        return jsonify({'patients': select_patients()})
+        return jsonify({'patients': select_patients(), 'username': select_current_user().login})
     return jsonify({'error': 'Patients not found'})
+
 
 @views.route('/search_patients', methods=['GET'])
 @login_required
