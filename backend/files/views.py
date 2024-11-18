@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta
 
 from flask import Blueprint, jsonify, request
 from flask_login import login_required
@@ -31,10 +31,10 @@ def orders():
             if request.args.get('week'):
                 this_week = int(request.args.get('week'))
             else:
-                this_week = datetime.datetime.now().isocalendar().week
-            current_year = datetime.datetime.now().year
-            monday = datetime.datetime.strptime(f"{current_year}-W{this_week}-1", "%Y-W%W-%w").date()
-            sunday = monday + datetime.timedelta(days=6)
+                this_week = datetime.now().isocalendar().week
+            current_year = datetime.now().year
+            monday = datetime.strptime(f"{current_year}-W{this_week}-1", "%Y-W%W-%w").date()
+            sunday = monday + timedelta(days=6)
             objednavky = select_current_doctor_orders(this_week)
             return jsonify(
                 {'username': select_current_user().login,
