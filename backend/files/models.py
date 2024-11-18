@@ -212,7 +212,7 @@ class Objednavka(db.Model):
     dovod = db.Column(VARCHAR2(50), nullable=True)
     datum_objednavky = db.Column(DATE, nullable=False)
     pocet_blokov = db.Column(NUMBER(38, 0), nullable=False)
-    miesnost = db.Column(CHAR(5), db.ForeignKey('m_miestnost.cislo_miestnosti'), nullable=False)
+    miestnost = db.Column(CHAR(5), db.ForeignKey('m_miestnost.cislo_miestnosti'), nullable=False)
     pacient = db.Column(VARCHAR2(10), db.ForeignKey('m_pacient.id_poistenca'), nullable=False)
     lekar = db.Column(CHAR(6), db.ForeignKey('m_zamestnanec.id_zamestnanca'), nullable=False)
 
@@ -224,7 +224,7 @@ class Objednavka(db.Model):
             'date': self.datum_objednavky.strftime('%d.%m.%Y'),
             'time': self.datum_objednavky.strftime('%H:%M'),
             'blocks': self.pocet_blokov,
-            'room': self.miesnost,
+            'room': self.miestnost,
             'patient': pacient.get_fullname_and_id(),
             'doctor': self.lekar,
             'day': self.datum_objednavky.strftime('%A')
