@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_login import login_required
 from .models import Pacient, Osoba, Pouzivatel, Zamestnanec, Liek, Miestnost
 from . import db
+from .queries import select_current_user
 
 api = Blueprint('api', __name__)
 
@@ -46,8 +47,16 @@ def get_drug_suggestions():
         return jsonify({'drugs': [{'name': drug.nazov, 'code': drug.kod} for drug in drugs]})
     return jsonify({'drugs': []})
 
+@api.route('/user-role')
+@login_required
+def get_user_role():
+    current_user = select_current_user()
+    if current_user:
+        return jsonify({'rola': current_user.rola})
+    return jsonify({'error': 'User not found'}), 404
 
 @api.route('/rooms_list')
+@login_required
 def rooms_list():
     query_filter = request.args.get('query')
     rooms = Miestnost.query.filter(

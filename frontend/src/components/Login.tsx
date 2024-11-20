@@ -1,12 +1,14 @@
 import React, {useState} from 'react';
 import axios from 'axios';
 import {useNavigate} from "react-router-dom";
+import { useUser } from '../context/UserContext';
 
 const Login: React.FC = () => {
     const [username, setUsername] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
+    const { setCurrentUser } = useUser();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -17,6 +19,11 @@ const Login: React.FC = () => {
             });
 
             if (response.status === 200) {
+                setCurrentUser({
+                    id: response.data.id,
+                    login: response.data.username,
+                    rola: response.data.rola
+                });
                 navigate('/home');
             }
         } catch (error) {

@@ -4,7 +4,7 @@ from flask import Blueprint, jsonify, request
 from flask_login import login_required
 
 from . import db
-from .models import Pacient, Zamestnanec, Liek
+from .models import Pacient, Zamestnanec, Pouzivatel, Osoba
 from .queries import *
 
 views = Blueprint('views', __name__)
@@ -109,6 +109,60 @@ def add_recept(id_poistenca):
                 })
             return jsonify({'error': 'Pacient not found'})
     return jsonify({'error': 'Invalid request method'})
+
+@views.route('/user-management', methods=['GET', 'POST'])
+@login_required
+def user_management():
+    current_user_log = select_current_user()
+    print("Current user:", current_user_log, "Role:", current_user_log.rola if current_user_log else None)
+    if not current_user_log or current_user_log.rola != 'A':
+        return jsonify({'error': 'Unauthorized access'}), 403
+
+    if request.method == 'POST':
+        try:
+            new_user = Pouzivatel(
+                id_zamestnanca=request.json['id_zamestnanca'],
+                login=request.json['login'],
+                heslo=request.json['heslo'],
+                rola=request.json['rola']
+            )
+            db.session.add(new_user)
+            db.session.commit()
+            return jsonify({'message': 'User created successfully'}), 201
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    elif request.method == 'GET':
+        try:
+            users = db.session.query(
+                Pouzivatel.id_zamestnanca,
+                Pouzivatel.login,
+                Pouzivatel.rola,
+                Osoba.meno,
+                Osoba.priezvisko,
+                Osoba.rod_cislo
+            ).join(
+                Zamestnanec,
+                Pouzivatel.id_zamestnanca == Zamestnanec.id_zamestnanca
+            ).join(
+                Osoba,
+                Zamestnanec.rod_cislo == Osoba.rod_cislo
+            ).all()
+
+            print("Debug - Users:", users) # Debug print
+
+            return jsonify({
+                'users': [{
+                    'id': u.id_zamestnanca.strip(),
+                    'login': u.login,
+                    'rola': u.rola,
+                    'meno': u.meno,
+                    'priezvisko': u.priezvisko
+                } for u in users]
+            })
+
+        except Exception as e:
+            print("Database error:", str(e))  # Debug print
+            return jsonify({'error': str(e)}), 500
 
 
 @views.route('/patients', methods=['GET'])

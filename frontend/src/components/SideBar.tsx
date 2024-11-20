@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {Nav, Button} from 'react-bootstrap';
 import {handleLogout} from '../utils/logout';
 import axios from 'axios';
+import { useUser } from '../context/UserContext';
 
 
 interface SidebarProps {
@@ -12,6 +13,9 @@ interface SidebarProps {
 
 const SideBar: React.FC<SidebarProps> = ({isOpen, toggleSidebar, username}) => {
     const [showUserOptions, setShowUserOptions] = useState(false);
+    const { currentUser, setCurrentUser } = useUser();
+
+     //console.log('Current user:', currentUser);
 
     const handleMouseEnter = () => {
         if (isOpen) {
@@ -28,6 +32,7 @@ const SideBar: React.FC<SidebarProps> = ({isOpen, toggleSidebar, username}) => {
     const handleLogout = () => {
         axios.post('/logout')
             .then(response => {
+                setCurrentUser(null);
                 window.location.href = '/login';
             })
             .catch(error => {
@@ -82,6 +87,13 @@ const SideBar: React.FC<SidebarProps> = ({isOpen, toggleSidebar, username}) => {
                     <i className="bi bi-file-earmark-medical"></i>
                     {isOpen && <span className="ms-2">Objednávky</span>}
                 </Nav.Link>
+
+                {currentUser?.rola === 'A' && (
+                    <Nav.Link href="/user-management" className={`text-nowrap ${isOpen ? '' : 'text-center'}`}>
+                        <i className="bi bi-person-check"></i>
+                        {isOpen && <span className="ms-2">Správa používateľov</span>}
+                    </Nav.Link>
+                )}
 
                 <Nav.Link onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}
                           className={`text-nowrap ${isOpen ? '' : 'text-center'}`}>
