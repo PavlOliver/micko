@@ -148,7 +148,7 @@ def user_management():
                 Zamestnanec.rod_cislo == Osoba.rod_cislo
             ).all()
 
-            print("Debug - Users:", users) # Debug print
+            #print("Debug - Users:", users) # Debug print
 
             return jsonify({
                 'users': [{
@@ -161,7 +161,7 @@ def user_management():
             })
 
         except Exception as e:
-            print("Database error:", str(e))  # Debug print
+            print("Database error:", str(e))  # Debug
             return jsonify({'error': str(e)}), 500
 
 
