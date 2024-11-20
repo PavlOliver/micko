@@ -255,7 +255,7 @@ class Liek(db.Model):
     indikacna_skupina = db.Column(NUMBER(38, 0), nullable=True)
     atc = db.Column(TAtc, nullable=True)
     expiracia = db.Column(VARCHAR2(14), nullable=False)
-    vydaj = db.Column(VARCHAR2(2), nullable=False)
+    vydaj = db.Column(VARCHAR2(2), nullable=False) #R-viazany na lek predpis, F-Nie je viazany na lek predpis, Rx-viazany na lek predpis s obmedzenim predpisovania, RB-Viazany na osobitne tlacivo so sikmym modyým pruhom
     kod_statu = db.Column(VARCHAR2(2), nullable=False)
     platnost = db.Column(CHAR(1), nullable=True)
     bezp_prvok = db.Column(CHAR(1), nullable=True)
@@ -265,8 +265,8 @@ class Liek(db.Model):
 class Recept(db.Model):
     __tablename__ = 'm_recept'
 
-    id_receptu = db.Column(NUMBER(38, 0), primary_key=True)
-    liek = db.Column(CHAR(5), db.ForeignKey('m_liek.kod_lieku'), primary_key=True)
+    id_receptu = db.Column(NUMBER(38, 0), primary_key=True, autoincrement=True)
+    liek = db.Column(CHAR(5), db.ForeignKey('m_liek.kod'), primary_key=True)
     vybrane = db.Column(DATE, nullable=True)
     vystavenie = db.Column(DATE, nullable=False)
     pacient = db.Column(VARCHAR2(10), db.ForeignKey('m_pacient.id_poistenca'), primary_key=True)

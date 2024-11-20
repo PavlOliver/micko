@@ -7,30 +7,37 @@ import SideBar from './SideBar';
 const Recept: React.FC = () => {
     const { id_poistenca } = useParams<{ id_poistenca: string }>();
     const [formData, setFormData] = useState({
-        liek: '',
+        liek_name: '',
+        liek_kod: '',
         vybrane: '',
         pacient: '',
         lekar: '',
         pocet: 1,
         poznamka: ''
     });
+
+    interface DrugSuggestion {
+        name: string;
+        code: string;
+    }
+
     const [IDs, setIDs] = useState({ lekar_id: '', pacient_id: '' });
     const [message, setMessage] = useState('');
     const [isSideBarOpen, setIsSidebarOpen] = useState(true);
     const [username, setUsername] = useState('');
     const [showErrorModal, setShowErrorModal] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    const [drugSuggestions, setDrugSuggestions] = useState<string[]>([]);
+    const [drugSuggestions, setDrugSuggestions] = useState<DrugSuggestion[]>([]);
     const navigate = useNavigate();
 
     useEffect(() => {
         axios.get(`/pacient/${id_poistenca}/recepty`, { withCredentials: true })
             .then(response => {
-                setFormData({
-                    ...formData,
+                setFormData(prevFormData => ({
+                    ...prevFormData,
                     pacient: response.data.pacient_meno,
                     lekar: response.data.lekar_meno
-                });
+                }));
                 setIDs({
                     lekar_id: response.data.lekar_id,
                     pacient_id: response.data.pacient_id
@@ -48,7 +55,7 @@ const Recept: React.FC = () => {
 
     const handleDrugInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        setFormData({ ...formData, liek: value });
+        setFormData({ ...formData, liek_name: value, liek_kod: '' });
         if (value.length >= 3) {
             axios.get(`/lieky?query=${value}`, { withCredentials: true })
                 .then(response => {
@@ -64,19 +71,26 @@ const Recept: React.FC = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const updatedFormData = { ...formData, lekar: IDs.lekar_id, pacient: IDs.pacient_id };
+        const updatedFormData = {
+            liek: formData.liek_kod,
+            pacient: IDs.pacient_id,
+            lekar: IDs.lekar_id,
+            pocet: formData.pocet,
+            poznamka: formData.poznamka || '',
+            vybrane: formData.vybrane || ''
+        };
         axios.post(`/pacient/${id_poistenca}/recepty`, updatedFormData, { withCredentials: true })
             .then(response => {
                 if (response.status === 201) {
                     setMessage('Recept bol úspešne pridaný');
                     setTimeout(() => {
                         setMessage('');
-                        navigate(`/pacient/${id_poistenca}/recepty`);
+                        navigate(`/patients`);
                     }, 3000);
                 }
             })
             .catch(error => {
-                console.error(error);
+                //console.error("Error response:", error.response?.data); // Debug log
                 setErrorMessage('Nastala chyba pri pridávaní receptu');
                 setShowErrorModal(true);
             });
@@ -110,21 +124,21 @@ const Recept: React.FC = () => {
                                     <Form.Control
                                         type="text"
                                         name="liek"
-                                        value={formData.liek}
+                                        value={formData.liek_name}
                                         onChange={handleDrugInputChange}
                                         required
                                     />
                                     {drugSuggestions.length > 0 && (
                                         <ul className="suggestions-list">
-                                            {drugSuggestions.map((suggestion, index) => (
+                                            {drugSuggestions.map((drug, index) => (
                                                 <li
                                                     key={index}
                                                     onClick={() => {
-                                                        setFormData({ ...formData, liek: suggestion });
+                                                        setFormData({ ...formData, liek_name: drug.name, liek_kod: drug.code });
                                                         setDrugSuggestions([]);
                                                     }}
                                                 >
-                                                    {suggestion}
+                                                    {drug.name}
                                                 </li>
                                             ))}
                                         </ul>
@@ -136,7 +150,13 @@ const Recept: React.FC = () => {
                                 </Form.Group>
                                 <Form.Group controlId="poznamka">
                                     <Form.Label>Poznámka</Form.Label>
-                                    <Form.Control type="text" name="poznamka" value={formData.poznamka} onChange={handleChange} />
+                                    <Form.Control
+                                        as="textarea"
+                                        rows={2}
+                                        name="poznamka"
+                                        value={formData.poznamka}
+                                        onChange={handleChange}
+                                    />
                                 </Form.Group>
                                 <Button variant="primary" type="submit">Pridať recept</Button>
                             </Form>

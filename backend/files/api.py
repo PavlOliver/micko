@@ -39,8 +39,11 @@ def doctors_list():
 def get_drug_suggestions():
     query = request.args.get('query')
     if query:
-        drugs = Liek.query.filter(Liek.nazov.ilike(f'%{query}%')).all()
-        return jsonify({'drugs': [drug.nazov for drug in drugs]})
+        drugs = Liek.query.filter(
+            Liek.nazov.ilike(f'%{query}%'),
+            Liek.vydaj != 'F'
+        ).all()
+        return jsonify({'drugs': [{'name': drug.nazov, 'code': drug.kod} for drug in drugs]})
     return jsonify({'drugs': []})
 
 

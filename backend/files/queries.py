@@ -88,7 +88,7 @@ def update_order(id, reason, patient, doctor, room, blocks, date, time):
 def insert_new_recept(liek, pacient, lekar, pocet, poznamka, vystavenie):
     """creates a new recept"""
     if pocet <= 0:
-        raise ValueError("Pocet must be greater than 0")
+        raise ValueError("Počet musí byť viac ako 0")
 
     if not liek or not pacient or not lekar:
         raise ValueError("All not-nullable fields must be filled")

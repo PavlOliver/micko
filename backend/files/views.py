@@ -78,7 +78,7 @@ def profile():
 @login_required
 def add_recept(id_poistenca):
     if request.method == 'POST':
-        print(request.json)
+        #print("Received data:", request.json)  # Debug print
         try:
             new_recept = insert_new_recept(
                 liek=request.json['liek'],
@@ -90,6 +90,7 @@ def add_recept(id_poistenca):
             )
             return jsonify({'message': 'Recept created'}), 201
         except Exception as e:
+            #print("Error details:", str(e)) # Debug print
             return jsonify({'error': str(e)}), 500
     elif request.method == 'GET':
         if select_current_user():
