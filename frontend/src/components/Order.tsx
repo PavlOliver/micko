@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import '../css/order.css';
 import SideBar from "./SideBar";
-import {Button, Col, Container, Form, Modal, Row} from "react-bootstrap";
+import {Button, Col, Container, Form, FormControl, Modal, Row} from "react-bootstrap";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
 
@@ -26,11 +26,16 @@ const Order: React.FC = () => {
     const navigate = useNavigate();
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [weekNumber, setWeekNumber] = useState(0);
+    const [mondayDate, setMondayDate] = useState('');
+    const [sundayDate, setSundayDate] = useState('');
     const toggleAddModal = () => setShowAddModal(!showAddModal);
     const toggleEditModal = () => setShowEditModal(!showEditModal);
     const [patientInput, setPatientInput] = useState('');
+    const [roomInput, setRoomInput] = useState('');
     const [patientSuggestions, setPatientSuggestions] = useState<string[]>([]);
     const [doctorSuggestions, setDoctorSuggestions] = useState<string[]>([]);
+    const [roomSuggestions, setRoomSuggestions] = useState<string[]>([]);
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const timeSlots = [
         "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
@@ -39,12 +44,16 @@ const Order: React.FC = () => {
     ];
     const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
+
     useEffect(() => {
         axios.get('/orders', {withCredentials: true})
             .then(response => {
                 if (response.data.username) {
                     setUsername(response.data.username);
                     setDoctorName(response.data.username);
+                    setWeekNumber(response.data.week);
+                    setMondayDate(response.data.monday);
+                    setSundayDate(response.data.sunday);
                 } else if (response.data.error) {
                     console.error('Error fetching username', response.data.error);
                 }
@@ -93,8 +102,23 @@ const Order: React.FC = () => {
         }
     }
 
+    const handleRoomInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setRoomInput(value);
+        if (value.length >= 3) {
+            axios.get(`/rooms_list?query=${value}`)
+                .then(response => {
+                    setRoomSuggestions(response.data.rooms);
+                })
+                .catch(error => {
+                    console.error('Error fetching room list', error);
+                });
+        } else {
+            setRoomSuggestions([]);
+        }
+    }
+
     const AddOrder = () => {
-        console.log('Add order');
         toggleAddModal();
         const newOrder = {
             reason: (document.querySelector('[name="dovod"]') as HTMLInputElement).value,
@@ -103,7 +127,7 @@ const Order: React.FC = () => {
             room: (document.querySelector('[name="room"]') as HTMLInputElement).value,
             blocks: Number((document.querySelector('[name="blocks"]') as HTMLInputElement).value),
             date: (document.querySelector('[name="datum_objednavky"]') as HTMLInputElement).value,
-            time: (document.querySelector('[name="cas_objednavky"]') as HTMLInputElement).value,
+            time: `${(document.querySelector('[name="hours"]') as HTMLInputElement).value}:${(document.querySelector('[name="minutes"]') as HTMLInputElement).value}`,
             day: new Date((document.querySelector('[name="datum_objednavky"]') as HTMLInputElement).value).toLocaleDateString('en-US', {weekday: 'long'})
         };
 
@@ -131,17 +155,27 @@ const Order: React.FC = () => {
 
             if (dovodElement) {
                 dovodElement.value = appointment.reason;
+                setPatientInput(appointment.patient); // Set patient input state
                 document.querySelector('[name="ePatient"]')?.setAttribute('value', appointment.patient);
                 document.querySelector('[name="eDoctor"]')?.setAttribute('value', appointment.doctor);
+                setDoctorName(appointment.doctor); // Set doctor name state
                 document.querySelector('[name="eRoom"]')?.setAttribute('value', appointment.room);
+                setRoomInput(appointment.room); // Set room input state
                 document.querySelector('[name="eBlocks"]')?.setAttribute('value', appointment.blocks.toString());
                 const [day, month, year] = appointment.date.split('.');
                 const date = `${year}-${month}-${day}`;
                 document.querySelector('[name="eDatum"]')?.setAttribute('value', date);
-
-                document.querySelector('[name="eCas"]')?.setAttribute('value', appointment.time);
+                const [hours, minutes] = appointment.time.split(':');
+                document.querySelector('[name="eHours"]')?.setAttribute('value', hours);
+                document.querySelector('[name="eMinutes"]')?.setAttribute('value', minutes);
             }
         }, 1);
+    };
+
+// Helper function to format date
+    const formatDateForInput = (date: string) => {
+        const [day, month, year] = date.split('.');
+        return `${year}-${month}-${day}`;
     };
 
 
@@ -160,7 +194,7 @@ const Order: React.FC = () => {
             room: (document.querySelector('[name="eRoom"]') as HTMLInputElement).value,
             blocks: Number((document.querySelector('[name="eBlocks"]') as HTMLInputElement).value),
             date: (document.querySelector('[name="eDatum"]') as HTMLInputElement).value,
-            time: (document.querySelector('[name="eCas"]') as HTMLInputElement).value,
+            time: `${(document.querySelector('[name="eHours"]') as HTMLInputElement).value}:${(document.querySelector('[name="eMinutes"]') as HTMLInputElement).value}`,
             day: new Date((document.querySelector('[name="eDatum"]') as HTMLInputElement).value).toLocaleDateString('en-US', {weekday: 'long'})
         };
 
@@ -192,6 +226,39 @@ const Order: React.FC = () => {
                 console.error('Error deleting order', error);
             });
     }
+
+    const handlePreviousWeek = () => {
+        if (weekNumber <= 0) {
+            return;
+        }
+        setWeekNumber(weekNumber - 1);
+        axios.get(`/orders?week=${weekNumber - 1}`, {withCredentials: true})
+            .then(response => {
+                setAppointments(response.data.appointments);
+                setMondayDate(response.data.monday);
+                setSundayDate(response.data.sunday);
+            })
+            .catch(error => {
+                console.error('Error fetching orders', error);
+            });
+    };
+
+    const handleNextWeek = () => {
+        if (weekNumber >= 52) {
+            return;
+        }
+        setWeekNumber(weekNumber + 1);
+        axios.get(`/orders?week=${weekNumber + 1}`, {withCredentials: true})
+            .then(response => {
+                setAppointments(response.data.appointments);
+                setMondayDate(response.data.monday);
+                setSundayDate(response.data.sunday);
+            })
+            .catch(error => {
+                console.error('Error fetching orders', error);
+            });
+    };
+
     return (
         <Container fluid>
             <Row>
@@ -201,9 +268,22 @@ const Order: React.FC = () => {
                 <Col md={isSideBarOpen ? 10 : 11} className="content-column">
                     <div className="container-fluid">
                         <div className="text-center">
-                            <div className="d-flex justify-content-between align-items-center">
-                                <h1>Rozvrh {username}</h1>
-                                <Button variant="primary" onClick={() => setShowAddModal(true)} className="mt-3">
+                            <div className="d-flex flex-wrap justify-content-between align-items-center mb-4">
+                                <h1 className="mb-3 mb-md-0">Rozvrh {username}</h1>
+                                <div className="d-flex align-items-center mb-3 mb-md-0">
+                                    <Button variant="outline-primary" className="me-3" onClick={handlePreviousWeek}>
+                                        &lt;
+                                    </Button>
+                                    <span className="fw-bold">{mondayDate} - {sundayDate}</span>
+                                    <Button variant="outline-primary" className="ms-3" onClick={handleNextWeek}>
+                                        &gt;
+                                    </Button>
+                                </div>
+
+                                <Button
+                                    variant="primary"
+                                    className="mt-3 mt-md-0"
+                                    onClick={() => setShowAddModal(true)}>
                                     Add Order
                                 </Button>
                             </div>
@@ -280,7 +360,24 @@ const Order: React.FC = () => {
                                                         type="text"
                                                         placeholder="Enter room name"
                                                         name="room"
+                                                        value={roomInput}
+                                                        onChange={handleRoomInputChange}
                                                     />
+                                                    {roomSuggestions.length > 0 && (
+                                                        <ul className="suggestions-list">
+                                                            {roomSuggestions.map((suggestion, index) => (
+                                                                <li
+                                                                    key={index}
+                                                                    onClick={() => {
+                                                                        setRoomInput(suggestion);
+                                                                        setRoomSuggestions([]);
+                                                                    }}
+                                                                >
+                                                                    {suggestion}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    )}
                                                 </Form.Group>
                                             </Col>
                                             <Col md={6}>
@@ -307,13 +404,32 @@ const Order: React.FC = () => {
                                                 </Form.Group>
                                             </Col>
                                             <Col md={6}>
-                                                <Form.Group controlId="formTime">
-                                                    <Form.Label>Time</Form.Label>
-                                                    <Form.Control
-                                                        type="time"
-                                                        name="cas_objednavky"
-                                                    />
-                                                </Form.Group>
+                                                <Row>
+                                                    <Col md={6}>
+                                                        <Form.Group controlId="formHours">
+                                                            <Form.Label>Hours</Form.Label>
+                                                            <Form.Control
+                                                                type="number"
+                                                                name="hours"
+                                                                min="9"
+                                                                max="17"
+                                                                step="1"
+                                                            />
+                                                        </Form.Group>
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <Form.Group controlId="formMinutes">
+                                                            <Form.Label>Minutes</Form.Label>
+                                                            <Form.Control
+                                                                type="number"
+                                                                name="minutes"
+                                                                min="0"
+                                                                max="59"
+                                                                step="30"
+                                                            />
+                                                        </Form.Group>
+                                                    </Col>
+                                                </Row>
                                             </Col>
                                         </Row>
                                     </Form>
@@ -400,7 +516,24 @@ const Order: React.FC = () => {
                                                         type="text"
                                                         placeholder="Enter room name"
                                                         name="eRoom"
+                                                        value={roomInput}
+                                                        onChange={handleRoomInputChange}
                                                     />
+                                                    {roomSuggestions.length > 0 && (
+                                                        <ul className="suggestions-list">
+                                                            {roomSuggestions.map((suggestion, index) => (
+                                                                <li
+                                                                    key={index}
+                                                                    onClick={() => {
+                                                                        setRoomInput(suggestion);
+                                                                        setRoomSuggestions([]);
+                                                                    }}
+                                                                >
+                                                                    {suggestion}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    )}
                                                 </Form.Group>
                                             </Col>
                                             <Col md={6}>
@@ -425,13 +558,32 @@ const Order: React.FC = () => {
                                                 </Form.Group>
                                             </Col>
                                             <Col md={6}>
-                                                <Form.Group controlId="formTime">
-                                                    <Form.Label>Time</Form.Label>
-                                                    <Form.Control
-                                                        type="time"
-                                                        name="eCas"
-                                                    />
-                                                </Form.Group>
+                                                <Row>
+                                                    <Col md={6}>
+                                                        <Form.Group controlId="formHours">
+                                                            <Form.Label>Hours</Form.Label>
+                                                            <Form.Control
+                                                                type="number"
+                                                                name="eHours"
+                                                                min="9"
+                                                                max="17"
+                                                                step="1"
+                                                            />
+                                                        </Form.Group>
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <Form.Group controlId="formMinutes">
+                                                            <Form.Label>Minutes</Form.Label>
+                                                            <Form.Control
+                                                                type="number"
+                                                                name="eMinutes"
+                                                                min="0"
+                                                                max="59"
+                                                                step="30"
+                                                            />
+                                                        </Form.Group>
+                                                    </Col>
+                                                </Row>
                                             </Col>
                                         </Row>
                                     </Form>

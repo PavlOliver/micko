@@ -7,70 +7,97 @@ import SideBar from './SideBar';
 const Recept: React.FC = () => {
     const { id_poistenca } = useParams<{ id_poistenca: string }>();
     const [formData, setFormData] = useState({
-        liek: '',
+        liek_name: '',
+        liek_kod: '',
         vybrane: '',
         pacient: '',
         lekar: '',
         pocet: 1,
         poznamka: ''
     });
-    const [IDs, setIDs] = useState({lekar_id: '', pacient_id: ''});
+
+    interface DrugSuggestion {
+        name: string;
+        code: string;
+    }
+
+    const [IDs, setIDs] = useState({ lekar_id: '', pacient_id: '' });
     const [message, setMessage] = useState('');
     const [isSideBarOpen, setIsSidebarOpen] = useState(true);
     const [username, setUsername] = useState('');
     const [showErrorModal, setShowErrorModal] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const [drugSuggestions, setDrugSuggestions] = useState<DrugSuggestion[]>([]);
     const navigate = useNavigate();
 
     useEffect(() => {
-
-       axios.get(`/pacient/${id_poistenca}/recepty`, { withCredentials: true })
-        .then(response => {
-            setFormData({
-                ...formData,
-                pacient: response.data.pacient_meno,
-                lekar: response.data.lekar_meno
+        axios.get(`/pacient/${id_poistenca}/recepty`, { withCredentials: true })
+            .then(response => {
+                setFormData(prevFormData => ({
+                    ...prevFormData,
+                    pacient: response.data.pacient_meno,
+                    lekar: response.data.lekar_meno
+                }));
+                setIDs({
+                    lekar_id: response.data.lekar_id,
+                    pacient_id: response.data.pacient_id
+                });
+                setUsername(response.data.username);
+            })
+            .catch(error => {
+                console.error(error);
             });
-            setIDs({
-                lekar_id: response.data.lekar_id,
-                pacient_id: response.data.pacient_id
-            });
-            setUsername(response.data.username);
-        })
-        .catch(error => {
-            console.error(error);
-        });
     }, [id_poistenca]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-   const handleSubmit = (e: React.FormEvent) => {
+    const handleDrugInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setFormData({ ...formData, liek_name: value, liek_kod: '' });
+        if (value.length >= 3) {
+            axios.get(`/lieky?query=${value}`, { withCredentials: true })
+                .then(response => {
+                    setDrugSuggestions(response.data.drugs);
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        } else {
+            setDrugSuggestions([]);
+        }
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const updatedFormData = { ...formData, lekar: IDs.lekar_id, pacient: IDs.pacient_id };
+        const updatedFormData = {
+            liek: formData.liek_kod,
+            pacient: IDs.pacient_id,
+            lekar: IDs.lekar_id,
+            pocet: formData.pocet,
+            poznamka: formData.poznamka || '',
+            vybrane: formData.vybrane || ''
+        };
         axios.post(`/pacient/${id_poistenca}/recepty`, updatedFormData, { withCredentials: true })
-        .then(response => {
-            console.log(response.status);
-            if (response.status === 201) {
-                setMessage('Recept bol úspešne pridaný');
-                //setShowMessageModal(true);
-                setTimeout(() => {
-                    setMessage('');
-                    navigate(`/pacient/${id_poistenca}/recepty`);
-                }, 3000);
-            }
-        })
-        .catch(error => {
-            console.error(error);
-            setErrorMessage('Nastala chyba pri pridávaní receptu');
-            setShowErrorModal(true);
-        });
+            .then(response => {
+                if (response.status === 201) {
+                    setMessage('Recept bol úspešne pridaný');
+                    setTimeout(() => {
+                        setMessage('');
+                        navigate(`/patients`);
+                    }, 3000);
+                }
+            })
+            .catch(error => {
+                //console.error("Error response:", error.response?.data); // Debug log
+                setErrorMessage('Nastala chyba pri pridávaní receptu');
+                setShowErrorModal(true);
+            });
     };
 
     const toggleSidebar = () => setIsSidebarOpen(!isSideBarOpen);
     const handleCloseErrorModal = () => setShowErrorModal(false);
-    //const handleCloseMessageModal = () => setShowMessageModal(false);
 
     return (
         <Container fluid>
@@ -81,7 +108,7 @@ const Recept: React.FC = () => {
                 <Col md={9} className="p-4" style={{ marginLeft: isSideBarOpen ? '250px' : '60px', transition: 'margin-left 0.3s' }}>
                     <Row>
                         <Col md={{ span: 6, offset: 3 }}>
-                            <h2>Pridať nový recept</h2>
+                            <h2>Nový recept</h2>
                             {message && <Alert variant="success" style={{ position: 'fixed', top: '10px', right: '10px', zIndex: 1000 }}>{message}</Alert>}
                             <Form onSubmit={handleSubmit}>
                                 <Form.Group controlId="lekar">
@@ -94,7 +121,28 @@ const Recept: React.FC = () => {
                                 </Form.Group>
                                 <Form.Group controlId="liek">
                                     <Form.Label>Liek</Form.Label>
-                                    <Form.Control type="text" name="liek" value={formData.liek} onChange={handleChange} required />
+                                    <Form.Control
+                                        type="text"
+                                        name="liek"
+                                        value={formData.liek_name}
+                                        onChange={handleDrugInputChange}
+                                        required
+                                    />
+                                    {drugSuggestions.length > 0 && (
+                                        <ul className="suggestions-list">
+                                            {drugSuggestions.map((drug, index) => (
+                                                <li
+                                                    key={index}
+                                                    onClick={() => {
+                                                        setFormData({ ...formData, liek_name: drug.name, liek_kod: drug.code });
+                                                        setDrugSuggestions([]);
+                                                    }}
+                                                >
+                                                    {drug.name}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
                                 </Form.Group>
                                 <Form.Group controlId="pocet">
                                     <Form.Label>Počet</Form.Label>
@@ -102,7 +150,13 @@ const Recept: React.FC = () => {
                                 </Form.Group>
                                 <Form.Group controlId="poznamka">
                                     <Form.Label>Poznámka</Form.Label>
-                                    <Form.Control type="text" name="poznamka" value={formData.poznamka} onChange={handleChange} />
+                                    <Form.Control
+                                        as="textarea"
+                                        rows={2}
+                                        name="poznamka"
+                                        value={formData.poznamka}
+                                        onChange={handleChange}
+                                    />
                                 </Form.Group>
                                 <Button variant="primary" type="submit">Pridať recept</Button>
                             </Form>
@@ -122,7 +176,6 @@ const Recept: React.FC = () => {
                     </Button>
                 </Modal.Footer>
             </Modal>
-
         </Container>
     );
 };

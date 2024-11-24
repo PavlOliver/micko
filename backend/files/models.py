@@ -65,7 +65,7 @@ class TAtc(UserDefinedType):
     def bind_processor(self, dialect):
         def process(value):
             if value is not None:
-                return f"{value['kod']},{value['nazov']}"
+                return f"{value['kod_atc']},{value['nazov_atc']}"
             return value
 
         return process
@@ -74,8 +74,8 @@ class TAtc(UserDefinedType):
         def process(value):
             if value is not None:
                 return {
-                    'kod': value.KOD,
-                    'nazov': value.NAZOV
+                    'kod_atc': value.KOD_ATC,
+                    'nazov_atc': value.NAZOV_ATC
                 }
             return value
 
@@ -212,7 +212,7 @@ class Objednavka(db.Model):
     dovod = db.Column(VARCHAR2(50), nullable=True)
     datum_objednavky = db.Column(DATE, nullable=False)
     pocet_blokov = db.Column(NUMBER(38, 0), nullable=False)
-    miesnost = db.Column(CHAR(5), db.ForeignKey('m_miestnost.cislo_miestnosti'), nullable=False)
+    miestnost = db.Column(CHAR(5), db.ForeignKey('m_miestnost.cislo_miestnosti'), nullable=False)
     pacient = db.Column(VARCHAR2(10), db.ForeignKey('m_pacient.id_poistenca'), nullable=False)
     lekar = db.Column(CHAR(6), db.ForeignKey('m_zamestnanec.id_zamestnanca'), nullable=False)
 
@@ -224,7 +224,7 @@ class Objednavka(db.Model):
             'date': self.datum_objednavky.strftime('%d.%m.%Y'),
             'time': self.datum_objednavky.strftime('%H:%M'),
             'blocks': self.pocet_blokov,
-            'room': self.miesnost,
+            'room': self.miestnost,
             'patient': pacient.get_fullname_and_id(),
             'doctor': self.lekar,
             'day': self.datum_objednavky.strftime('%A')
@@ -246,7 +246,7 @@ class Hospitalizacia(db.Model):
 class Liek(db.Model):
     __tablename__ = 'm_liek'
 
-    kod_lieku = db.Column(CHAR(5), primary_key=True)
+    kod = db.Column(CHAR(5), primary_key=True)
     nazov = db.Column(VARCHAR2(255), nullable=False)
     reg_cislo = db.Column(VARCHAR2(16), nullable=False)
     doplnok = db.Column(VARCHAR2(120), nullable=False)
@@ -255,7 +255,7 @@ class Liek(db.Model):
     indikacna_skupina = db.Column(NUMBER(38, 0), nullable=True)
     atc = db.Column(TAtc, nullable=True)
     expiracia = db.Column(VARCHAR2(14), nullable=False)
-    vydaj = db.Column(VARCHAR2(2), nullable=False)
+    vydaj = db.Column(VARCHAR2(2), nullable=False) #R-viazany na lek predpis, F-Nie je viazany na lek predpis, Rx-viazany na lek predpis s obmedzenim predpisovania, RB-Viazany na osobitne tlacivo so sikmym modyým pruhom
     kod_statu = db.Column(VARCHAR2(2), nullable=False)
     platnost = db.Column(CHAR(1), nullable=True)
     bezp_prvok = db.Column(CHAR(1), nullable=True)
@@ -265,8 +265,8 @@ class Liek(db.Model):
 class Recept(db.Model):
     __tablename__ = 'm_recept'
 
-    id_receptu = db.Column(NUMBER(38, 0), primary_key=True)
-    liek = db.Column(CHAR(5), db.ForeignKey('m_liek.kod_lieku'), primary_key=True)
+    id_receptu = db.Column(NUMBER(38, 0), primary_key=True, autoincrement=True)
+    liek = db.Column(CHAR(5), db.ForeignKey('m_liek.kod'), primary_key=True)
     vybrane = db.Column(DATE, nullable=True)
     vystavenie = db.Column(DATE, nullable=False)
     pacient = db.Column(VARCHAR2(10), db.ForeignKey('m_pacient.id_poistenca'), primary_key=True)
