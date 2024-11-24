@@ -99,6 +99,15 @@ class Osoba(db.Model):
     adresa = db.Column(TAdresa, nullable=True)
     tel_cislo = db.Column(VARCHAR2(50), nullable=True)
 
+    def to_dic(self):
+        return {
+            'rodne_cislo': self.rod_cislo,
+            'meno': self.meno,
+            'priezvisko': self.priezvisko,
+            'adresa': self.adresa,
+            'tel_cislo': self.tel_cislo
+        }
+
 
 class Pacient(db.Model):
     __tablename__ = 'm_pacient'
@@ -242,6 +251,13 @@ class Hospitalizacia(db.Model):
     dovod = db.Column(VARCHAR2(255), nullable=False)
     lekar = db.Column(CHAR(6), db.ForeignKey('m_zamestnanec.id_zamestnanca'), nullable=False)
 
+    def to_dic2(self):
+        return {
+            'datum_od': self.datum_od.strftime('%d.%m.%Y'),
+            'datum_do': self.datum_do.strftime('%Y-%m-%d') if self.datum_do else None,
+            'miestnost': self.miestnost,
+            'dovod': self.dovod,
+        }
 
 class Liek(db.Model):
     __tablename__ = 'm_liek'
@@ -279,16 +295,24 @@ class Recept(db.Model):
         liek = Liek.query.filter(Liek.kod_lieku == self.liek).first()
         lekar = Zamestnanec.query.filter(Zamestnanec.id_zamestnanca == self.lekar).first()
         return {
-            'id_receptu': self.id_receptu,
             'liek': liek.nazov if liek else None,
             'vybrane': self.vybrane.strftime('%H:%M %d.%m.%Y'),
             'vystavenie': self.vybrane.strftime('%H:%M %d.%m.%Y'),
-            'pacient': pacient.get_full_name() if pacient else None,
             'lekar': lekar.get_full_name_and_login() if lekar else None,
             'pocet': self.pocet,
             'poznamka': self.poznamka
         }
 
+    def zaznam(self):
+        lekar = Zamestnanec.query.filter(Zamestnanec.id_zamestnanca == self.lekar).first()
+        liekn = Liek.query.filter(Liek.kod == self.liek).first()
+
+        return {
+            'liek': liekn.nazov if liekn else None,
+            'vystavenie': self.vystavenie.strftime('%d.%m.%Y'),
+            'lekar': lekar.get_full_name_and_login() if lekar else None,
+            'poznamka': self.poznamka
+        }
 
 class SkladLiekov(db.Model):
     __tablename__ = 'm_sklad_liekov'

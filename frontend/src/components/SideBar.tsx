@@ -1,6 +1,5 @@
 import React, {useState} from 'react';
 import {Nav, Button} from 'react-bootstrap';
-import {handleLogout} from '../utils/logout';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
 

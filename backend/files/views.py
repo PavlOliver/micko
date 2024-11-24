@@ -4,7 +4,7 @@ from flask import Blueprint, jsonify, request
 from flask_login import login_required
 
 from . import db
-from .models import Pacient, Zamestnanec, Pouzivatel, Osoba
+from .models import Pacient, Zamestnanec, Pouzivatel, Osoba, Hospitalizacia
 from .queries import *
 
 views = Blueprint('views', __name__)
@@ -209,3 +209,58 @@ def search_patients():
         # Logovanie chyby
         print(f"Error: {e}")
         return jsonify({'error': 'An internal error occurred'}), 500
+
+def extract_date_of_birth(rodne_cislo):
+    rc_part = rodne_cislo[:6]
+    year = int(rc_part[:2])
+    month = int(rc_part[2:4])
+    day = int(rc_part[4:6])
+    if month > 50:
+        month -= 50
+    current_year = datetime.now().year % 100
+    century = 1900 if year > current_year else 2000
+    year += century
+    return datetime(year, month, day)
+
+@views.route('/pacient/<id_poistenca>/zdravotna-karta', methods=['GET'])
+@login_required
+def get_zdravotna_karta(id_poistenca):
+    current_user_log = select_current_user()
+    print("Current user:", current_user_log, "Role:", current_user_log.rola if current_user_log else None)
+    if not current_user_log or current_user_log.rola != 'A':
+        return jsonify({'error': 'Unauthorized access'}), 403
+    try:
+        print("Received parameters: ID_Poistenca=", id_poistenca)
+        pacient = Pacient.query.filter_by(id_poistenca=id_poistenca).first()
+        print('meno:', pacient.to_dic()['meno'])
+        osoba = Osoba.query.filter_by(rod_cislo=pacient.rod_cislo).first()
+        hosp = Hospitalizacia.query.filter_by(pacient=id_poistenca).all()
+        hospitalizacie = [h.to_dic2() for h in hosp]
+        rec = Recept.query.filter_by(pacient=id_poistenca).all()
+        print('recept ', rec)
+        rec = [r.zaznam() for r in rec]
+        print(hospitalizacie)
+        print('meno:', osoba.to_dic())
+        if pacient:
+            datum_narodenia = extract_date_of_birth(pacient.rod_cislo)
+            zdravotna_karta = {
+                'meno': pacient.to_dic()['meno'],
+                'priezvisko': pacient.to_dic()['priezvisko'],
+                'datumNarodenia': datum_narodenia.strftime('%Y-%m-%d'),
+                'rodneCislo': pacient.to_dic()['id_poistenca'],
+                'adresa': osoba.to_dic()['adresa'],
+                'telefon': osoba.to_dic()['tel_cislo'],
+                #'krvnaSkupina': pacient.krvna_skupina,
+                #'alergie': pacient.alergie,
+                #'diagnozy': pacient.diagnozy,
+                'hospitalizacie': hospitalizacie,
+                #'vysledkyVysetreni': pacient.vysledky_vysetreni,
+                'recepty': rec
+            }
+            return jsonify({'zdravotna_karta': zdravotna_karta})
+        return jsonify({'error': 'Pacient not found'})
+
+    except Exception as e:
+        print("Error:", str(e))
+        return jsonify({'error': 'An internal error occurred'}), 500
+

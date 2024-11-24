@@ -13,6 +13,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import Recept from "./components/Recept";
 import Patients from "./components/Patients";
 import UserManagement from './components/AdminPage';
+import ZdravotnaKarta from "./components/ZdravotnaKarta";
 
 axios.defaults.baseURL = 'http://localhost:5000';
 axios.defaults.withCredentials = true;
@@ -66,6 +67,7 @@ function AppContent() {
             <Route path={"/profile"} element={<Profile/>} />
             <Route path={"/orders"} element={<Order/>} />
             <Route path="/pacient/:id_poistenca/recepty" element={<Recept/>} />
+            <Route path="/pacient/:id_poistenca/zdravotna_karta" element={<ZdravotnaKarta/>} />
             <Route path={"/patients"} element={<Patients/>} />
             <Route path="/user-management" element={<UserManagement />} />
         </Routes>

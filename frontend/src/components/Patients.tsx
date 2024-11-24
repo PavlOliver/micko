@@ -67,7 +67,7 @@ const Patients: React.FC = () => {
 
     function handleShowZdravotnaKarta(id_poistenca: number) {
         console.log('Show zdravotna karta');
-        navigate(`/patient/${id_poistenca}/zdravotna_karta`);
+        navigate(`/pacient/${id_poistenca}/zdravotna_karta`);
     }
 
     return (
