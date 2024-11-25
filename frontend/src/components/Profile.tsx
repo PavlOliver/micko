@@ -8,7 +8,9 @@ import '../css/ProfilePage.css';
 
 const ProfilePage: React.FC = () => {
     const [username, setUsername] = useState('Oliver');
-    const [password, setPassword] = useState('');
+    const [oldPassword, setOldPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmNewPassword, setConfirmNewPassword] = useState('');
     const [editMode, setEditMode] = useState(false);
     const [isSideBarOpen, setIsSidebarOpen] = useState(true);
     const [profilePicture, setProfilePicture] = useState<File | null>(null);
@@ -28,8 +30,14 @@ const ProfilePage: React.FC = () => {
     }, [navigate]);
 
     const handleSave = () => {
+        if (newPassword !== confirmNewPassword) {
+            console.error('New passwords do not match');
+            return;
+        }
+
         const formData = new FormData();
-        formData.append('new_password', password);
+        formData.append('old_password', oldPassword);
+        formData.append('new_password', newPassword);
         if (profilePicture) {
             formData.append('profile_picture', profilePicture);
         }
@@ -85,22 +93,41 @@ const ProfilePage: React.FC = () => {
                                         <Form.Label>Username</Form.Label>
                                         <Form.Control type="text" value={username} disabled/>
                                     </Form.Group>
-                                    <Form.Group className="mb-3" controlId="formPassword">
-                                        <Form.Label>Password</Form.Label>
-                                        {editMode ? (
-                                            <Form.Control
-                                                type="password"
-                                                placeholder="Enter new password"
-                                                onChange={(e) => setPassword(e.target.value)}
-                                            />
-                                        ) : (
+                                    {editMode ? (
+                                        <>
+                                            <Form.Group className="mb-3" controlId="formOldPassword">
+                                                <Form.Label>Old Password</Form.Label>
+                                                <Form.Control
+                                                    type="password"
+                                                    placeholder="Enter old password"
+                                                    onChange={(e) => setOldPassword(e.target.value)}
+                                                />
+                                            </Form.Group>
+                                            <Form.Group className="mb-3" controlId="formNewPassword">
+                                                <Form.Label>New Password</Form.Label>
+                                                <Form.Control
+                                                    type="password"
+                                                    placeholder="Enter new password"
+                                                    onChange={(e) => setNewPassword(e.target.value)}
+                                                />
+                                            </Form.Group>
+                                            <Form.Group className="mb-3" controlId="formConfirmNewPassword">
+                                                <Form.Label>Confirm New Password</Form.Label>
+                                                <Form.Control
+                                                    type="password"
+                                                    placeholder="Confirm new password"
+                                                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                                                />
+                                            </Form.Group>
+                                            <Form.Group className="mb-3" controlId="formProfilePicture">
+                                                <Form.Label>Change Profile Picture</Form.Label>
+                                                <Form.Control type="file" onChange={handleProfilePictureChange}/>
+                                            </Form.Group>
+                                        </>
+                                    ) : (
+                                        <Form.Group className="mb-3" controlId="formPassword">
+                                            <Form.Label>Password</Form.Label>
                                             <Form.Control type="password" value="********" disabled/>
-                                        )}
-                                    </Form.Group>
-                                    {editMode && (
-                                        <Form.Group className="mb-3" controlId="formProfilePicture">
-                                            <Form.Label>Change Profile Picture</Form.Label>
-                                            <Form.Control type="file" onChange={handleProfilePictureChange}/>
                                         </Form.Group>
                                     )}
                                     <div className="d-flex justify-content-between">

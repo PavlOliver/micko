@@ -82,6 +82,14 @@ def profile():
             })
         return jsonify({'error': 'User not found'})
     else:
+        print(request.form)
+        if request.form.get('new_password') and request.form.get('old_password'):
+            print(select_current_user().heslo)
+            if check_password_hash(select_current_user().heslo, request.form['old_password']):
+                select_current_user().heslo = generate_password_hash(request.form['new_password'])
+                db.session.commit()
+                return jsonify({'message': 'Password updated'})
+            return jsonify({'error': 'Invalid password'})
         if request.files:
             print(request.files['profile_picture'])
             file = request.files['profile_picture']

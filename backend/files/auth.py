@@ -25,3 +25,11 @@ def logout():
     logout_user()
     return jsonify({"message": "Logged out", "status": "success"}), 200
 
+@auth.route('/hash_all')
+def hash_all():
+    users = Pouzivatel.query.all()
+    for user in users:
+        user.heslo = generate_password_hash('password123')
+    db.session.commit()
+    return jsonify({"message": "All passwords hashed", "status": "success"}), 200
+
