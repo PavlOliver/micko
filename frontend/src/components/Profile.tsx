@@ -7,7 +7,7 @@ import {handleLogout} from "../utils/logout";
 import '../css/ProfilePage.css';
 
 const ProfilePage: React.FC = () => {
-    const [username, setUsername] = useState('Oliver');
+    const [username, setUsername] = useState('');
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmNewPassword, setConfirmNewPassword] = useState('');
@@ -70,97 +70,101 @@ const ProfilePage: React.FC = () => {
 
     const toggleSidebar = () => setIsSidebarOpen(!isSideBarOpen);
 
-    return (
-        <Container fluid className="profile-page">
-            <Row>
-                <Col md={3} className={`p-0 ${isSideBarOpen ? "sidebar-open" : "sidebar-closed"}`}>
-                    <SideBar isOpen={isSideBarOpen} toggleSidebar={toggleSidebar} username={username}/>
-                </Col>
-                <Col md={9} className="p-4 profile-content">
-                    <div className="d-flex justify-content-center align-items-center vh-100">
-                        <Card className="profile-card shadow">
-                            <Card.Body>
-                                <div className="text-center mb-4">
-                                    <img
-                                        src="http://localhost:5000/profile_picture"
-                                        alt="Profile"
-                                        className="profile-picture"
-                                    />
-                                </div>
-                                <Card.Title className="text-center mb-4">Profile Settings</Card.Title>
-                                <Form>
-                                    <Form.Group className="mb-3" controlId="formUsername">
-                                        <Form.Label>Username</Form.Label>
-                                        <Form.Control type="text" value={username} disabled/>
-                                    </Form.Group>
-                                    {editMode ? (
-                                        <>
-                                            <Form.Group className="mb-3" controlId="formOldPassword">
-                                                <Form.Label>Old Password</Form.Label>
-                                                <Form.Control
-                                                    type="password"
-                                                    placeholder="Enter old password"
-                                                    onChange={(e) => setOldPassword(e.target.value)}
-                                                />
-                                            </Form.Group>
-                                            <Form.Group className="mb-3" controlId="formNewPassword">
-                                                <Form.Label>New Password</Form.Label>
-                                                <Form.Control
-                                                    type="password"
-                                                    placeholder="Enter new password"
-                                                    onChange={(e) => setNewPassword(e.target.value)}
-                                                />
-                                            </Form.Group>
-                                            <Form.Group className="mb-3" controlId="formConfirmNewPassword">
-                                                <Form.Label>Confirm New Password</Form.Label>
-                                                <Form.Control
-                                                    type="password"
-                                                    placeholder="Confirm new password"
-                                                    onChange={(e) => setConfirmNewPassword(e.target.value)}
-                                                />
-                                            </Form.Group>
-                                            <Form.Group className="mb-3" controlId="formProfilePicture">
-                                                <Form.Label>Change Profile Picture</Form.Label>
-                                                <Form.Control type="file" onChange={handleProfilePictureChange}/>
-                                            </Form.Group>
-                                        </>
-                                    ) : (
-                                        <Form.Group className="mb-3" controlId="formPassword">
-                                            <Form.Label>Password</Form.Label>
-                                            <Form.Control type="password" value="********" disabled/>
+    if (username) {
+        return (
+            <Container fluid className="profile-page">
+                <Row>
+                    <Col md={3} className={`p-0 ${isSideBarOpen ? "sidebar-open" : "sidebar-closed"}`}>
+                        <SideBar isOpen={isSideBarOpen} toggleSidebar={toggleSidebar} username={username}/>
+                    </Col>
+                    <Col md={9} className="p-4 profile-content">
+                        <div className="d-flex justify-content-center align-items-center vh-100">
+                            <Card className="profile-card shadow">
+                                <Card.Body>
+                                    <div className="text-center mb-4">
+                                        <img
+                                            src="http://localhost:5000/profile_picture"
+                                            alt="Profile"
+                                            className="profile-picture"
+                                        />
+                                    </div>
+                                    <Card.Title className="text-center mb-4">Profile Settings</Card.Title>
+                                    <Form>
+                                        <Form.Group className="mb-3" controlId="formUsername">
+                                            <Form.Label>Username</Form.Label>
+                                            <Form.Control type="text" value={username} disabled/>
                                         </Form.Group>
-                                    )}
-                                    <div className="d-flex justify-content-between">
                                         {editMode ? (
                                             <>
-                                                <Button variant="secondary" onClick={handleCancel}>
-                                                    Cancel
-                                                </Button>
-                                                <Button variant="primary" onClick={handleSave}>
-                                                    Save
-                                                </Button>
+                                                <Form.Group className="mb-3" controlId="formOldPassword">
+                                                    <Form.Label>Old Password</Form.Label>
+                                                    <Form.Control
+                                                        type="password"
+                                                        placeholder="Enter old password"
+                                                        onChange={(e) => setOldPassword(e.target.value)}
+                                                    />
+                                                </Form.Group>
+                                                <Form.Group className="mb-3" controlId="formNewPassword">
+                                                    <Form.Label>New Password</Form.Label>
+                                                    <Form.Control
+                                                        type="password"
+                                                        placeholder="Enter new password"
+                                                        onChange={(e) => setNewPassword(e.target.value)}
+                                                    />
+                                                </Form.Group>
+                                                <Form.Group className="mb-3" controlId="formConfirmNewPassword">
+                                                    <Form.Label>Confirm New Password</Form.Label>
+                                                    <Form.Control
+                                                        type="password"
+                                                        placeholder="Confirm new password"
+                                                        onChange={(e) => setConfirmNewPassword(e.target.value)}
+                                                    />
+                                                </Form.Group>
+                                                <Form.Group className="mb-3" controlId="formProfilePicture">
+                                                    <Form.Label>Change Profile Picture</Form.Label>
+                                                    <Form.Control type="file" onChange={handleProfilePictureChange}/>
+                                                </Form.Group>
                                             </>
                                         ) : (
-                                            <Button variant="primary" onClick={() => setEditMode(true)}>
-                                                Edit Profile
-                                            </Button>
+                                            <Form.Group className="mb-3" controlId="formPassword">
+                                                <Form.Label>Password</Form.Label>
+                                                <Form.Control type="password" value="********" disabled/>
+                                            </Form.Group>
                                         )}
-                                    </div>
-                                </Form>
-                            </Card.Body>
-                        </Card>
-                    </div>
-                    <Row className="mt-4">
-                        <Col className="text-center">
-                            <Button variant="danger" onClick={() => handleLogout()}>
-                                Logout
-                            </Button>
-                        </Col>
-                    </Row>
-                </Col>
-            </Row>
-        </Container>
-    );
+                                        <div className="d-flex justify-content-between">
+                                            {editMode ? (
+                                                <>
+                                                    <Button variant="secondary" onClick={handleCancel}>
+                                                        Cancel
+                                                    </Button>
+                                                    <Button variant="primary" onClick={handleSave}>
+                                                        Save
+                                                    </Button>
+                                                </>
+                                            ) : (
+                                                <Button variant="primary" onClick={() => setEditMode(true)}>
+                                                    Edit Profile
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </Form>
+                                </Card.Body>
+                            </Card>
+                        </div>
+                        <Row className="mt-4">
+                            <Col className="text-center">
+                                <Button variant="danger" onClick={() => handleLogout()}>
+                                    Logout
+                                </Button>
+                            </Col>
+                        </Row>
+                    </Col>
+                </Row>
+            </Container>
+        );
+    } else {
+        return null;
+    }
 };
 
 export default ProfilePage;
