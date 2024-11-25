@@ -1,7 +1,5 @@
-from uuid import uuid4
-
 from flask_login import UserMixin
-from sqlalchemy.dialects.oracle import VARCHAR2, CHAR, DATE, NUMBER
+from sqlalchemy.dialects.oracle import VARCHAR2, CHAR, DATE, NUMBER, BFILE
 from sqlalchemy.types import CLOB, UserDefinedType
 
 from backend.files import db
@@ -133,6 +131,7 @@ class Pacient(db.Model):
             'priezvisko': osoba.priezvisko,
         }
 
+
 class Specializacia(db.Model):
     __tablename__ = 'm_specializacia'
 
@@ -147,7 +146,7 @@ class Zamestnanec(db.Model):
     id_zamestnanca = db.Column(CHAR(6), primary_key=True)
     rod_cislo = db.Column(VARCHAR2(10), db.ForeignKey('m_osoba.rod_cislo'), nullable=False)
     specializacia = db.Column(NUMBER(38, 0), db.ForeignKey('m_specializacia.kod_specializacie'), nullable=False)
-    fotka = db.Column(VARCHAR2(20), nullable=True)
+    fotka = db.Column(BFILE, nullable=True)
 
     def get_full_name_and_login(self):
         osoba = Osoba.query.filter(Osoba.rod_cislo == self.rod_cislo).first()
@@ -169,6 +168,12 @@ class Pouzivatel(db.Model, UserMixin):
 
     def get_id(self):
         return str(self.id_zamestnanca)
+
+    def get_profile_picture(self):
+        zamestnanec = Zamestnanec.query.filter(Zamestnanec.id_zamestnanca == self.id_zamestnanca).first()
+        print(zamestnanec)
+        print(zamestnanec.fotka)
+        return zamestnanec.fotka if zamestnanec else None
 
 
 class ZdravotnyZaznam(db.Model):
@@ -237,10 +242,22 @@ class Hospitalizacia(db.Model):
     id_hospitalizacie = db.Column(NUMBER(38, 0), primary_key=True)
     pacient = db.Column(VARCHAR2(10), db.ForeignKey('m_pacient.id_poistenca'), nullable=False)
     datum_od = db.Column(DATE, nullable=False)
-    datum_do = db.Column(DATE, nullable=False)
-    miestnost = db.Column(CHAR(5), db.ForeignKey('m_miestnost.cislo_miestnosti'), nullable=False)
+    datum_do = db.Column(DATE, nullable=True)
+    miestnost = db.Column(CHAR(4), db.ForeignKey('m_miestnost.cislo_miestnosti'), nullable=False)
     dovod = db.Column(VARCHAR2(255), nullable=False)
     lekar = db.Column(CHAR(6), db.ForeignKey('m_zamestnanec.id_zamestnanca'), nullable=False)
+
+    def to_dic(self):
+        pacient = Pacient.query.filter(Pacient.id_poistenca == self.pacient).first()
+        return {
+            'id': self.id_hospitalizacie,
+            'patient': pacient.get_fullname_and_id(),
+            'from': self.datum_od.strftime('%d.%m.%Y'),
+            'to': self.datum_do.strftime('%d.%m.%Y') if self.datum_do else None,
+            'room': self.miestnost,
+            'reason': self.dovod,
+            'doctor': self.lekar
+        }
 
 
 class Liek(db.Model):

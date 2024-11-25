@@ -2,7 +2,7 @@ from datetime import datetime
 
 from flask_login import current_user
 from . import db
-from .models import Objednavka, Pouzivatel, Pacient, Recept
+from .models import Objednavka, Pouzivatel, Pacient, Recept, Hospitalizacia
 
 
 def select_current_user():
@@ -55,12 +55,14 @@ def insert_new_order(reason, patient, doctor, room, blocks, date, time):
     db.session.commit()
     return new_order
 
+
 def select_patients():
     patients = Pacient.query.all()
     to_return = []
     for patient in patients:
         to_return.append(patient.to_dic())
     return to_return
+
 
 def delete_order(id):
     """this deletes an order"""
@@ -83,6 +85,14 @@ def update_order(id, reason, patient, doctor, room, blocks, date, time):
     db.session.commit()
     return order
 
+
+def select_hospitalisations():
+    """this returns all hospitalisations"""
+    hospitalisations = Hospitalizacia.query.all()
+    to_return = []
+    for hospitalisation in hospitalisations:
+        to_return.append(hospitalisation.to_dic())
+    return to_return
 
 
 def insert_new_recept(liek, pacient, lekar, pocet, poznamka, vystavenie):
