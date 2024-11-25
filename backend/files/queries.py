@@ -114,3 +114,11 @@ def insert_new_recept(liek, pacient, lekar, pocet, poznamka, vystavenie):
     db.session.add(new_recept)
     db.session.commit()
     return new_recept
+
+
+def update_profile_picture(filename):
+    """this updates the profile picture of the current user"""
+    user = select_current_user()
+    user.fotka = filename
+    db.session.commit()
+    return user

@@ -1,7 +1,9 @@
 import os
 from datetime import timedelta
+from io import BytesIO
 
 from flask import Blueprint, jsonify, request, send_file, url_for
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_required
 
 from .models import Zamestnanec, Osoba
@@ -59,15 +61,14 @@ def orders():
         return jsonify({'message': 'Order deleted'})
     return jsonify({'error': 'User not found'})
 
+
 @views.route('/profile_picture', methods=['GET'])
 def profile_picture():
-    filename = db.session.query(db.func.get_file_name(Zamestnanec.fotka)).filter(
-        Zamestnanec.id_zamestnanca == select_current_user().id_zamestnanca).first()
-    if filename:
-        from backend.app import app
-        file = open(f"{app.config['PHOTO_DIR']}/{filename[0]}", 'rb')
-        #return send_file(file, mimetype='image/png')
-        return url_for('static', filename=f'images/photos/{filename[0]}')
+    file = Zamestnanec.query.filter_by(id_zamestnanca=select_current_user().id_zamestnanca).first().fotka
+    if file:
+        file_stream = BytesIO(file)
+        return send_file(file_stream, mimetype='image/png')
+    return jsonify({'error': 'No file found'})
 
 
 @views.route('/profile', methods=['GET', 'POST'])
@@ -81,25 +82,15 @@ def profile():
             })
         return jsonify({'error': 'User not found'})
     else:
-        from sqlalchemy import text
-        new_password = request.form.get('new_password')
-        profile_picture = request.files.get('profile_picture')
-        if new_password:
-            select_current_user().heslo = new_password
-        if profile_picture:
-            from backend.app import app
-            profile_picture_path = f"{app.config['PHOTO_DIR']}/{profile_picture.filename}"
-            profile_picture.save(profile_picture_path)
-            directory_name = 'PHOTO_DIR'
-            id_zamestnanca = select_current_user().id_zamestnanca
-            db.session.execute(
-                text(
-                    "UPDATE m_zamestnanec SET fotka = BFILENAME(:directory_name, :filename) WHERE id_zamestnanca = :id_zamestnanca"),
-                {'directory_name': directory_name, 'filename': profile_picture.filename,
-                 'id_zamestnanca': id_zamestnanca}
-            )
-        db.session.commit()
-        return jsonify({'message': 'Profile updated'})
+        if request.files:
+            print(request.files['profile_picture'])
+            file = request.files['profile_picture']
+            if file:
+                zamestnanec = Zamestnanec.query.filter_by(id_zamestnanca=select_current_user().id_zamestnanca).first()
+                zamestnanec.fotka = file.read()
+                db.session.commit()
+                return jsonify({'message': 'Profile picture updated'})
+        return jsonify({'error': 'No file found'})
 
 
 @views.route('/pacient/<id_poistenca>/recepty', methods=['GET', 'POST'])
@@ -137,6 +128,7 @@ def add_recept(id_poistenca):
             return jsonify({'error': 'Pacient not found'})
     return jsonify({'error': 'Invalid request method'})
 
+
 @views.route('/user-management', methods=['GET', 'POST'])
 @login_required
 def user_management():
@@ -150,10 +142,11 @@ def user_management():
             new_user = Pouzivatel(
                 id_zamestnanca=request.json['id_zamestnanca'],
                 login=request.json['login'],
-                heslo=request.json['heslo'],
+                heslo=generate_password_hash(request.json['heslo']),
                 rola=request.json['rola']
             )
             db.session.add(new_user)
+            print(new_user)
             db.session.commit()
             return jsonify({'message': 'User created successfully'}), 201
         except Exception as e:
@@ -175,7 +168,7 @@ def user_management():
                 Zamestnanec.rod_cislo == Osoba.rod_cislo
             ).all()
 
-            #print("Debug - Users:", users) # Debug print
+            # print("Debug - Users:", users) # Debug print
 
             return jsonify({
                 'users': [{

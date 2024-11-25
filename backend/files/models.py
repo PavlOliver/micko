@@ -1,5 +1,5 @@
 from flask_login import UserMixin
-from sqlalchemy.dialects.oracle import VARCHAR2, CHAR, DATE, NUMBER, BFILE
+from sqlalchemy.dialects.oracle import VARCHAR2, CHAR, DATE, NUMBER, BLOB
 from sqlalchemy.types import CLOB, UserDefinedType
 
 from backend.files import db
@@ -146,7 +146,7 @@ class Zamestnanec(db.Model):
     id_zamestnanca = db.Column(CHAR(6), primary_key=True)
     rod_cislo = db.Column(VARCHAR2(10), db.ForeignKey('m_osoba.rod_cislo'), nullable=False)
     specializacia = db.Column(NUMBER(38, 0), db.ForeignKey('m_specializacia.kod_specializacie'), nullable=False)
-    fotka = db.Column(BFILE, nullable=True)
+    fotka = db.Column(BLOB, nullable=True)
 
     def get_full_name_and_login(self):
         osoba = Osoba.query.filter(Osoba.rod_cislo == self.rod_cislo).first()
@@ -163,7 +163,7 @@ class Pouzivatel(db.Model, UserMixin):
 
     id_zamestnanca = db.Column(CHAR(6), db.ForeignKey('m_zamestnanec.id_zamestnanca'), primary_key=True)
     login = db.Column(VARCHAR2(50), nullable=False)
-    heslo = db.Column(VARCHAR2(50), nullable=False)
+    heslo = db.Column(VARCHAR2(255), nullable=False)
     rola = db.Column(CHAR(1), nullable=False)
 
     def get_id(self):

@@ -1,9 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import {Container, Row, Col, Card, Button, Form} from 'react-bootstrap';
-import {useNavigate} from "react-router-dom";
+import {useNavigate} from 'react-router-dom';
 import SideBar from './SideBar';
 import axios from 'axios';
 import {handleLogout} from "../utils/logout";
+import '../css/ProfilePage.css';
 
 const ProfilePage: React.FC = () => {
     const [username, setUsername] = useState('Oliver');
@@ -11,7 +12,6 @@ const ProfilePage: React.FC = () => {
     const [editMode, setEditMode] = useState(false);
     const [isSideBarOpen, setIsSidebarOpen] = useState(true);
     const [profilePicture, setProfilePicture] = useState<File | null>(null);
-    const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -25,17 +25,6 @@ const ProfilePage: React.FC = () => {
                 console.error('Error fetching profile data', error);
                 navigate('/login');
             });
-
-        axios.get('/profile_picture', {withCredentials: true})
-            .then(response => {
-                if (response.data) {
-                    setProfilePictureUrl(axios.defaults.baseURL + response.data);
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching profile picture', error);
-            }
-        );
     }, [navigate]);
 
     const handleSave = () => {
@@ -44,8 +33,6 @@ const ProfilePage: React.FC = () => {
         if (profilePicture) {
             formData.append('profile_picture', profilePicture);
         }
-        console.log('formData', formData);
-        console.log('profilePicture', formData.get('profile_picture'));
 
         axios.post('/profile', formData, {
             headers: {
@@ -56,15 +43,11 @@ const ProfilePage: React.FC = () => {
             .then(response => {
                 if (response.status === 200) {
                     setEditMode(false);
-                    if (response.data.profilePictureUrl) {
-                        setProfilePictureUrl(response.data.profilePictureUrl);
-                    }
                 }
             })
             .catch(error => {
                 console.error('Error saving profile', error);
             });
-        setEditMode(false);
     };
 
     const handleCancel = () => {
@@ -80,58 +63,71 @@ const ProfilePage: React.FC = () => {
     const toggleSidebar = () => setIsSidebarOpen(!isSideBarOpen);
 
     return (
-        <Container fluid>
-            <Row style={{height: '100vh'}}>
-                <Col md={3} className="p-0">
+        <Container fluid className="profile-page">
+            <Row>
+                <Col md={3} className={`p-0 ${isSideBarOpen ? "sidebar-open" : "sidebar-closed"}`}>
                     <SideBar isOpen={isSideBarOpen} toggleSidebar={toggleSidebar} username={username}/>
                 </Col>
-                <Col md={9} className="p-4"
-                     style={{marginLeft: isSideBarOpen ? '250px' : '60px', transition: 'margin-left 0.3s'}}>
-                    <Row>
-                        <Col md={6} className="offset-md-3">
-                            <Card>
-                                <Card.Body>
-                                    <Card.Title>Profile</Card.Title>
-                                    <Form>
-                                        <Form.Group controlId="formProfilePicture">
-                                            <Form.Label>Profile Picture</Form.Label>
-                                            {profilePictureUrl && <img src={profilePictureUrl} alt="Profile"
-                                                                       className="img-thumbnail mb-3"/>}
-                                            {editMode && (
-                                                <Form.Control type="file" onChange={handleProfilePictureChange}/>
-                                            )}
-                                        </Form.Group>
-                                        <Form.Group controlId="formPassword">
-                                            <Form.Label>Username</Form.Label>
-                                            <Form.Control type="text" value={username} disabled/>
-                                            <Form.Label>Password</Form.Label>
-                                            {editMode ? (
-                                                <Form.Control
-                                                    type="password"
-                                                    onChange={(e) => setPassword(e.target.value)}
-                                                />
-                                            ) : (
-                                                <Form.Control type="password" value="********" disabled/>
-                                            )}
-                                        </Form.Group>
+                <Col md={9} className="p-4 profile-content">
+                    <div className="d-flex justify-content-center align-items-center vh-100">
+                        <Card className="profile-card shadow">
+                            <Card.Body>
+                                <div className="text-center mb-4">
+                                    <img
+                                        src="http://localhost:5000/profile_picture"
+                                        alt="Profile"
+                                        className="profile-picture"
+                                    />
+                                </div>
+                                <Card.Title className="text-center mb-4">Profile Settings</Card.Title>
+                                <Form>
+                                    <Form.Group className="mb-3" controlId="formUsername">
+                                        <Form.Label>Username</Form.Label>
+                                        <Form.Control type="text" value={username} disabled/>
+                                    </Form.Group>
+                                    <Form.Group className="mb-3" controlId="formPassword">
+                                        <Form.Label>Password</Form.Label>
                                         {editMode ? (
-                                            <div className="d-flex justify-content-between">
-                                                <Button variant="secondary" onClick={handleCancel}>Cancel</Button>
-                                                <Button variant="primary" onClick={handleSave}>Save</Button>
-                                            </div>
+                                            <Form.Control
+                                                type="password"
+                                                placeholder="Enter new password"
+                                                onChange={(e) => setPassword(e.target.value)}
+                                            />
+                                        ) : (
+                                            <Form.Control type="password" value="********" disabled/>
+                                        )}
+                                    </Form.Group>
+                                    {editMode && (
+                                        <Form.Group className="mb-3" controlId="formProfilePicture">
+                                            <Form.Label>Change Profile Picture</Form.Label>
+                                            <Form.Control type="file" onChange={handleProfilePictureChange}/>
+                                        </Form.Group>
+                                    )}
+                                    <div className="d-flex justify-content-between">
+                                        {editMode ? (
+                                            <>
+                                                <Button variant="secondary" onClick={handleCancel}>
+                                                    Cancel
+                                                </Button>
+                                                <Button variant="primary" onClick={handleSave}>
+                                                    Save
+                                                </Button>
+                                            </>
                                         ) : (
                                             <Button variant="primary" onClick={() => setEditMode(true)}>
-                                                Edit
+                                                Edit Profile
                                             </Button>
                                         )}
-                                    </Form>
-                                </Card.Body>
-                            </Card>
-                        </Col>
-                    </Row>
-                    <Row className="mt-3">
+                                    </div>
+                                </Form>
+                            </Card.Body>
+                        </Card>
+                    </div>
+                    <Row className="mt-4">
                         <Col className="text-center">
-                            <Button variant="danger" onClick={() => handleLogout()}>Logout</Button>
+                            <Button variant="danger" onClick={() => handleLogout()}>
+                                Logout
+                            </Button>
                         </Col>
                     </Row>
                 </Col>
