@@ -1,10 +1,10 @@
-from datetime import datetime, timedelta
+import os
+from datetime import timedelta
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, send_file, url_for
 from flask_login import login_required
 
-from . import db
-from .models import Pacient, Zamestnanec, Pouzivatel, Osoba
+from .models import Zamestnanec, Osoba
 from .queries import *
 
 views = Blueprint('views', __name__)
@@ -59,17 +59,45 @@ def orders():
         return jsonify({'message': 'Order deleted'})
     return jsonify({'error': 'User not found'})
 
+@views.route('/profile_picture', methods=['GET'])
+def profile_picture():
+    filename = db.session.query(db.func.get_file_name(Zamestnanec.fotka)).filter(
+        Zamestnanec.id_zamestnanca == select_current_user().id_zamestnanca).first()
+    if filename:
+        from backend.app import app
+        file = open(f"{app.config['PHOTO_DIR']}/{filename[0]}", 'rb')
+        #return send_file(file, mimetype='image/png')
+        return url_for('static', filename=f'images/photos/{filename[0]}')
+
 
 @views.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
     if request.method == 'GET':
         if select_current_user():
-            return jsonify({'username': select_current_user().login})
+            return jsonify({
+                'username': select_current_user().login
+                # 'picture': select_current_user().get_profile_picture()
+            })
         return jsonify({'error': 'User not found'})
     else:
-        new_password = request.json['new_password']
-        select_current_user().heslo = new_password
+        from sqlalchemy import text
+        new_password = request.form.get('new_password')
+        profile_picture = request.files.get('profile_picture')
+        if new_password:
+            select_current_user().heslo = new_password
+        if profile_picture:
+            from backend.app import app
+            profile_picture_path = f"{app.config['PHOTO_DIR']}/{profile_picture.filename}"
+            profile_picture.save(profile_picture_path)
+            directory_name = 'PHOTO_DIR'
+            id_zamestnanca = select_current_user().id_zamestnanca
+            db.session.execute(
+                text(
+                    "UPDATE m_zamestnanec SET fotka = BFILENAME(:directory_name, :filename) WHERE id_zamestnanca = :id_zamestnanca"),
+                {'directory_name': directory_name, 'filename': profile_picture.filename,
+                 'id_zamestnanca': id_zamestnanca}
+            )
         db.session.commit()
         return jsonify({'message': 'Profile updated'})
 
@@ -78,7 +106,7 @@ def profile():
 @login_required
 def add_recept(id_poistenca):
     if request.method == 'POST':
-        #print("Received data:", request.json)  # Debug print
+        print(request.json)
         try:
             new_recept = insert_new_recept(
                 liek=request.json['liek'],
@@ -90,7 +118,6 @@ def add_recept(id_poistenca):
             )
             return jsonify({'message': 'Recept created'}), 201
         except Exception as e:
-            #print("Error details:", str(e)) # Debug print
             return jsonify({'error': str(e)}), 500
     elif request.method == 'GET':
         if select_current_user():

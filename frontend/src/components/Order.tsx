@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import '../css/order.css';
 import SideBar from "./SideBar";
-import {Button, Col, Container, Form, FormControl, Modal, Row} from "react-bootstrap";
+import {Button, Col, Container, Form, Modal, Row} from "react-bootstrap";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
 
@@ -165,19 +165,13 @@ const Order: React.FC = () => {
                 const [day, month, year] = appointment.date.split('.');
                 const date = `${year}-${month}-${day}`;
                 document.querySelector('[name="eDatum"]')?.setAttribute('value', date);
-                const [hours, minutes] = appointment.time.split(':');
-                document.querySelector('[name="eHours"]')?.setAttribute('value', hours);
-                document.querySelector('[name="eMinutes"]')?.setAttribute('value', minutes);
+                let [hours, minutes] = appointment.time.split(':');
+                minutes === '00' ? minutes = '0' : minutes = '30';
+                (document.querySelector('[name="eHours"]') as HTMLSelectElement).value = hours;
+                (document.querySelector('[name="eMinutes"]') as HTMLSelectElement).value = minutes;
             }
         }, 1);
     };
-
-// Helper function to format date
-    const formatDateForInput = (date: string) => {
-        const [day, month, year] = date.split('.');
-        return `${year}-${month}-${day}`;
-    };
-
 
     const coveredSlots: { [day: string]: { [time: string]: boolean } } = {};
     days.forEach(day => {
@@ -279,11 +273,15 @@ const Order: React.FC = () => {
                                         &gt;
                                     </Button>
                                 </div>
-
                                 <Button
                                     variant="primary"
                                     className="mt-3 mt-md-0"
-                                    onClick={() => setShowAddModal(true)}>
+                                    onClick={() => {
+                                        setShowAddModal(true);
+                                        setPatientInput('');
+                                        setRoomInput('');
+                                        setDoctorName(username);
+                                    }}>
                                     Add Order
                                 </Button>
                             </div>
@@ -409,24 +407,23 @@ const Order: React.FC = () => {
                                                         <Form.Group controlId="formHours">
                                                             <Form.Label>Hours</Form.Label>
                                                             <Form.Control
-                                                                type="number"
-                                                                name="hours"
-                                                                min="9"
-                                                                max="17"
-                                                                step="1"
-                                                            />
+                                                                as="select"
+                                                                name="hours">
+                                                                {Array.from({length: 9}, (_, i) => i + 9).map(hour => (
+                                                                    <option key={hour} value={hour}>{hour}</option>
+                                                                ))}
+                                                            </Form.Control>
                                                         </Form.Group>
                                                     </Col>
                                                     <Col md={6}>
                                                         <Form.Group controlId="formMinutes">
                                                             <Form.Label>Minutes</Form.Label>
                                                             <Form.Control
-                                                                type="number"
-                                                                name="minutes"
-                                                                min="0"
-                                                                max="59"
-                                                                step="30"
-                                                            />
+                                                                as="select"
+                                                                name="minutes">
+                                                                <option value="0">00</option>
+                                                                <option value="30">30</option>
+                                                            </Form.Control>
                                                         </Form.Group>
                                                     </Col>
                                                 </Row>
@@ -563,24 +560,23 @@ const Order: React.FC = () => {
                                                         <Form.Group controlId="formHours">
                                                             <Form.Label>Hours</Form.Label>
                                                             <Form.Control
-                                                                type="number"
-                                                                name="eHours"
-                                                                min="9"
-                                                                max="17"
-                                                                step="1"
-                                                            />
+                                                                as="select"
+                                                                name="eHours">
+                                                                {Array.from({length: 9}, (_, i) => i + 9).map(hour => (
+                                                                    <option key={hour} value={hour}>{hour}</option>
+                                                                ))}
+                                                            </Form.Control>
                                                         </Form.Group>
                                                     </Col>
                                                     <Col md={6}>
                                                         <Form.Group controlId="formMinutes">
                                                             <Form.Label>Minutes</Form.Label>
                                                             <Form.Control
-                                                                type="number"
-                                                                name="eMinutes"
-                                                                min="0"
-                                                                max="59"
-                                                                step="30"
-                                                            />
+                                                                as="select"
+                                                                name="eMinutes">
+                                                                <option value="0">00</option>
+                                                                <option value="30">30</option>
+                                                            </Form.Control>
                                                         </Form.Group>
                                                     </Col>
                                                 </Row>
@@ -615,7 +611,7 @@ const Order: React.FC = () => {
                                 </thead>
                                 <tbody>
                                 {timeSlots.map((timeSlot, rowIndex) => {
-                                    const isEmptyRow = days.every(day => !appointments.some(appt => appt.day === day && appt.time === timeSlot));
+                                    days.every(day => !appointments.some(appt => appt.day === day && appt.time === timeSlot));
                                     return (
                                         <tr key={rowIndex}>
                                             <td>{timeSlot}</td>
