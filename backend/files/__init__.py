@@ -17,7 +17,6 @@ def create_app():
 
     static_folder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'static'))
     app = Flask(__name__, static_folder=static_folder_path)
-    print('static:',app.static_folder)
     CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
     app.config['SECRET_KEY'] = "our secret key"
     app.config['SQLALCHEMY_DATABASE_URI'] = (
