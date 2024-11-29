@@ -14,6 +14,8 @@ import Recept from "./components/Recept";
 import Patients from "./components/Patients";
 import UserManagement from './components/AdminPage';
 import ZdravotnaKarta from "./components/ZdravotnaKarta";
+import Diagnoza from "./components/Diagnoza";
+import Hospitalizacia from "./components/Hospitalizacia";
 
 axios.defaults.baseURL = 'http://localhost:5000';
 axios.defaults.withCredentials = true;
@@ -36,6 +38,7 @@ axios.defaults.withCredentials = true;
 //         </UserProvider>
 //     );
 // };
+
 
 function AppContent() {
   const { setCurrentUser } = useUser();
@@ -69,6 +72,8 @@ function AppContent() {
             <Route path="/pacient/:id_poistenca/recepty" element={<Recept/>} />
             <Route path="/pacient/:id_poistenca/zdravotna_karta" element={<ZdravotnaKarta/>} />
             <Route path={"/patients"} element={<Patients/>} />
+            <Route path="/pacient/:id_poistenca/diagnoza" element={<Diagnoza/>} />
+            <Route path="/pacient/:id_poistenca/hospitalizacia" element={<Hospitalizacia/>} />
             <Route path="/user-management" element={<UserManagement />} />
         </Routes>
     </Router>
