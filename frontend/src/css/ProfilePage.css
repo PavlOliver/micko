@@ -1,0 +1,38 @@
+.profile-page {
+    background-color: #f8f9fa;
+}
+
+.sidebar-open {
+    width: 250px;
+    transition: width 0.3s;
+}
+
+.sidebar-closed {
+    width: 60px;
+    transition: width 0.3s;
+}
+
+.profile-content {
+    margin-left: 250px;
+    transition: margin-left 0.3s;
+}
+
+.profile-card {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 15px;
+}
+
+.profile-picture {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #ddd;
+}
+
+@media (max-width: 768px) {
+    .profile-content {
+        margin-left: 0;
+    }
+}

@@ -1,10 +1,14 @@
-from datetime import datetime, timedelta
+import os
+from datetime import timedelta
+from io import BytesIO
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, send_file, url_for
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_required
 
 from . import db
 from .models import Pacient, Zamestnanec, Pouzivatel, Osoba, Hospitalizacia
+from .models import Zamestnanec, Osoba
 from .queries import *
 
 views = Blueprint('views', __name__)
@@ -60,25 +64,50 @@ def orders():
     return jsonify({'error': 'User not found'})
 
 
+@views.route('/profile_picture', methods=['GET'])
+def profile_picture():
+    file = Zamestnanec.query.filter_by(id_zamestnanca=select_current_user().id_zamestnanca).first().fotka
+    if file:
+        file_stream = BytesIO(file)
+        return send_file(file_stream, mimetype='image/png')
+    return jsonify({'error': 'No file found'})
+
+
 @views.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
     if request.method == 'GET':
         if select_current_user():
-            return jsonify({'username': select_current_user().login})
+            return jsonify({
+                'username': select_current_user().login
+                # 'picture': select_current_user().get_profile_picture()
+            })
         return jsonify({'error': 'User not found'})
     else:
-        new_password = request.json['new_password']
-        select_current_user().heslo = new_password
-        db.session.commit()
-        return jsonify({'message': 'Profile updated'})
+        print(request.form)
+        if request.form.get('new_password') and request.form.get('old_password'):
+            print(select_current_user().heslo)
+            if check_password_hash(select_current_user().heslo, request.form['old_password']):
+                select_current_user().heslo = generate_password_hash(request.form['new_password'])
+                db.session.commit()
+                return jsonify({'message': 'Password updated'})
+            return jsonify({'error': 'Invalid password'})
+        if request.files:
+            print(request.files['profile_picture'])
+            file = request.files['profile_picture']
+            if file:
+                zamestnanec = Zamestnanec.query.filter_by(id_zamestnanca=select_current_user().id_zamestnanca).first()
+                zamestnanec.fotka = file.read()
+                db.session.commit()
+                return jsonify({'message': 'Profile picture updated'})
+        return jsonify({'error': 'No file found'})
 
 
 @views.route('/pacient/<id_poistenca>/recepty', methods=['GET', 'POST'])
 @login_required
 def add_recept(id_poistenca):
     if request.method == 'POST':
-        #print("Received data:", request.json)  # Debug print
+        print(request.json)
         try:
             new_recept = insert_new_recept(
                 liek=request.json['liek'],
@@ -90,7 +119,6 @@ def add_recept(id_poistenca):
             )
             return jsonify({'message': 'Recept created'}), 201
         except Exception as e:
-            #print("Error details:", str(e)) # Debug print
             return jsonify({'error': str(e)}), 500
     elif request.method == 'GET':
         if select_current_user():
@@ -110,6 +138,7 @@ def add_recept(id_poistenca):
             return jsonify({'error': 'Pacient not found'})
     return jsonify({'error': 'Invalid request method'})
 
+
 @views.route('/user-management', methods=['GET', 'POST'])
 @login_required
 def user_management():
@@ -123,10 +152,11 @@ def user_management():
             new_user = Pouzivatel(
                 id_zamestnanca=request.json['id_zamestnanca'],
                 login=request.json['login'],
-                heslo=request.json['heslo'],
+                heslo=generate_password_hash(request.json['heslo']),
                 rola=request.json['rola']
             )
             db.session.add(new_user)
+            print(new_user)
             db.session.commit()
             return jsonify({'message': 'User created successfully'}), 201
         except Exception as e:
@@ -148,7 +178,7 @@ def user_management():
                 Zamestnanec.rod_cislo == Osoba.rod_cislo
             ).all()
 
-            #print("Debug - Users:", users) # Debug print
+            # print("Debug - Users:", users) # Debug print
 
             return jsonify({
                 'users': [{

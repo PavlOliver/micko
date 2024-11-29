@@ -1,7 +1,5 @@
-from uuid import uuid4
-
 from flask_login import UserMixin
-from sqlalchemy.dialects.oracle import VARCHAR2, CHAR, DATE, NUMBER
+from sqlalchemy.dialects.oracle import VARCHAR2, CHAR, DATE, NUMBER, BLOB
 from sqlalchemy.types import CLOB, UserDefinedType
 
 from backend.files import db
@@ -142,6 +140,7 @@ class Pacient(db.Model):
             'priezvisko': osoba.priezvisko,
         }
 
+
 class Specializacia(db.Model):
     __tablename__ = 'm_specializacia'
 
@@ -153,10 +152,10 @@ class Specializacia(db.Model):
 class Zamestnanec(db.Model):
     __tablename__ = 'm_zamestnanec'
 
-    id_zamestnanca = db.Column(CHAR(6), primary_key=True)
+    id_zamestnanca = db.Column(CHAR(4), primary_key=True)
     rod_cislo = db.Column(VARCHAR2(10), db.ForeignKey('m_osoba.rod_cislo'), nullable=False)
     specializacia = db.Column(NUMBER(38, 0), db.ForeignKey('m_specializacia.kod_specializacie'), nullable=False)
-    fotka = db.Column(VARCHAR2(20), nullable=True)
+    fotka = db.Column(BLOB, nullable=True)
 
     def get_full_name_and_login(self):
         osoba = Osoba.query.filter(Osoba.rod_cislo == self.rod_cislo).first()
@@ -171,20 +170,26 @@ class Zamestnanec(db.Model):
 class Pouzivatel(db.Model, UserMixin):
     __tablename__ = 'm_pouzivatel'
 
-    id_zamestnanca = db.Column(CHAR(6), db.ForeignKey('m_zamestnanec.id_zamestnanca'), primary_key=True)
+    id_zamestnanca = db.Column(CHAR(4), db.ForeignKey('m_zamestnanec.id_zamestnanca'), primary_key=True)
     login = db.Column(VARCHAR2(50), nullable=False)
-    heslo = db.Column(VARCHAR2(50), nullable=False)
+    heslo = db.Column(VARCHAR2(255), nullable=False)
     rola = db.Column(CHAR(1), nullable=False)
 
     def get_id(self):
         return str(self.id_zamestnanca)
+
+    def get_profile_picture(self):
+        zamestnanec = Zamestnanec.query.filter(Zamestnanec.id_zamestnanca == self.id_zamestnanca).first()
+        print(zamestnanec)
+        print(zamestnanec.fotka)
+        return zamestnanec.fotka if zamestnanec else None
 
 
 class ZdravotnyZaznam(db.Model):
     __tablename__ = 'm_zdravotny_zaznam'
 
     id_zaznamu = db.Column(NUMBER(38, 0), primary_key=True)
-    lekar = db.Column(CHAR(6), db.ForeignKey('m_zamestnanec.id_zamestnanca'), nullable=False)
+    lekar = db.Column(CHAR(4), db.ForeignKey('m_zamestnanec.id_zamestnanca'), nullable=False)
     pacient = db.Column(VARCHAR2(10), db.ForeignKey('m_pacient.id_poistenca'), nullable=False)
     kod_diagnozy = db.Column(CHAR(6), db.ForeignKey('m_diagnoza.kod_diagnozy'), nullable=False)
     datum_vysetrenia = db.Column(DATE, nullable=False)
@@ -207,7 +212,7 @@ class Miestnost(db.Model):
 class Zmena(db.Model):
     __tablename__ = 'm_zmena'
 
-    zamestnanec = db.Column(CHAR(6), db.ForeignKey('m_zamestnanec.id_zamestnanca'), primary_key=True)
+    zamestnanec = db.Column(CHAR(4), db.ForeignKey('m_zamestnanec.id_zamestnanca'), primary_key=True)
     od_kedy = db.Column(DATE, primary_key=True)
     do_kedy = db.Column(DATE, nullable=False)
     typ_zmeny = db.Column(VARCHAR2(50), nullable=False)
@@ -223,7 +228,7 @@ class Objednavka(db.Model):
     pocet_blokov = db.Column(NUMBER(38, 0), nullable=False)
     miestnost = db.Column(CHAR(5), db.ForeignKey('m_miestnost.cislo_miestnosti'), nullable=False)
     pacient = db.Column(VARCHAR2(10), db.ForeignKey('m_pacient.id_poistenca'), nullable=False)
-    lekar = db.Column(CHAR(6), db.ForeignKey('m_zamestnanec.id_zamestnanca'), nullable=False)
+    lekar = db.Column(CHAR(4), db.ForeignKey('m_zamestnanec.id_zamestnanca'), nullable=False)
 
     def to_dic(self):
         pacient = Pacient.query.filter(Pacient.id_poistenca == self.pacient).first()
@@ -246,10 +251,22 @@ class Hospitalizacia(db.Model):
     id_hospitalizacie = db.Column(NUMBER(38, 0), primary_key=True)
     pacient = db.Column(VARCHAR2(10), db.ForeignKey('m_pacient.id_poistenca'), nullable=False)
     datum_od = db.Column(DATE, nullable=False)
-    datum_do = db.Column(DATE, nullable=False)
-    miestnost = db.Column(CHAR(5), db.ForeignKey('m_miestnost.cislo_miestnosti'), nullable=False)
+    datum_do = db.Column(DATE, nullable=True)
+    miestnost = db.Column(CHAR(4), db.ForeignKey('m_miestnost.cislo_miestnosti'), nullable=False)
     dovod = db.Column(VARCHAR2(255), nullable=False)
-    lekar = db.Column(CHAR(6), db.ForeignKey('m_zamestnanec.id_zamestnanca'), nullable=False)
+    lekar = db.Column(CHAR(4), db.ForeignKey('m_zamestnanec.id_zamestnanca'), nullable=False)
+
+    def to_dic(self):
+        pacient = Pacient.query.filter(Pacient.id_poistenca == self.pacient).first()
+        return {
+            'id': self.id_hospitalizacie,
+            'patient': pacient.get_fullname_and_id(),
+            'from': self.datum_od.strftime('%d.%m.%Y'),
+            'to': self.datum_do.strftime('%d.%m.%Y') if self.datum_do else None,
+            'room': self.miestnost,
+            'reason': self.dovod,
+            'doctor': self.lekar
+        }
 
     def to_dic2(self):
         return {
@@ -286,7 +303,7 @@ class Recept(db.Model):
     vybrane = db.Column(DATE, nullable=True)
     vystavenie = db.Column(DATE, nullable=False)
     pacient = db.Column(VARCHAR2(10), db.ForeignKey('m_pacient.id_poistenca'), primary_key=True)
-    lekar = db.Column(CHAR(6), db.ForeignKey('m_zamestnanec.id_zamestnanca'), primary_key=True)
+    lekar = db.Column(CHAR(4), db.ForeignKey('m_zamestnanec.id_zamestnanca'), primary_key=True)
     pocet = db.Column(NUMBER(38, 0), nullable=False)
     poznamka = db.Column(VARCHAR2(255), nullable=True)
 

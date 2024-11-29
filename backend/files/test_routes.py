@@ -1,13 +1,14 @@
 import csv
 import datetime
+import os
 import re
-
-
-from flask import Blueprint, jsonify
-
+import oracledb
+import cx_Oracle
+from flask import Blueprint, jsonify, render_template, send_file
+from sqlalchemy.dialects.oracle import oracledb
 
 from backend.files import db
-from backend.files.models import Diagnoza
+from backend.files.models import Diagnoza, Zamestnanec
 
 test_routes = Blueprint('test_routes', __name__)
 
@@ -46,7 +47,7 @@ def load():
 
             print("Nové objekty v session pred commitom:")
             for obj in db.session.new:
-                print(obj)            # Uložte záznamy do databázy
+                print(obj)  # Uložte záznamy do databázy
             db.session.commit()  # Odkomentuj, keď overíš dáta
             print("Údaje boli úspešne uložené do databázy.")
 
@@ -122,4 +123,31 @@ def get_time():
 @test_routes.route('/xx')
 def xx():
     return jsonify({'username': 'current_user.login'})
+
+
+# use it to show imahe
+"""
+DECLARE
+    v_lob_loc BFILE;
+    v_file_loc VARCHAR2(100);
+BEGIN
+    v_file_loc := 'PHOTO_DIR:o.png';
+    v_lob_loc := BFILENAME('PHOTO_DIR', 'o.png');
+    DBMS_LOB.fileopen(v_lob_loc, DBMS_LOB.file_readonly);
+END;
+/"""
+
+import cx_Oracle
+
+
+@test_routes.route('/img', methods=['GET'])
+def img():
+    # from sqlalchemy import text
+    # query = text("SELECT get_file_name(fotka) FROM M_ZAMESTNANEC")
+    # result = db.session.execute(query).fetchall()
+    # print(result)
+    from backend.files.models import Zamestnanec
+    result = db.session.query(db.func.get_file_name(Zamestnanec.fotka)).all()
+    print(result)
+    return 'x'
 

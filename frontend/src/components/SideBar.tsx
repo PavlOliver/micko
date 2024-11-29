@@ -43,13 +43,11 @@ const SideBar: React.FC<SidebarProps> = ({isOpen, toggleSidebar, username}) => {
         <div
             className={`bg-light p-3 shadow`}
             style={{
-                width: isOpen ? '250px' : '60px',
                 height: '100vh',
                 transition: 'width 0.3s',
                 overflow: 'hidden',
                 position: 'fixed',
                 top: 0,
-                left: '10px',
                 zIndex: 1000,
             }}
         >
@@ -57,7 +55,7 @@ const SideBar: React.FC<SidebarProps> = ({isOpen, toggleSidebar, username}) => {
                 <i className={`bi ${isOpen ? "bi-chevron-left" : "bi-list"}`}></i>
             </Button>
 
-            <Nav defaultActiveKey="/home" className="flex-column">
+            <Nav defaultActiveKey="/home" className="flex-column px-0">
                 <Nav.Link href="/home" className={`text-nowrap ${isOpen ? '' : 'text-center'}`}>
                     <i className="bi bi-house"></i>
                     {isOpen && <span className="ms-2">Domov</span>}

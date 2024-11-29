@@ -1,4 +1,5 @@
 import json
+import os
 
 from flask import Flask
 from flask_cors import CORS
@@ -9,16 +10,19 @@ from sqlalchemy import MetaData
 metadata = MetaData(schema='pavlanin2')
 db = SQLAlchemy(metadata=metadata)
 
+
 def create_app():
     with open('backend/static/config.json') as config_file:
         config = json.load(config_file)
 
-    app = Flask(__name__)
+    static_folder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'static'))
+    app = Flask(__name__, static_folder=static_folder_path)
     CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
     app.config['SECRET_KEY'] = "our secret key"
     app.config['SQLALCHEMY_DATABASE_URI'] = (
         f'oracle+oracledb://{config["username"]}:{config["password"]}@{config["hostname"]}:{config["port"]}/{config["sid"]}')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['PHOTO_DIR'] = './backend/static/images/photos'
 
     from .views import views
     from .auth import auth
