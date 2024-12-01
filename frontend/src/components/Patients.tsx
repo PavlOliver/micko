@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Container, Col, Row, Form, FormControl, Button, Card} from 'react-bootstrap';
+import {Container, Col, Row, Form, FormControl, Button, Card, Modal} from 'react-bootstrap';
 import SideBar from "./SideBar";
 import '../css/patients.css';
 import axios from "axios";
@@ -21,6 +21,10 @@ const Patients: React.FC = () => {
     const [adresa, setAdresa] = useState('');
     const navigate = useNavigate();
     const [username, setUsername] = useState('');
+    const [showModal, setShowModal] = useState(false);
+
+    const handleShowModal = () => setShowModal(true);
+    const handleCloseModal = () => setShowModal(false);
 
     const toggleSidebar = () => {
         setIsSideBarOpen(!isSideBarOpen);
@@ -69,6 +73,14 @@ const Patients: React.FC = () => {
     function handleShowZdravotnaKarta(id_poistenca: number) {
         console.log('Show zdravotna karta');
         navigate(`/pacient/${id_poistenca}/zdravotna_karta`);
+    }
+
+    function handleAddDiagnosis(id_poistenca: number) {
+        navigate(`/pacient/${id_poistenca}/diagnoza`);
+    }
+
+    function handleAddHospitalization(id_poistenca: number) {
+        navigate(`/pacient/${id_poistenca}/hospitalizacia`);
     }
 
     if (username) {
@@ -149,10 +161,37 @@ const Patients: React.FC = () => {
                                                             onClick={() => handleShowZdravotnaKarta(patient.id_poistenca)}>
                                                         <i className="bi bi-info-circle me-1"></i> Detail
                                                     </Button>
+                                                    <Button variant="outline-success" onClick={handleShowModal}>
+                                                        <i className="bi bi-plus-circle me-1"></i> Pridať
+                                                    </Button>
                                                     <Button variant="outline-success"
                                                             onClick={() => handleAddRecept(patient.id_poistenca)}>
                                                         <i className="bi bi-plus-circle me-1"></i> Pridať recept
                                                     </Button>
+                                                    <Modal show={showModal} onHide={handleCloseModal}>
+                                                        <Modal.Header closeButton>
+                                                            <Modal.Title>Pridať</Modal.Title>
+                                                        </Modal.Header>
+                                                        <Modal.Body>
+                                                            <Button variant="primary" className="mb-2"
+                                                                    onClick={() => handleAddRecept(patient.id_poistenca)}>
+                                                                Pridať recept
+                                                            </Button>
+                                                            <Button variant="primary" className="mb-2"
+                                                                    onClick={() => handleAddDiagnosis(patient.id_poistenca)}>
+                                                                Pridať diagnózu
+                                                            </Button>
+                                                            <Button variant="primary"
+                                                                    onClick={() => handleAddHospitalization(patient.id_poistenca)}>
+                                                                Pridať hospitalizáciu
+                                                            </Button>
+                                                        </Modal.Body>
+                                                        <Modal.Footer>
+                                                            <Button variant="secondary" onClick={handleCloseModal}>
+                                                                Zavrieť
+                                                            </Button>
+                                                        </Modal.Footer>
+                                                    </Modal>
                                                 </Col>
                                             </Row>
                                         </Card.Body>
