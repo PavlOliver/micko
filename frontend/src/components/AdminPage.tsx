@@ -91,9 +91,6 @@ const UserManagement: React.FC = () => {
                 <h2>Správa používateľov</h2>
                 {message && <Alert variant="success">{message}</Alert>}
                 {error && <Alert variant="danger">{error}</Alert>}
-                <Col md={3} className="p-0">
-                    <SideBar isOpen={isSideBarOpen} toggleSidebar={toggleSidebar} username={username}/>
-                </Col>
                 <Form onSubmit={handleSubmit}>
                     <Form.Group>
                         <Form.Label>ID Zamestnanca</Form.Label>
