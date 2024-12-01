@@ -87,6 +87,12 @@ class Diagnoza(db.Model):
     nazov_diagnozy = db.Column(VARCHAR2(255), nullable=False)
     doplnujuce_info = db.Column(CLOB, nullable=True)
 
+    def to_dict(self):
+        return {
+            'kod_diagnozy': self.kod_diagnozy,
+            'nazov_diagnozy': self.nazov_diagnozy
+        }
+
 
 class Osoba(db.Model):
     __tablename__ = 'm_osoba'
@@ -276,6 +282,7 @@ class Hospitalizacia(db.Model):
             'dovod': self.dovod,
         }
 
+
 class Liek(db.Model):
     __tablename__ = 'm_liek'
 
@@ -288,7 +295,8 @@ class Liek(db.Model):
     indikacna_skupina = db.Column(NUMBER(38, 0), nullable=True)
     atc = db.Column(TAtc, nullable=True)
     expiracia = db.Column(VARCHAR2(14), nullable=False)
-    vydaj = db.Column(VARCHAR2(2), nullable=False) #R-viazany na lek predpis, F-Nie je viazany na lek predpis, Rx-viazany na lek predpis s obmedzenim predpisovania, RB-Viazany na osobitne tlacivo so sikmym modyým pruhom
+    vydaj = db.Column(VARCHAR2(2),
+                      nullable=False)  # R-viazany na lek predpis, F-Nie je viazany na lek predpis, Rx-viazany na lek predpis s obmedzenim predpisovania, RB-Viazany na osobitne tlacivo so sikmym modyým pruhom
     kod_statu = db.Column(VARCHAR2(2), nullable=False)
     platnost = db.Column(CHAR(1), nullable=True)
     bezp_prvok = db.Column(CHAR(1), nullable=True)
@@ -330,6 +338,7 @@ class Recept(db.Model):
             'lekar': lekar.get_full_name_and_login() if lekar else None,
             'poznamka': self.poznamka
         }
+
 
 class SkladLiekov(db.Model):
     __tablename__ = 'm_sklad_liekov'

@@ -121,21 +121,10 @@ def add_recept(id_poistenca):
         except Exception as e:
             return jsonify({'error': str(e)}), 500
     elif request.method == 'GET':
-        if select_current_user():
-            pacient = Pacient.query.filter_by(id_poistenca=id_poistenca).first()
-            pacient_meno = pacient.get_full_name()
-            pacient_id = pacient.id_poistenca
-            lekar_login = select_current_user().login
-            lekar_meno = Zamestnanec.query.filter_by(
-                id_zamestnanca=select_current_user().id_zamestnanca).first().get_full_name()
-            lekar_id = select_current_user().id_zamestnanca
-            if pacient:
-                return jsonify({
-                    'pacient_meno': pacient_meno, 'pacient_id': pacient_id,
-                    'username': lekar_login, 'lekar_id': lekar_id,
-                    'lekar_meno': lekar_meno,
-                })
-            return jsonify({'error': 'Pacient not found'})
+        to_return = select_patient_and_doctor_data(id_poistenca)
+        if to_return:
+            return jsonify(to_return)
+        return jsonify({'error': 'Pacient not found'})
     return jsonify({'error': 'Invalid request method'})
 
 
@@ -240,6 +229,7 @@ def search_patients():
         print(f"Error: {e}")
         return jsonify({'error': 'An internal error occurred'}), 500
 
+
 def extract_date_of_birth(rodne_cislo):
     rc_part = rodne_cislo[:6]
     year = int(rc_part[:2])
@@ -251,6 +241,7 @@ def extract_date_of_birth(rodne_cislo):
     century = 1900 if year > current_year else 2000
     year += century
     return datetime(year, month, day)
+
 
 @views.route('/pacient/<id_poistenca>/zdravotna-karta', methods=['GET'])
 @login_required
@@ -280,11 +271,11 @@ def get_zdravotna_karta(id_poistenca):
                 'rodneCislo': pacient.to_dic()['id_poistenca'],
                 'adresa': osoba.to_dic()['adresa'],
                 'telefon': osoba.to_dic()['tel_cislo'],
-                #'krvnaSkupina': pacient.krvna_skupina,
-                #'alergie': pacient.alergie,
-                #'diagnozy': pacient.diagnozy,
+                # 'krvnaSkupina': pacient.krvna_skupina,
+                # 'alergie': pacient.alergie,
+                # 'diagnozy': pacient.diagnozy,
                 'hospitalizacie': hospitalizacie,
-                #'vysledkyVysetreni': pacient.vysledky_vysetreni,
+                # 'vysledkyVysetreni': pacient.vysledky_vysetreni,
                 'recepty': rec
             }
             return jsonify({'zdravotna_karta': zdravotna_karta})
@@ -294,3 +285,24 @@ def get_zdravotna_karta(id_poistenca):
         print("Error:", str(e))
         return jsonify({'error': 'An internal error occurred'}), 500
 
+
+@views.route('/pacient/<id_poistenca>/zaznam', methods=['GET', 'POST'])
+@login_required
+def add_diagnoza(id_poistenca):
+    if request.method == 'GET':
+        to_return = select_patient_and_doctor_data(id_poistenca)
+        if to_return:
+            return jsonify(to_return)
+        return jsonify({'error': 'Patient not found'})
+    elif request.method == 'POST':
+        # {'diahnoza_nazov': 'Vred dvanástnika', 'diagnoza_kod': 'K26.-', 'datum_vysetrenia': '', 'pacient': 'Ján Novák', 'lekar': 'John Doe', 'popis': ''}
+        print(request.json)
+        try:
+            new_diagnoza = insert_new_diagnoza(
+                diagnoza_kod=request.json['diagnoza_kod'],
+                datum_vysetrenia=datetime.strptime(request.json['datum_vysetrenia'], '%Y-%m-%d'),
+                pacient=id_poistenca,
+                popis=request.json['popis'])
+            return jsonify({'message': 'Diagnosis created'}), 201
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
