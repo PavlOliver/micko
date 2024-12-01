@@ -8,7 +8,7 @@ from flask_login import login_required
 
 from . import db
 from .models import Pacient, Zamestnanec, Pouzivatel, Osoba, Hospitalizacia
-from .models import Zamestnanec, Osoba
+from .models import Zamestnanec, Osoba, Specializacia
 from .queries import *
 
 views = Blueprint('views', __name__)
@@ -294,3 +294,15 @@ def get_zdravotna_karta(id_poistenca):
         print("Error:", str(e))
         return jsonify({'error': 'An internal error occurred'}), 500
 
+
+@views.route('/staff', methods=['GET'])
+@login_required
+def get_zamestnanci():
+    try:
+        print("Fetching employees...")  # Debug log
+        zamestnanci = select_zamestnanci()
+        print(f"Found {len(zamestnanci)} employees")  # Debug log
+        return jsonify({'zamestnanci': zamestnanci})
+    except Exception as e:
+        print("Error in get_zamestnanci:", str(e))  # Detailed error
+        return jsonify({'error': str(e)}), 500

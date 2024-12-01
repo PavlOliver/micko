@@ -2,7 +2,7 @@ from datetime import datetime
 
 from flask_login import current_user
 from . import db
-from .models import Objednavka, Pouzivatel, Pacient, Recept, Hospitalizacia
+from .models import Objednavka, Pouzivatel, Pacient, Recept, Hospitalizacia, Zamestnanec, Osoba, Specializacia
 
 
 def select_current_user():
@@ -122,3 +122,25 @@ def update_profile_picture(filename):
     user.fotka = filename
     db.session.commit()
     return user
+
+def select_zamestnanci():
+    """Returns all employees with their specializations"""
+    zamestnanci = db.session.query(
+        Zamestnanec,
+        Osoba,
+        Specializacia
+    ).join(
+        Osoba,
+        Zamestnanec.rod_cislo == Osoba.rod_cislo
+    ).join(
+        Specializacia,
+        Zamestnanec.specializacia == Specializacia.kod_specializacie
+    ).all()
+
+    return [{
+        'id': zamestnanec.id_zamestnanca,
+        'meno': osoba.meno,
+        'priezvisko': osoba.priezvisko,
+        'specializacia': specializacia.nazov_specializacie,
+        'popis_specializacie': specializacia.popis
+    } for zamestnanec, osoba, specializacia in zamestnanci]
