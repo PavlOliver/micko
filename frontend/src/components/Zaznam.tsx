@@ -163,7 +163,7 @@ const Zaznam: React.FC = () => {
                                         onChange={(e) => setFormData({...formData, datum_vysetrenia: e.target.value})}
                                     />
                                 </Form.Group>
-                                <Button variant="primary" type="submit">Pridať recept</Button>
+                                <Button className="mt-3" variant="primary" type="submit">Pridať zdravotný záznam</Button>
                             </Form>
                         </Col>
                     </Row>

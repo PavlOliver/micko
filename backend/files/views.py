@@ -302,7 +302,6 @@ def add_diagnoza(id_poistenca):
             return jsonify(to_return)
         return jsonify({'error': 'Patient not found'})
     elif request.method == 'POST':
-        # {'diahnoza_nazov': 'Vred dvanástnika', 'diagnoza_kod': 'K26.-', 'datum_vysetrenia': '', 'pacient': 'Ján Novák', 'lekar': 'John Doe', 'popis': ''}
         print(request.json)
         try:
             new_diagnoza = insert_new_diagnoza(

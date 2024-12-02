@@ -15,6 +15,7 @@ import UserManagement from './components/AdminPage';
 import ZdravotnaKarta from "./components/ZdravotnaKarta";
 import Zaznam from "./components/Zaznam";
 import Zamestnanci from "./components/Zamestnanci";
+import HospitalizationAnalysis from "./components/HospitalizationAnalysis";
 
 axios.defaults.baseURL = 'http://localhost:5000';
 axios.defaults.withCredentials = true;
@@ -74,6 +75,7 @@ function AppContent() {
             <Route path={"/patients"} element={<Patients/>} />
             <Route path="/user-management" element={<UserManagement />} />
             <Route path="/staff" element={<Zamestnanci />} />
+            <Route path="/hospitalization-analysis" element={<HospitalizationAnalysis />} />
         </Routes>
     </Router>
   );

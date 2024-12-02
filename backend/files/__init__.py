@@ -28,11 +28,13 @@ def create_app():
     from .auth import auth
     from .test_routes import test_routes
     from .api import api
+    from .pds_api import pds_api
 
     app.register_blueprint(views)
     app.register_blueprint(auth)
     app.register_blueprint(test_routes)
     app.register_blueprint(api)
+    app.register_blueprint(pds_api, url_prefix='/analysis')
 
     from .models import Pouzivatel
 
