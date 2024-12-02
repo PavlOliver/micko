@@ -212,34 +212,41 @@ def search_patients():
         vek = request.args.get('vek')
         adresa = request.args.get('adresa')
 
-        # Logovanie parametrov
         print(f"Received parameters: meno={ID_Poistenca}, rodne_cislo={rodne_cislo}, vek={vek}, adresa={adresa}")
 
-        # Vyhľadávacie filtre na základe parametrov
         query = Pacient.query
         if ID_Poistenca:
             query = query.filter(Pacient.id_poistenca.ilike(f'%{ID_Poistenca}%'))
         if rodne_cislo:
             query = query.filter(Pacient.rod_cislo.ilike(f'%{rodne_cislo}%'))
-        if vek:
-            query = query.filter(Pacient.vek == vek)
         if adresa:
-            query = query.filter(Pacient.adresa.ilike(f'%{adresa}%'))
+            query = query.join(Osoba).filter(Osoba.adresa.ilike(f'%{adresa}%'))
 
-        # Získanie pacientov
         patients = query.all()
 
-        # Logovanie odpovede
+        # Filter by age after fetching
+        if vek:
+            vek = int(vek)
+            patients = [
+                patient for patient in patients
+                if extract_age_from_date_of_birth(extract_date_of_birth(patient.rod_cislo)) == vek
+            ]
+
         print(f"Found patients: {patients}")
 
-        # Vrátenie pacientov ako JSON
         return jsonify({'patients': [patient.to_dic() for patient in patients]})
 
     except Exception as e:
-        # Logovanie chyby
         print(f"Error: {e}")
         return jsonify({'error': 'An internal error occurred'}), 500
 
+
+def extract_age_from_date_of_birth(date_of_birth):
+    today = datetime.now()
+    age = today.year - date_of_birth.year
+    if (today.month, today.day) < (date_of_birth.month, date_of_birth.day):
+        age -= 1
+    return age
 def extract_date_of_birth(rodne_cislo):
     rc_part = rodne_cislo[:6]
     year = int(rc_part[:2])
