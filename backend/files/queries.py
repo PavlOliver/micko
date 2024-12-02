@@ -2,7 +2,8 @@ from datetime import datetime
 
 from flask_login import current_user
 from . import db
-from .models import Objednavka, Pouzivatel, Pacient, Recept, Hospitalizacia
+from .models import Objednavka, Pouzivatel, Pacient, Recept, Hospitalizacia, Zamestnanec, ZdravotnyZaznam
+from .models import Objednavka, Pouzivatel, Pacient, Recept, Hospitalizacia, Zamestnanec, Osoba, Specializacia
 
 
 def select_current_user():
@@ -122,3 +123,57 @@ def update_profile_picture(filename):
     user.fotka = filename
     db.session.commit()
     return user
+
+
+def select_patient_and_doctor_data(id_poistenca):
+    if select_current_user():
+        pacient = Pacient.query.filter_by(id_poistenca=id_poistenca).first()
+    pacient_meno = pacient.get_full_name()
+    pacient_id = pacient.id_poistenca
+    lekar_login = select_current_user().login
+    lekar_meno = Zamestnanec.query.filter_by(
+        id_zamestnanca=select_current_user().id_zamestnanca).first().get_full_name()
+    lekar_id = select_current_user().id_zamestnanca
+    if pacient:
+        return {
+            'pacient_meno': pacient_meno, 'pacient_id': pacient_id,
+            'username': lekar_login, 'lekar_id': lekar_id,
+            'lekar_meno': lekar_meno,
+        }
+    return None
+
+
+def insert_new_diagnoza(diagnoza_kod, datum_vysetrenia, pacient, popis):
+    """this creates a new diagnosis"""
+    new_diagnoza = ZdravotnyZaznam(
+        kod_diagnozy=diagnoza_kod,
+        datum_vysetrenia=datum_vysetrenia,
+        pacient=pacient,
+        popis=popis,
+        lekar=select_current_user().id_zamestnanca
+    )
+    db.session.add(new_diagnoza)
+    db.session.commit()
+    return new_diagnoza
+
+def select_zamestnanci():
+    """Returns all employees with their specializations"""
+    zamestnanci = db.session.query(
+        Zamestnanec,
+        Osoba,
+        Specializacia
+    ).join(
+        Osoba,
+        Zamestnanec.rod_cislo == Osoba.rod_cislo
+    ).join(
+        Specializacia,
+        Zamestnanec.specializacia == Specializacia.kod_specializacie
+    ).all()
+
+    return [{
+        'id': zamestnanec.id_zamestnanca,
+        'meno': osoba.meno,
+        'priezvisko': osoba.priezvisko,
+        'specializacia': specializacia.nazov_specializacie,
+        'popis_specializacie': specializacia.popis
+    } for zamestnanec, osoba, specializacia in zamestnanci]

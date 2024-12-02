@@ -14,8 +14,10 @@ import Recept from "./components/Recept";
 import Patients from "./components/Patients";
 import UserManagement from './components/AdminPage';
 import ZdravotnaKarta from "./components/ZdravotnaKarta";
+import Zaznam from "./components/Zaznam";
 import Diagnoza from "./components/Diagnoza";
 import Hospitalizacia from "./components/Hospitalizacia";
+import Zamestnanci from "./components/Zamestnanci";
 
 axios.defaults.baseURL = 'http://localhost:5000';
 axios.defaults.withCredentials = true;
@@ -71,10 +73,10 @@ function AppContent() {
             <Route path={"/orders"} element={<Order/>} />
             <Route path="/pacient/:id_poistenca/recepty" element={<Recept/>} />
             <Route path="/pacient/:id_poistenca/zdravotna_karta" element={<ZdravotnaKarta/>} />
+            <Route path="/pacient/:id_poistenca/zaznam" element={<Zaznam/>} />
             <Route path={"/patients"} element={<Patients/>} />
-            <Route path="/pacient/:id_poistenca/diagnoza" element={<Diagnoza/>} />
-            <Route path="/pacient/:id_poistenca/hospitalizacia" element={<Hospitalizacia/>} />
             <Route path="/user-management" element={<UserManagement />} />
+            <Route path="/staff" element={<Zamestnanci />} />
         </Routes>
     </Router>
   );
