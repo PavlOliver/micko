@@ -222,7 +222,7 @@ class Zmena(db.Model):
     od_kedy = db.Column(DATE, primary_key=True)
     do_kedy = db.Column(DATE, nullable=False)
     typ_zmeny = db.Column(VARCHAR2(50), nullable=False)
-    miestnost = db.Column(CHAR(5), db.ForeignKey('m_miestnost.cislo_miestnosti'), nullable=True)
+    miestnost = db.Column(CHAR(4), db.ForeignKey('m_miestnost.cislo_miestnosti'), nullable=True)
 
 
 class Objednavka(db.Model):

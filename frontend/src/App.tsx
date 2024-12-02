@@ -15,6 +15,9 @@ import Patients from "./components/Patients";
 import UserManagement from './components/AdminPage';
 import ZdravotnaKarta from "./components/ZdravotnaKarta";
 import Zaznam from "./components/Zaznam";
+import Diagnoza from "./components/Diagnoza";
+import Hospitalizacia from "./components/Hospitalizacia";
+import Zamestnanci from "./components/Zamestnanci";
 
 axios.defaults.baseURL = 'http://localhost:5000';
 axios.defaults.withCredentials = true;
@@ -37,6 +40,7 @@ axios.defaults.withCredentials = true;
 //         </UserProvider>
 //     );
 // };
+
 
 function AppContent() {
   const { setCurrentUser } = useUser();
@@ -72,6 +76,7 @@ function AppContent() {
             <Route path="/pacient/:id_poistenca/zaznam" element={<Zaznam/>} />
             <Route path={"/patients"} element={<Patients/>} />
             <Route path="/user-management" element={<UserManagement />} />
+            <Route path="/staff" element={<Zamestnanci />} />
         </Routes>
     </Router>
   );

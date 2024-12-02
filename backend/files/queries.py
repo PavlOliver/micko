@@ -3,6 +3,7 @@ from datetime import datetime
 from flask_login import current_user
 from . import db
 from .models import Objednavka, Pouzivatel, Pacient, Recept, Hospitalizacia, Zamestnanec, ZdravotnyZaznam
+from .models import Objednavka, Pouzivatel, Pacient, Recept, Hospitalizacia, Zamestnanec, Osoba, Specializacia
 
 
 def select_current_user():
@@ -154,3 +155,25 @@ def insert_new_diagnoza(diagnoza_kod, datum_vysetrenia, pacient, popis):
     db.session.add(new_diagnoza)
     db.session.commit()
     return new_diagnoza
+
+def select_zamestnanci():
+    """Returns all employees with their specializations"""
+    zamestnanci = db.session.query(
+        Zamestnanec,
+        Osoba,
+        Specializacia
+    ).join(
+        Osoba,
+        Zamestnanec.rod_cislo == Osoba.rod_cislo
+    ).join(
+        Specializacia,
+        Zamestnanec.specializacia == Specializacia.kod_specializacie
+    ).all()
+
+    return [{
+        'id': zamestnanec.id_zamestnanca,
+        'meno': osoba.meno,
+        'priezvisko': osoba.priezvisko,
+        'specializacia': specializacia.nazov_specializacie,
+        'popis_specializacie': specializacia.popis
+    } for zamestnanec, osoba, specializacia in zamestnanci]
