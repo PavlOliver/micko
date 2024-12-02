@@ -62,7 +62,10 @@ const Zaznam: React.FC = () => {
         axios.post(`/pacient/${id_poistenca}/zaznam`, formData, {withCredentials: true})
             .then(response => {
                 setMessage('Záznam bol úspešne pridaný');
-                navigate(`/pacient/${id_poistenca}/zaznamy`);
+                navigate(`/pacient/${id_poistenca}/zaznam`);
+                formData.popis = '';
+                formData.datum_vysetrenia = '';
+                formData.diagnoza_nazov = '';
             })
             .catch(error => {
                 setErrorMessage(error.response.data.error);

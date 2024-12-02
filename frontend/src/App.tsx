@@ -1,7 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect } from 'react';
-import Home from "./components/Home";
 import { UserProvider, useUser } from './context/UserContext';
 import Domaca from "./components/Domaca";
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -15,8 +14,6 @@ import Patients from "./components/Patients";
 import UserManagement from './components/AdminPage';
 import ZdravotnaKarta from "./components/ZdravotnaKarta";
 import Zaznam from "./components/Zaznam";
-import Diagnoza from "./components/Diagnoza";
-import Hospitalizacia from "./components/Hospitalizacia";
 import Zamestnanci from "./components/Zamestnanci";
 
 axios.defaults.baseURL = 'http://localhost:5000';

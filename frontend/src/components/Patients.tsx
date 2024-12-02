@@ -72,7 +72,7 @@ const Patients: React.FC = () => {
     }
 
     function handleAddDiagnosis(id_poistenca: number) {
-        navigate(`/pacient/${id_poistenca}/diagnoza`);
+        navigate(`/pacient/${id_poistenca}/zaznam`);
     }
 
     function handleAddHospitalization(id_poistenca: number) {
