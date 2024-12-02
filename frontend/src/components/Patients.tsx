@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Container, Col, Row, Form, FormControl, Button, Card, Modal} from 'react-bootstrap';
+import {Container, Col, Row, Form, FormControl, Button, Card, Modal, Dropdown} from 'react-bootstrap';
 import SideBar from "./SideBar";
 import '../css/patients.css';
 import axios from "axios";
@@ -21,10 +21,7 @@ const Patients: React.FC = () => {
     const [adresa, setAdresa] = useState('');
     const navigate = useNavigate();
     const [username, setUsername] = useState('');
-    const [showModal, setShowModal] = useState(false);
 
-    const handleShowModal = () => setShowModal(true);
-    const handleCloseModal = () => setShowModal(false);
 
     const toggleSidebar = () => {
         setIsSideBarOpen(!isSideBarOpen);
@@ -51,12 +48,11 @@ const Patients: React.FC = () => {
             .then(response => {
                 console.log('Search results:', response.data);
 
-                // Skontroluj, či response.data.patients je definované a je to pole
                 if (Array.isArray(response.data.patients)) {
                     setPatients(response.data.patients);
                 } else {
                     console.error('Expected an array of patients, but got:', response.data.patients);
-                    setPatients([]); // Môžeš nastaviť prázdny zoznam, ak pacienti nie sú k dispozícii
+                    setPatients([]);
                 }
             })
             .catch(error => {
@@ -122,10 +118,14 @@ const Patients: React.FC = () => {
                                             <FormControl
                                                 type="number"
                                                 placeholder="Zadajte vek"
-                                                value={vek}
-                                                onChange={(e) => setVek(parseInt(e.target.value))}
+                                                value={vek || ''}
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    setVek(value ? parseInt(value) : '');
+                                                }}
                                             />
                                         </Form.Group>
+
                                     </Col>
                                     <Col md={6}>
                                         <Form.Group controlId="formAdresa">
@@ -145,59 +145,52 @@ const Patients: React.FC = () => {
                             </Form>
                         </Row>
                         <Row>
-                            {patients.map(patient => (
-                                <Col md={6} key={patient.id_poistenca} className="mb-4">
-                                    <Card>
-                                        <Card.Body>
-                                            <Row>
-                                                <Col md={8}>
-                                                    <Card.Title>{patient.meno} {patient.priezvisko}</Card.Title>
-                                                    <Card.Text>
-                                                        <strong>Rodné číslo:</strong> {patient.rodne_cislo}
-                                                    </Card.Text>
-                                                </Col>
-                                                <Col md={4} className="d-flex align-items-center justify-content-end">
-                                                    <Button variant="outline-primary" className="me-2"
-                                                            onClick={() => handleShowZdravotnaKarta(patient.id_poistenca)}>
-                                                        <i className="bi bi-info-circle me-1"></i> Detail
-                                                    </Button>
-                                                    <Button variant="outline-success" onClick={handleShowModal}>
-                                                        <i className="bi bi-plus-circle me-1"></i> Pridať
-                                                    </Button>
-                                                    <Button variant="outline-success"
-                                                            onClick={() => handleAddRecept(patient.id_poistenca)}>
-                                                        <i className="bi bi-plus-circle me-1"></i> Pridať recept
-                                                    </Button>
-                                                    <Modal show={showModal} onHide={handleCloseModal}>
-                                                        <Modal.Header closeButton>
-                                                            <Modal.Title>Pridať</Modal.Title>
-                                                        </Modal.Header>
-                                                        <Modal.Body>
-                                                            <Button variant="primary" className="mb-2"
-                                                                    onClick={() => handleAddRecept(patient.id_poistenca)}>
-                                                                Pridať recept
-                                                            </Button>
-                                                            <Button variant="primary" className="mb-2"
-                                                                    onClick={() => handleAddDiagnosis(patient.id_poistenca)}>
-                                                                Pridať diagnózu
-                                                            </Button>
-                                                            <Button variant="primary"
-                                                                    onClick={() => handleAddHospitalization(patient.id_poistenca)}>
-                                                                Pridať hospitalizáciu
-                                                            </Button>
-                                                        </Modal.Body>
-                                                        <Modal.Footer>
-                                                            <Button variant="secondary" onClick={handleCloseModal}>
-                                                                Zavrieť
-                                                            </Button>
-                                                        </Modal.Footer>
-                                                    </Modal>
-                                                </Col>
-                                            </Row>
-                                        </Card.Body>
-                                    </Card>
+                            {patients.length === 0 ? (
+                                <Col md={12} className="text-center">
+                                    <p>Aktuálne sa nenachádzaju žíadni pacienti</p>
                                 </Col>
-                            ))}
+                            ) : (
+                                patients.map(patient => (
+                                    <Col md={6} key={patient.id_poistenca} className="mb-4">
+                                        <Card>
+                                            <Card.Body>
+                                                <Row>
+                                                    <Col md={8}>
+                                                        <Card.Title>{patient.meno} {patient.priezvisko}</Card.Title>
+                                                        <Card.Text>
+                                                            <strong>Rodné číslo:</strong> {patient.rodne_cislo}
+                                                        </Card.Text>
+                                                    </Col>
+                                                    <Col md={4}
+                                                         className="d-flex align-items-center justify-content-end">
+                                                        <Button variant="outline-primary" className="me-2"
+                                                                onClick={() => handleShowZdravotnaKarta(patient.id_poistenca)}>
+                                                            <i className="bi bi-info-circle me-1"></i> Detail
+                                                        </Button>
+                                                        <Dropdown>
+                                                            <Dropdown.Toggle variant="outline-success"
+                                                                             id="dropdown-basic">
+                                                                <i className="bi bi-plus-circle me-1"></i> Pridať
+                                                            </Dropdown.Toggle>
+                                                            <Dropdown.Menu>
+                                                                <Dropdown.Item
+                                                                    onClick={() => handleAddRecept(patient.id_poistenca)}>Pridať
+                                                                    recept</Dropdown.Item>
+                                                                <Dropdown.Item
+                                                                    onClick={() => handleAddDiagnosis(patient.id_poistenca)}>Pridať
+                                                                    diagnózu</Dropdown.Item>
+                                                                <Dropdown.Item
+                                                                    onClick={() => handleAddHospitalization(patient.id_poistenca)}>Pridať
+                                                                    hospitalizáciu</Dropdown.Item>
+                                                            </Dropdown.Menu>
+                                                        </Dropdown>
+                                                    </Col>
+                                                </Row>
+                                            </Card.Body>
+                                        </Card>
+                                    </Col>
+                                ))
+                            )}
                         </Row>
                     </Col>
                 </Row>
