@@ -14,23 +14,19 @@ def select_current_user():
     return None
 
 
-def select_current_doctor_orders(week_number):
+def select_current_doctor_orders(week_number, year):
     """this returns all orders of the current user (doctor) based on the week number"""
+    from sqlalchemy import extract
     if select_current_user():
-        objednavky = Objednavka.query.filter(Objednavka.lekar == select_current_user().id_zamestnanca).join(
-            Pacient).all()
+        objednavky = Objednavka.query.filter(
+            Objednavka.lekar == select_current_user().id_zamestnanca,
+            extract('year', Objednavka.datum_objednavky) == year
+        ).join(Pacient).all()
         to_return = []
         for objednavka in objednavky:
             if objednavka.datum_objednavky.isocalendar().week == week_number:
                 to_return.append(objednavka.to_dic())
         return to_return
-    # if select_current_user():
-    #     objednavky = Objednavka.query.filter(Objednavka.lekar == select_current_user().id_zamestnanca).join(
-    #         Pacient).all()
-    #     to_return = []
-    #     for objednavka in objednavky:
-    #         to_return.append(objednavka.to_dic())
-    #     return to_return
 
 
 def select_last_order():
@@ -156,6 +152,7 @@ def insert_new_diagnoza(diagnoza_kod, datum_vysetrenia, pacient, popis):
     db.session.add(new_diagnoza)
     db.session.commit()
     return new_diagnoza
+
 
 def select_zamestnanci():
     """Returns all employees with their specializations"""

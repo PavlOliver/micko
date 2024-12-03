@@ -27,6 +27,7 @@ const Order: React.FC = () => {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [weekNumber, setWeekNumber] = useState(0);
+    const [year, setYear] = useState(new Date().getFullYear());
     const [mondayDate, setMondayDate] = useState('');
     const [sundayDate, setSundayDate] = useState('');
     const toggleAddModal = () => setShowAddModal(!showAddModal);
@@ -222,11 +223,18 @@ const Order: React.FC = () => {
     }
 
     const handlePreviousWeek = () => {
-        if (weekNumber <= 0) {
-            return;
+        let newWeekNumber = weekNumber - 1;
+        let newYear = year;
+
+        if (newWeekNumber < 1) {
+            newWeekNumber = 52;
+            newYear -= 1;
         }
-        setWeekNumber(weekNumber - 1);
-        axios.get(`/orders?week=${weekNumber - 1}`, {withCredentials: true})
+
+        setWeekNumber(newWeekNumber);
+        setYear(newYear);
+
+        axios.get(`/orders?week=${newWeekNumber}&year=${newYear}`, {withCredentials: true})
             .then(response => {
                 setAppointments(response.data.appointments);
                 setMondayDate(response.data.monday);
@@ -238,11 +246,18 @@ const Order: React.FC = () => {
     };
 
     const handleNextWeek = () => {
-        if (weekNumber >= 52) {
-            return;
+        let newWeekNumber = weekNumber + 1;
+        let newYear = year;
+
+        if (newWeekNumber > 52) {
+            newWeekNumber = 1;
+            newYear += 1;
         }
-        setWeekNumber(weekNumber + 1);
-        axios.get(`/orders?week=${weekNumber + 1}`, {withCredentials: true})
+
+        setWeekNumber(newWeekNumber);
+        setYear(newYear);
+
+        axios.get(`/orders?week=${newWeekNumber}&year=${newYear}`, {withCredentials: true})
             .then(response => {
                 setAppointments(response.data.appointments);
                 setMondayDate(response.data.monday);
@@ -307,6 +322,7 @@ const Order: React.FC = () => {
                                                 name="patient"
                                                 value={patientInput}
                                                 onChange={handlePatientInputChange}
+                                                onClick={() => setPatientSuggestions([])} // Clear suggestions on click
                                             />
                                             {patientSuggestions.length > 0 && (
                                                 <ul className="suggestions-list">
@@ -323,7 +339,6 @@ const Order: React.FC = () => {
                                                     ))}
                                                 </ul>
                                             )}
-
                                         </Form.Group>
                                         <Form.Group controlId="formDoctor">
                                             <Form.Label>Lekár</Form.Label>
@@ -462,6 +477,7 @@ const Order: React.FC = () => {
                                                 name="ePatient"
                                                 value={patientInput}
                                                 onChange={handlePatientInputChange}
+                                                onClick={() => setPatientSuggestions([])}
                                             />
                                             {patientSuggestions.length > 0 && (
                                                 <ul className="suggestions-list">

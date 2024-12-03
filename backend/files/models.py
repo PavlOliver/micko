@@ -247,7 +247,7 @@ class Objednavka(db.Model):
             'room': self.miestnost,
             'patient': pacient.get_fullname_and_id(),
             'doctor': self.lekar,
-            'day': self.datum_objednavky.strftime('%A')
+            'day': self.datum_objednavky.strftime('%A'),
         }
 
 

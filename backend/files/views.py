@@ -32,14 +32,15 @@ def orders():
     DELETE - deletes an order"""
     if request.method == 'GET':
         if select_current_user():
-            if request.args.get('week'):
+            if request.args.get('week') and request.args.get('year'):
                 this_week = int(request.args.get('week'))
+                this_year = int(request.args.get('year'))
             else:
                 this_week = datetime.now().isocalendar().week
-            current_year = datetime.now().year
-            monday = datetime.strptime(f"{current_year}-W{this_week}-1", "%Y-W%W-%w").date()
+                this_year = datetime.now().year
+            monday = datetime.strptime(f"{this_year}-W{this_week}-1", "%Y-W%W-%w").date()
             sunday = monday + timedelta(days=6)
-            objednavky = select_current_doctor_orders(this_week)
+            objednavky = select_current_doctor_orders(this_week, this_year)
             return jsonify(
                 {'username': select_current_user().login,
                  'appointments': objednavky,
