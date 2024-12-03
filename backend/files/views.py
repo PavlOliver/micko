@@ -255,7 +255,7 @@ def extract_date_of_birth(rodne_cislo):
 def get_zdravotna_karta(id_poistenca):
     current_user_log = select_current_user()
     print("Current user:", current_user_log, "Role:", current_user_log.rola if current_user_log else None)
-    if not current_user_log or current_user_log.rola != 'A' or current_user_log.rola != 'L':
+    if not current_user_log or current_user_log.rola != 'A' and current_user_log.rola != 'L':
         return jsonify({'error': 'Unauthorized access'}), 403
     try:
         print("Received parameters: ID_Poistenca=", id_poistenca)
