@@ -24,6 +24,12 @@ interface Adresa {
     psc: string;
 }
 
+interface VysledokVysetrenia {
+    datum: string;
+    vysledok: string;
+    lekar: string;
+}
+
 interface os_udaje {
     meno: string;
     priezvisko: string;
@@ -33,7 +39,9 @@ interface os_udaje {
     telefon: string;
     hospitalizacie: Hospitalizacia[];
     recepty: Recept[];
+    vysledkyVysetreni: VysledokVysetrenia[];
 }
+
 
 const ZdravotnaKarta: React.FC = () => {
     const { id_poistenca } = useParams<{ id_poistenca: string }>();
@@ -54,7 +62,7 @@ const ZdravotnaKarta: React.FC = () => {
             .catch(error => {
                 console.error('Error fetching patient data:', error);
             });
-    }, [id_poistenca]); // Oprava závislosti
+    }, [id_poistenca]);
 
     if (!Pacient) {
         return (
@@ -127,6 +135,40 @@ const ZdravotnaKarta: React.FC = () => {
                             </Card>
                         </Col>
                     </Row>
+                    <Row>
+    <Col md={12}>
+        <Card className="mb-4">
+            <Card.Body>
+                <Card.Title>Výsledky vyšetrení</Card.Title>
+                <Table striped bordered hover>
+                    <thead>
+                        <tr>
+                            <th>Dátum</th>
+                            <th>Výsledok</th>
+                            <th>Lekár</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {Pacient.vysledkyVysetreni?.length > 0 ? (
+                            Pacient.vysledkyVysetreni.map((vysledok, index) => (
+                                <tr key={index}>
+                                    <td>{vysledok.datum}</td>
+                                    <td>{vysledok.vysledok}</td>
+                                    <td>{vysledok.lekar}</td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan={3} className="text-center">Žiadne výsledky vyšetrení</td>
+                            </tr>
+                        )}
+                    </tbody>
+                </Table>
+            </Card.Body>
+        </Card>
+    </Col>
+</Row>
+
                     <Row>
                         <Col md={12}>
                             <Card className="mb-4">

@@ -255,7 +255,7 @@ def extract_date_of_birth(rodne_cislo):
 def get_zdravotna_karta(id_poistenca):
     current_user_log = select_current_user()
     print("Current user:", current_user_log, "Role:", current_user_log.rola if current_user_log else None)
-    if not current_user_log or current_user_log.rola != 'A':
+    if not current_user_log or current_user_log.rola != 'A' or current_user_log.rola != 'L':
         return jsonify({'error': 'Unauthorized access'}), 403
     try:
         print("Received parameters: ID_Poistenca=", id_poistenca)
@@ -265,6 +265,8 @@ def get_zdravotna_karta(id_poistenca):
         hosp = Hospitalizacia.query.filter_by(pacient=id_poistenca).all()
         hospitalizacie = [h.to_dic2() for h in hosp]
         rec = Recept.query.filter_by(pacient=id_poistenca).all()
+        zdrav_zaznamy = ZdravotnyZaznam.query.filter_by(pacient=id_poistenca).all()
+        zdrav_zaznamy = [z.zaznam() for z in zdrav_zaznamy]
         print('recept ', rec)
         rec = [r.zaznam() for r in rec]
         print(hospitalizacie)
@@ -282,7 +284,7 @@ def get_zdravotna_karta(id_poistenca):
                 # 'alergie': pacient.alergie,
                 # 'diagnozy': pacient.diagnozy,
                 'hospitalizacie': hospitalizacie,
-                # 'vysledkyVysetreni': pacient.vysledky_vysetreni,
+                'zdravZaznamy': zdrav_zaznamy,
                 'recepty': rec
             }
             return jsonify({'zdravotna_karta': zdravotna_karta})
