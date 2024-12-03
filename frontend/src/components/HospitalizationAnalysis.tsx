@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
     BarChart,
@@ -11,7 +11,7 @@ import {
     ResponsiveContainer,
 } from 'recharts';
 import SideBar from "./SideBar";
-import {Col, Container, Row, Form, Table} from "react-bootstrap";
+import { Col, Container, Row, Form, Table, Button } from "react-bootstrap";
 
 interface HospAnalysisItem {
     meno: string;
@@ -31,12 +31,8 @@ const HospitalizationBarChart = () => {
     const toggleSidebar = () => setIsSidebarOpen(!isSideBarOpen);
 
     useEffect(() => {
-        if (startDate && endDate) {
-            fetchData(startDate, endDate);
-        } else {
-            fetchData('', '');
-        }
-    }, [startDate, endDate]);
+        fetchData(startDate, endDate);
+    }, []);
 
     const fetchData = (start: string, end: string) => {
         axios
@@ -55,12 +51,16 @@ const HospitalizationBarChart = () => {
     };
 
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const {id, value} = e.target;
+        const { id, value } = e.target;
         if (id === 'startDate') {
             setStartDate(value);
         } else if (id === 'endDate') {
             setEndDate(value);
         }
+    };
+
+    const handleRefresh = () => {
+        fetchData(startDate, endDate);
     };
 
     return (
@@ -72,7 +72,7 @@ const HospitalizationBarChart = () => {
                 <Col md={isSideBarOpen ? 10 : 11} className="content-column">
                     <div className="d-flex justify-content-between align-items-center mb-4">
                         <h2>Hospitalization Analysis</h2>
-                        <Form.Group controlId="dateSelect">
+                        <Form.Group>
                             <Form.Label>Select Date Range</Form.Label>
                             <div className="d-flex">
                                 <Form.Control
@@ -90,6 +90,7 @@ const HospitalizationBarChart = () => {
                                 />
                             </div>
                         </Form.Group>
+                        <Button onClick={handleRefresh} className="ms-2">Refresh</Button>
                     </div>
                     <ResponsiveContainer width="100%" height={400}>
                         <BarChart
