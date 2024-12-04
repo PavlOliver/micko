@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
 import {Nav, Button} from 'react-bootstrap';
 import axios from 'axios';
-import { useUser } from '../context/UserContext';
-
+import {useUser} from '../context/UserContext';
+import '../css/SideBar.css';
 
 interface SidebarProps {
     isOpen: boolean;
@@ -12,20 +12,15 @@ interface SidebarProps {
 
 const SideBar: React.FC<SidebarProps> = ({isOpen, toggleSidebar, username}) => {
     const [showUserOptions, setShowUserOptions] = useState(false);
-    const { currentUser, setCurrentUser } = useUser();
+    const [showStats, setShowStats] = useState(false);
+    const {currentUser, setCurrentUser} = useUser();
 
-     //console.log('Current user:', currentUser);
-
-    const handleMouseEnter = () => {
-        if (isOpen) {
-            setShowUserOptions(true);
-        }
+    const handleStatsClick = () => {
+        if (isOpen) setShowStats(!showStats);
     };
 
-    const handleMouseLeave = () => {
-        if (isOpen) {
-            setShowUserOptions(false);
-        }
+    const handleUserOptionsClick = () => {
+        if (isOpen) setShowUserOptions(!showUserOptions);
     };
 
     const handleLogout = () => {
@@ -56,44 +51,74 @@ const SideBar: React.FC<SidebarProps> = ({isOpen, toggleSidebar, username}) => {
             </Button>
 
             <Nav defaultActiveKey="/home" className="flex-column px-0">
-                <Nav.Link href="/home" className={`text-nowrap ${isOpen ? '' : 'text-center'}`}>
+                <Nav.Link href="/home" className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
                     <i className="bi bi-house"></i>
                     {isOpen && <span className="ms-2">Domov</span>}
                 </Nav.Link>
-                <Nav.Link href="/patients" className={`text-nowrap ${isOpen ? '' : 'text-center'}`}>
+                <Nav.Link href="/patients" className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
                     <i className="bi bi-person"></i>
                     {isOpen && <span className="ms-2">Pacienti</span>}
                 </Nav.Link>
-                <Nav.Link href="/hospitalizations" className={`text-nowrap ${isOpen ? '' : 'text-center'}`}>
+                <Nav.Link href="/hospitalizations" className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
                     <i className="bi bi-hospital"></i>
                     {isOpen && <span className="ms-2">Hospitalizácie</span>}
                 </Nav.Link>
-                <Nav.Link href="/examinations" className={`text-nowrap ${isOpen ? '' : 'text-center'}`}>
+                <Nav.Link href="/examinations" className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
                     <i className="bi bi-file-earmark-text"></i>
                     {isOpen && <span className="ms-2">Vyšetrenia</span>}
                 </Nav.Link>
-                <Nav.Link href="/staff" className={`text-nowrap ${isOpen ? '' : 'text-center'}`}>
+                <Nav.Link href="/staff" className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
                     <i className="bi bi-person-check"></i>
                     {isOpen && <span className="ms-2">Zamestnanci</span>}
                 </Nav.Link>
-                <Nav.Link href="/schedule" className={`text-nowrap ${isOpen ? '' : 'text-center'}`}>
+                <Nav.Link href="/schedule" className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
                     <i className="bi bi-calendar"></i>
                     {isOpen && <span className="ms-2">Rozvrh miestností</span>}
                 </Nav.Link>
-                <Nav.Link href="/orders" className={`text-nowrap ${isOpen ? '' : 'text-center'}`}>
+                <Nav.Link href="/orders" className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
                     <i className="bi bi-file-earmark-medical"></i>
                     {isOpen && <span className="ms-2">Objednávky</span>}
                 </Nav.Link>
+                <Nav.Link onClick={handleStatsClick} className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
+                    <i className="bi bi-person-circle"></i>
+                    {isOpen && <span className="ms-2">Analýza</span>}
+                    {isOpen && (
+                        <i className={`bi ms-2 ${showStats ? 'bi-caret-up-fill' : 'bi-caret-down-fill'}`}
+                           style={{transition: 'transform 0.3s ease'}}></i>)}
+                </Nav.Link>
+                {showStats && (
+                    <div className="ms-3">
+                        <Nav.Link href="/hospitalization-analysis"
+                                  className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
+                            <i className="bi bi-house"></i>
+                            {isOpen && <span className="ms-2">Hospitalizácia</span>}
+                        </Nav.Link>
+                        <Nav.Link href="/appointment-analysis"
+                                  className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
+                            <i className="bi bi-calendar"></i>
+                            {isOpen && <span className="ms-2">Objednávky</span>}
+                        </Nav.Link>
+                        <Nav.Link href="/diagnosis-analysis"
+                                  className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
+                            <i className="bi bi-file-earmark-medical"></i>
+                            {isOpen && <span className="ms-2">Diagnózy</span>}
+                        </Nav.Link>
+                        <Nav.Link href="/hosp-discharge-analysis"
+                                  className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
+                            <i className="bi bi-file-earmark-medical"></i>
+                            {isOpen && <span className="ms-2">Prijatý a Prepustený</span>}
+                        </Nav.Link>
+                    </div>
+                )}
 
                 {currentUser?.rola === 'A' && (
-                    <Nav.Link href="/user-management" className={`text-nowrap ${isOpen ? '' : 'text-center'}`}>
+                    <Nav.Link href="/user-management" className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
                         <i className="bi bi-person-check"></i>
                         {isOpen && <span className="ms-2">Správa používateľov</span>}
                     </Nav.Link>
                 )}
 
-                <Nav.Link onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}
-                          className={`text-nowrap ${isOpen ? '' : 'text-center'}`}>
+                <Nav.Link onClick={handleUserOptionsClick} className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
                     <i className="bi bi-person-circle"></i>
                     {isOpen && <span className="ms-2">{username}</span>}
                     {isOpen && (
@@ -101,14 +126,12 @@ const SideBar: React.FC<SidebarProps> = ({isOpen, toggleSidebar, username}) => {
                            style={{transition: 'transform 0.3s ease'}}></i>)}
                 </Nav.Link>
                 {showUserOptions && (
-                    <div className="ms-3" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-                        <Nav.Link href="/profile" className={`text-nowrap ${isOpen ? '' : 'text-center'}`}>
+                    <div className="ms-3">
+                        <Nav.Link href="/profile" className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
                             <i className="bi bi-gear"></i>
                             {isOpen && <span className="ms-2">Detail</span>}
                         </Nav.Link>
-                        <Nav.Link
-                            className={`text-nowrap ${isOpen ? '' : 'text-center'}`}
-                            onClick={handleLogout}>
+                        <Nav.Link className={`nav-link-button ${isOpen ? '' : 'text-center'}`} onClick={handleLogout}>
                             <i className="bi bi-box-arrow-right"></i>
                             {isOpen && <span className="ms-2">Odhlásiť</span>}
                         </Nav.Link>

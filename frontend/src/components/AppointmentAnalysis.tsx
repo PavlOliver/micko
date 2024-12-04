@@ -13,17 +13,15 @@ import {
 import SideBar from "./SideBar";
 import {Col, Container, Row, Form, Table, Button, Spinner} from "react-bootstrap";
 
-interface HospAnalysisItem {
-    meno: string;
-    priezvisko: string;
-    rod_cislo: string;
-    pocet_dni: number;
-    rank: number;
+interface AppointmentAnalysisItem {
+    lekar: string;
+    total_orders: number;
+    doctor_rank: number;
 }
 
-const HospitalizationBarChart = () => {
+const AppointmentAnalysis = () => {
     const [username, setUsername] = useState('');
-    const [data, setData] = useState<HospAnalysisItem[]>([]);
+    const [data, setData] = useState<AppointmentAnalysisItem[]>([]);
     const [isSideBarOpen, setIsSidebarOpen] = useState(true);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
@@ -38,13 +36,9 @@ const HospitalizationBarChart = () => {
 
     const fetchData = (start: string, end: string) => {
         axios
-            .get(`analysis/hosp_analysis?start_date=${start}&end_date=${end}`)
+            .get(`analysis/appointment_analysis?start_date=${start}&end_date=${end}`)
             .then((response) => {
-                const transformedData = response.data.analysis.map((item: HospAnalysisItem) => ({
-                    ...item,
-                    fullName: `${item.meno} ${item.priezvisko}`,
-                }));
-                setData(transformedData);
+                setData(response.data.analysis);
                 setUsername(response.data.username);
                 setLoading(false);
             })
@@ -65,6 +59,7 @@ const HospitalizationBarChart = () => {
 
     const handleRefresh = () => {
         fetchData(startDate, endDate);
+        setLoading(true);
     };
 
     return (
@@ -75,7 +70,7 @@ const HospitalizationBarChart = () => {
                 </Col>
                 <Col md={isSideBarOpen ? 10 : 11} className="content-column">
                     <div className="d-flex justify-content-between align-items-center mb-4">
-                        <h2>Hospitalization Analysis</h2>
+                        <h2>Appointment Analysis</h2>
                         <Form.Group>
                             <Form.Label>Select Date Range</Form.Label>
                             <div className="d-flex">
@@ -112,31 +107,27 @@ const HospitalizationBarChart = () => {
                                         bottom: 5,
                                     }}>
                                     <CartesianGrid strokeDasharray="3 3"/>
-                                    <XAxis dataKey="fullName"/>
+                                    <XAxis dataKey="lekar"/>
                                     <YAxis/>
                                     <Tooltip/>
                                     <Legend/>
-                                    <Bar dataKey="pocet_dni" fill="#8884d8" name="Počet dní"/>
+                                    <Bar dataKey="total_orders" fill="#8884d8" name="Total Orders"/>
                                 </BarChart>
                             </ResponsiveContainer>
                             <Table striped bordered hover className="mt-4">
                                 <thead>
                                 <tr>
-                                    <th>Por. číslo</th>
-                                    <th>Meno</th>
-                                    <th>Priezvisko</th>
-                                    <th>Rodné číslo</th>
-                                    <th>Počet dní</th>
+                                    <th>Doctor</th>
+                                    <th>Total Orders</th>
+                                    <th>Rank</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 {data.map((item, index) => (
                                     <tr key={index}>
-                                        <td>{item.rank}</td>
-                                        <td>{item.meno}</td>
-                                        <td>{item.priezvisko}</td>
-                                        <td>{item.rod_cislo}</td>
-                                        <td>{item.pocet_dni}</td>
+                                        <td>{item.lekar}</td>
+                                        <td>{item.total_orders}</td>
+                                        <td>{item.doctor_rank}</td>
                                     </tr>
                                 ))}
                                 </tbody>
@@ -149,4 +140,4 @@ const HospitalizationBarChart = () => {
     );
 };
 
-export default HospitalizationBarChart;
+export default AppointmentAnalysis;
