@@ -287,3 +287,49 @@ def readmissions_analysis():
     }
 
     return jsonify(to_return)
+
+@pds_api.route('/room_usage_analysis/')
+def room_usage_analysis():
+    query = text('''
+    SELECT JSON_ARRAYAGG(
+        JSON_OBJECT(
+            'cislo_miestnosti' VALUE sub.cislo_miestnosti,
+            'typ' VALUE sub.typ,
+            'kapacita' VALUE sub.kapacita,
+            'celkove_vyuzitie' VALUE sub.total_usage,
+            'rank' VALUE sub.room_rank
+        )
+    ) AS room_usage_json
+    FROM (
+        SELECT 
+            m.cislo_miestnosti,
+            m.typ,
+            m.kapacita,
+            COUNT(h.id_hospitalizacie) as total_usage,
+            RANK() OVER (ORDER BY COUNT(*) DESC) as room_rank
+        FROM 
+            pavlanin2.m_miestnost m
+        JOIN 
+            pavlanin2.m_hospitalizacia h ON m.cislo_miestnosti = h.miestnost
+        WHERE 
+            h.datum_od BETWEEN TO_DATE(:start_date, 'YYYY-MM-DD') AND TO_DATE(:end_date, 'YYYY-MM-DD')
+        GROUP BY 
+            m.cislo_miestnosti,
+            m.typ,
+            m.kapacita
+        ORDER BY 
+            total_usage DESC
+    ) sub
+    ''')
+
+    start_date = request.args.get('start_date', '2024-01-01')
+    end_date = request.args.get('end_date', '2024-12-31')
+
+    result = db.session.execute(query, {'start_date': start_date, 'end_date': end_date}).fetchone()
+
+    to_return = {
+        'username': select_current_user().login,
+        'room_usage': result[0] if result and result[0] else '[]'
+    }
+
+    return jsonify(to_return)

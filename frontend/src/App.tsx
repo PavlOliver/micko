@@ -20,29 +20,10 @@ import AppointmentAnalysis from "./components/AppointmentAnalysis";
 import DiagnosisAnalysis from "./components/DiagnosisAnalysis";
 import HospDischargeAnalysis from "./components/HospDischageAnalysis";
 import ShiftAnalysis from "./components/ShiftAnalysis";
+import RoomAnalysis from "./components/RoomAnalysis";
 
 axios.defaults.baseURL = 'http://localhost:5000';
 axios.defaults.withCredentials = true;
-
-// const App: React.FC = () => {
-//     return (
-//         <UserProvider>
-//             <Router>
-//                 <Routes>
-//                     <Route path="/" element={<Domaca/>} />
-//                     <Route path="/home" element={<Domaca/>} />
-//                     <Route path="/login" element={<Login/>} />
-//                     <Route path={"/profile"} element={<Profile/>} />
-//                     <Route path={"/orders"} element={<Order/>} />
-//                     <Route path="/pacient/:id_poistenca/recepty" element={<Recept/>} />
-//                     <Route path={"/patients"} element={<Patients/>} />
-//                     <Route path="/user-management" element={<UserManagement />} />
-//                 </Routes>
-//             </Router>
-//         </UserProvider>
-//     );
-// };
-
 
 function AppContent() {
     const {setCurrentUser} = useUser();
@@ -84,6 +65,7 @@ function AppContent() {
                 <Route path={"/diagnosis-analysis"} element={<DiagnosisAnalysis/>}/>
                 <Route path={"/hosp-discharge-analysis"} element={<HospDischargeAnalysis/>}/>
                 <Route path={"/shift-analysis"} element={<ShiftAnalysis/>}/>
+                <Route path={"/room-analysis"} element={<RoomAnalysis/>}/>
             </Routes>
         </Router>
     );
