@@ -84,7 +84,7 @@ const ShiftAnalysis = () => {
                     <div className="d-flex justify-content-between align-items-center mb-4">
                         <h2>Analýza zmien | najviac odpracovaných hodín za obdobie</h2>
                         <Form.Group>
-                            <Form.Label>Select Date Range</Form.Label>
+                            <Form.Label>Vyber rozsah dátumu</Form.Label>
                             <div className="d-flex">
                                 <Form.Control
                                     type="date"

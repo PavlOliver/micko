@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
-    BarChart,
-    Bar,
+    LineChart,
+    Line,
     XAxis,
     YAxis,
     CartesianGrid,
@@ -13,51 +13,43 @@ import {
 import SideBar from './SideBar';
 import { Col, Container, Row, Form, Table, Button, Spinner } from 'react-bootstrap';
 
-interface RoomAnalysisItem {
-    cislo_miestnosti: string;
-    typ: string;
-    kapacita: number;
-    celkove_vyuzitie: number;
-    rank: number;
+interface PrescriptionData {
+    month_year: string;
+    id_poistenca: string;
+    meno: string;
+    priezvisko: string;
+    prescription_count: number;
+    patient_order: number;
 }
 
-const RoomAnalysis = () => {
+const ReceptyMonthly = () => {
     const [username, setUsername] = useState('');
-    const [data, setData] = useState<RoomAnalysisItem[]>([]);
+    const [data, setData] = useState<PrescriptionData[]>([]);
     const [isSideBarOpen, setIsSidebarOpen] = useState(true);
     const [startDate, setStartDate] = useState('2024-01-01');
     const [endDate, setEndDate] = useState('2024-12-31');
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
 
     const toggleSidebar = () => setIsSidebarOpen(!isSideBarOpen);
-
-    const topFiveData = data
-        .sort((a, b) => b.celkove_vyuzitie - a.celkove_vyuzitie)
-        .slice(0, 5);
 
     useEffect(() => {
         fetchData(startDate, endDate);
     }, []);
 
-   const fetchData = (start: string, end: string) => {
+    const fetchData = (start: string, end: string) => {
         setLoading(true);
         axios
-            .get(`analysis/room_usage_analysis/?start_date=${start}&end_date=${end}`) // Add 'analysis/' prefix
+            .get(`/analysis/prescription_monthly_analysis/?start_date=${start}&end_date=${end}`)
             .then((response) => {
-                console.log('Response from server:', response);
-                // Parse the JSON string from response.data.room_usage
-                const roomData = JSON.parse(response.data.room_usage);
-                setData(roomData);
+                setData(response.data.prescription_analysis);
                 setUsername(response.data.username);
                 setLoading(false);
             })
             .catch((error) => {
                 console.error('Error fetching data:', error);
-                setError(error.message);
                 setLoading(false);
             });
-   };
+    };
 
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target;
@@ -80,7 +72,7 @@ const RoomAnalysis = () => {
                 </Col>
                 <Col md={isSideBarOpen ? 10 : 11} className="content-column">
                     <div className="d-flex justify-content-between align-items-center mb-4">
-                        <h2>Analýza využitia miestností</h2>
+                        <h2>Pacienti ktorý majú najviac receptov za mesiac</h2>
                         <Form.Group>
                             <Form.Label>Vyber rozsah dátumu</Form.Label>
                             <div className="d-flex">
@@ -103,11 +95,6 @@ const RoomAnalysis = () => {
                             Refresh
                         </Button>
                     </div>
-                    {error && (
-                        <div className="alert alert-danger">
-                            Error loading data: {error}
-                        </div>
-                    )}
                     {loading ? (
                         <div className="d-flex justify-content-center align-items-center" style={{ height: '400px' }}>
                             <Spinner animation="border" role="status">
@@ -117,39 +104,40 @@ const RoomAnalysis = () => {
                     ) : (
                         <>
                             <ResponsiveContainer width="100%" height={400}>
-                                <BarChart
-                                    data={topFiveData}
-                                    margin={{
-                                        top: 20,
-                                        bottom: 5,
-                                    }}
-                                >
+                                <LineChart data={data}>
                                     <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="cislo_miestnosti" />
+                                    <XAxis dataKey="month_year" />
                                     <YAxis />
                                     <Tooltip />
                                     <Legend />
-                                    <Bar dataKey="celkove_vyuzitie" fill="#82ca9d" name="Hospitalizácie" />
-                                </BarChart>
+                                    <Line
+                                        type="monotone"
+                                        dataKey="prescription_count"
+                                        stroke="#8884d8"
+                                        name="Počet receptov"
+                                    />
+                                </LineChart>
                             </ResponsiveContainer>
+
                             <Table striped bordered hover className="mt-4">
                                 <thead>
-                                    <tr>
-                                        <th>Por. číslo</th>
-                                        <th>Číslo miestnosti</th>
-                                        <th>Typ</th>
-                                        <th>Kapacita</th>
-                                        <th>Hospitalizácie</th>
-                                    </tr>
+                                <tr>
+                                    <th>Rok-Mesiac Poradie</th>
+                                    <th>Číslo poistenca</th>
+                                    <th>Poradie</th>
+                                    <th>Meno Priezvisko</th>
+                                    <th>Predpísaných receptov</th>
+
+                                </tr>
                                 </thead>
                                 <tbody>
                                     {data.map((item, index) => (
                                         <tr key={index}>
-                                            <td>{item.rank}</td>
-                                            <td>{item.cislo_miestnosti}</td>
-                                            <td>{item.typ}</td>
-                                            <td>{item.kapacita}</td>
-                                            <td>{item.celkove_vyuzitie}</td>
+                                            <td>{item.month_year}</td>
+                                            <td>{item.id_poistenca}</td>
+                                            <td>{item.patient_order}</td>
+                                            <td>{item.meno} {item.priezvisko}</td>
+                                            <td>{item.prescription_count}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -162,4 +150,4 @@ const RoomAnalysis = () => {
     );
 };
 
-export default RoomAnalysis;
+export default ReceptyMonthly;

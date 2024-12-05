@@ -333,3 +333,64 @@ def room_usage_analysis():
     }
 
     return jsonify(to_return)
+
+
+@pds_api.route('/prescription_monthly_analysis/')
+def prescription_monthly_analysis():
+    query = text('''
+    SELECT *
+    FROM (
+        SELECT 
+            TO_CHAR(r.vystavenie, 'YYYY-MM') as month_year,
+            p.id_poistenca,
+            o.meno,
+            o.priezvisko,
+            COUNT(*) as prescription_count,
+            ROW_NUMBER() OVER (
+                PARTITION BY TO_CHAR(r.vystavenie, 'YYYY-MM') 
+                ORDER BY COUNT(*) DESC,
+                         p.id_poistenca
+            ) as patient_order
+        FROM 
+            pavlanin2.m_recept r
+        JOIN 
+            pavlanin2.m_pacient p ON r.pacient = p.id_poistenca
+        JOIN 
+            pavlanin2.m_osoba o ON p.rod_cislo = o.rod_cislo
+        WHERE
+            r.vystavenie BETWEEN TO_DATE(:start_date, 'YYYY-MM-DD') AND TO_DATE(:end_date, 'YYYY-MM-DD')
+        GROUP BY 
+            TO_CHAR(r.vystavenie, 'YYYY-MM'),
+            p.id_poistenca,
+            o.meno,
+            o.priezvisko
+    ) ranked
+    WHERE patient_order <= 5
+    ORDER BY
+        month_year,
+        prescription_count DESC,
+        patient_order
+    ''')
+
+    start_date = request.args.get('start_date', '2024-01-01')
+    end_date = request.args.get('end_date', '2024-12-31')
+
+    results = db.session.execute(query, {'start_date': start_date, 'end_date': end_date}).fetchall()
+
+    prescription_data = []
+    for row in results:
+        prescription_data.append({
+            'month_year': row[0],
+            'id_poistenca': row[1],
+            'meno': row[2],
+            'priezvisko': row[3],
+            'prescription_count': row[4],
+            'patient_order': row[5]
+        })
+
+    to_return = {
+        'username': select_current_user().login,
+        'prescription_analysis': prescription_data
+    }
+
+    return jsonify(to_return)
