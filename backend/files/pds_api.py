@@ -171,26 +171,39 @@ ORDER BY
 @pds_api.route('/shift_analysis/')
 def shift_analysis_json():
     query = text('''
-        SELECT
-            z.id_zamestnanca,
-            o.meno, o.priezvisko,
-            COUNT(*) AS shifts_count,
-            DENSE_RANK() OVER (ORDER BY COUNT(*) DESC) AS doctor_rank
-        FROM
-            pavlanin2.m_zmena zm
-        JOIN
-            pavlanin2.m_zamestnanec z ON zm.zamestnanec = z.id_zamestnanca
-        JOIN
-            pavlanin2.m_osoba o ON z.rod_cislo = o.rod_cislo
-        WHERE
-            zm.od_kedy BETWEEN TO_DATE(:start_date, 'YYYY-MM-DD') AND TO_DATE(:end_date, 'YYYY-MM-DD')
-            AND zm.do_kedy BETWEEN TO_DATE(:start_date, 'YYYY-MM-DD') AND TO_DATE(:end_date, 'YYYY-MM-DD')
-        GROUP BY
-            z.id_zamestnanca,
-            o.meno,
-            o.priezvisko
-        ORDER BY
-            doctor_rank
+       SELECT
+        z.id_zamestnanca,
+        o.meno, o.priezvisko,
+        ROUND(
+            SUM(
+                (EXTRACT(DAY FROM (zm.do_kedy - zm.od_kedy)) * 24) +
+                (EXTRACT(HOUR FROM (zm.do_kedy - zm.od_kedy))) +
+                (EXTRACT(MINUTE FROM (zm.do_kedy - zm.od_kedy)) / 60)
+            ), 
+            2
+        ) AS total_hours,
+        DENSE_RANK() OVER (
+            ORDER BY SUM(
+                (EXTRACT(DAY FROM (zm.do_kedy - zm.od_kedy)) * 24) +
+                (EXTRACT(HOUR FROM (zm.do_kedy - zm.od_kedy))) +
+                (EXTRACT(MINUTE FROM (zm.do_kedy - zm.od_kedy)) / 60)
+            ) DESC
+        ) AS doctor_rank
+    FROM
+        pavlanin2.m_zmena zm
+    JOIN
+        pavlanin2.m_zamestnanec z ON zm.zamestnanec = z.id_zamestnanca
+    JOIN
+        pavlanin2.m_osoba o ON z.rod_cislo = o.rod_cislo
+    WHERE
+        zm.od_kedy BETWEEN TO_DATE(:start_date, 'YYYY-MM-DD') AND TO_DATE(:end_date, 'YYYY-MM-DD')
+        AND zm.do_kedy BETWEEN TO_DATE(:start_date, 'YYYY-MM-DD') AND TO_DATE(:end_date, 'YYYY-MM-DD')
+    GROUP BY
+        z.id_zamestnanca,
+        o.meno,
+        o.priezvisko
+    ORDER BY
+        doctor_rank
     ''')
 
     start_date = request.args.get('start_date', '2023-01-01')
@@ -204,7 +217,7 @@ def shift_analysis_json():
             'id_zamestnanca': row[0],
             'meno': row[1],
             'priezvisko': row[2],
-            'shifts_count': row[3],
+            'total_hours': row[3],
             'doctor_rank': row[4]
         })
 
@@ -212,4 +225,65 @@ def shift_analysis_json():
         'username': select_current_user().login,
         'shift_analysis': shifts
     }
+    return jsonify(to_return)
+
+
+#nepouzivat
+@pds_api.route('/readmissions_analysis/')
+def readmissions_analysis():
+    query = text('''
+    SELECT JSON_ARRAYAGG(
+        JSON_OBJECT(
+            'id_poistenca' VALUE sub.id_poistenca,
+            'meno' VALUE sub.meno,
+            'priezvisko' VALUE sub.priezvisko,
+            'pocet_readmisii' VALUE sub.readmission_count,
+            'priemerne_dni_medzi' VALUE sub.avg_days,
+            'rank' VALUE sub.patient_rank,
+            'posledne_prepustenie' VALUE sub.last_discharge,
+            'posledna_readmisia' VALUE sub.last_readmission
+        )
+    ) AS readmissions_json
+    FROM (
+        SELECT 
+            p.id_poistenca,
+            o.meno,
+            o.priezvisko,
+            COUNT(*) as readmission_count,
+            ROUND(AVG(h2.datum_od - h1.datum_do), 2) as avg_days,
+            DENSE_RANK() OVER (ORDER BY COUNT(*) DESC) as patient_rank,
+            MAX(TO_CHAR(h1.datum_do, 'YYYY-MM-DD')) as last_discharge,
+            MAX(TO_CHAR(h2.datum_od, 'YYYY-MM-DD')) as last_readmission
+        FROM 
+            pavlanin2.m_hospitalizacia h1
+        JOIN 
+            pavlanin2.m_hospitalizacia h2 ON h1.pacient = h2.pacient
+            AND h2.datum_od > h1.datum_do 
+            AND h2.datum_od <= h1.datum_do + 30
+        JOIN
+            pavlanin2.m_pacient p ON h1.pacient = p.id_poistenca
+        JOIN
+            pavlanin2.m_osoba o ON p.rod_cislo = o.rod_cislo
+        WHERE
+            h1.datum_do IS NOT NULL
+            AND h1.datum_do BETWEEN TO_DATE(:start_date, 'YYYY-MM-DD') AND TO_DATE(:end_date, 'YYYY-MM-DD')
+        GROUP BY
+            p.id_poistenca,
+            o.meno,
+            o.priezvisko
+        ORDER BY
+            readmission_count DESC
+    ) sub
+    ''')
+
+    start_date = request.args.get('start_date', '2024-01-01')
+    end_date = request.args.get('end_date', '2024-12-31')
+
+    result = db.session.execute(query, {'start_date': start_date, 'end_date': end_date}).fetchone()
+
+    to_return = {
+        'username': select_current_user().login,
+        'readmissions': result[0] if result and result[0] else '[]'
+    }
+
     return jsonify(to_return)

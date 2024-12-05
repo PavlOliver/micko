@@ -17,7 +17,7 @@ interface ShiftAnalysisItem {
     id_zamestnanca: string;
     meno: string;
     priezvisko: string;
-    shifts_count: number;
+    total_hours: number;
     doctor_rank: number;
     fullName: string;
 }
@@ -34,8 +34,8 @@ const ShiftAnalysis = () => {
     const toggleSidebar = () => setIsSidebarOpen(!isSideBarOpen);
 
     const topFiveData = data
-    .sort((a, b) => b.shifts_count - a.shifts_count)
-    .slice(0, 5);
+        .sort((a, b) => b.total_hours - a.total_hours)
+        .slice(0, 5);
 
     useEffect(() => {
         fetchData(startDate, endDate);
@@ -126,7 +126,7 @@ const ShiftAnalysis = () => {
                                     <YAxis />
                                     <Tooltip />
                                     <Legend />
-                                    <Bar dataKey="shifts_count" fill="#8884d8" name="Počet zmien" />
+                                    <Bar dataKey="total_hours" fill="#8884d8" name="Počet hodín" />
                                 </BarChart>
                             </ResponsiveContainer>
                             <Table striped bordered hover className="mt-4">
@@ -136,7 +136,7 @@ const ShiftAnalysis = () => {
                                         <th>ID zamestnanca</th>
                                         <th>Meno</th>
                                         <th>Priezvisko</th>
-                                        <th>Počet zmien</th>
+                                        <th>Počet hodín</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -146,7 +146,7 @@ const ShiftAnalysis = () => {
                                             <td>{item.id_zamestnanca}</td>
                                             <td>{item.meno}</td>
                                             <td>{item.priezvisko}</td>
-                                            <td>{item.shifts_count}</td>
+                                            <td>{item.total_hours}</td>
                                         </tr>
                                     ))}
                                 </tbody>
