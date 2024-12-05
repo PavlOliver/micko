@@ -22,6 +22,7 @@ import HospDischargeAnalysis from "./components/HospDischageAnalysis";
 import ShiftAnalysis from "./components/ShiftAnalysis";
 import RoomAnalysis from "./components/RoomAnalysis";
 import ReceptyMonthly from "./components/ReceptyMonthly";
+import ReceptyDoktor from "./components/ReceptyDoktor";
 
 axios.defaults.baseURL = 'http://localhost:5000';
 axios.defaults.withCredentials = true;
@@ -68,6 +69,7 @@ function AppContent() {
                 <Route path={"/shift-analysis"} element={<ShiftAnalysis/>}/>
                 <Route path={"/room-analysis"} element={<RoomAnalysis/>}/>
                 <Route path={"/monthly-prescription-analysis"} element={<ReceptyMonthly/>}/>
+                <Route path={"/doctor-prescription-analysis"} element={<ReceptyDoktor/>}/>
             </Routes>
         </Router>
     );

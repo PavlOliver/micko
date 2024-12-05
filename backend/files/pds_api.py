@@ -228,7 +228,7 @@ def shift_analysis_json():
     return jsonify(to_return)
 
 
-#nepouzivat
+#TODO nefunguje nepouzivat !!
 @pds_api.route('/readmissions_analysis/')
 def readmissions_analysis():
     query = text('''
@@ -391,6 +391,59 @@ def prescription_monthly_analysis():
     to_return = {
         'username': select_current_user().login,
         'prescription_analysis': prescription_data
+    }
+
+    return jsonify(to_return)
+
+@pds_api.route('/doctor_prescription_analysis/')
+def doctor_prescription_analysis():
+    query = text('''
+    SELECT
+        r.lekar,
+        s.NAZOV_SPECIALIZACIE,
+        o.meno,
+        o.priezvisko,
+        COUNT(*) AS prescriptions_count,
+        RANK() OVER (ORDER BY COUNT(*) DESC) AS doctor_rank
+    FROM
+        pavlanin2.m_recept r
+    JOIN
+        pavlanin2.m_zamestnanec z ON z.id_zamestnanca = r.lekar
+    JOIN
+        pavlanin2.m_osoba o ON z.rod_cislo = o.rod_cislo
+    JOIN
+        pavlanin2.m_specializacia@dblinkx s on z.specializacia = s.kod_specializacie
+    WHERE
+        r.vystavenie BETWEEN TO_DATE(:start_date, 'YYYY-MM-DD') AND TO_DATE(:end_date, 'YYYY-MM-DD')
+    GROUP BY
+        r.lekar,
+        s.NAZOV_SPECIALIZACIE,
+        o.rod_cislo,
+        o.meno,
+        o.priezvisko
+    ORDER BY
+        doctor_rank
+    ''')
+
+    start_date = request.args.get('start_date', '2024-01-01')
+    end_date = request.args.get('end_date', '2024-12-31')
+
+    results = db.session.execute(query, {'start_date': start_date, 'end_date': end_date}).fetchall()
+
+    doctor_data = []
+    for row in results:
+        doctor_data.append({
+            'lekar': row[0],
+            'specializacia': row[1],
+            'meno': row[2],
+            'priezvisko': row[3],
+            'prescriptions_count': row[4],
+            'doctor_rank': row[5]
+        })
+
+    to_return = {
+        'username': select_current_user().login,
+        'doctor_analysis': doctor_data
     }
 
     return jsonify(to_return)
