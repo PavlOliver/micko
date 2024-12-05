@@ -166,3 +166,245 @@ ORDER BY
             'total_discharges': row[2]
         })
     return jsonify(to_return)
+
+@pds_api.route('/recepty_za_mesiac_narast')
+def recepty_za_mesiac_narast():
+    # Váš SQL dotaz
+    query = text('''
+    SELECT
+        aktualny_mesac.mesiac,
+        aktualny_mesac.pocet_predpisov,
+        ROUND(
+            (aktualny_mesac.pocet_predpisov - predchadzajuci_mesac.pocet_predpisov) * 100.0
+            / predchadzajuci_mesac.pocet_predpisov,
+            2
+        ) AS percentualny_narast,
+        RANK() OVER (ORDER BY aktualny_mesac.pocet_predpisov DESC) AS poradove_cislo
+    FROM
+        (SELECT
+            TO_CHAR(vystavenie, 'MM') AS mesiac,
+            COUNT(id_receptu) AS pocet_predpisov
+        FROM
+            pavlanin2.m_recept
+        GROUP BY
+            TO_CHAR(vystavenie, 'MM')
+        ) aktualny_mesac
+    LEFT JOIN
+        (SELECT
+            TO_CHAR(vystavenie, 'MM') AS mesiac,
+            COUNT(id_receptu) AS pocet_predpisov
+        FROM
+            pavlanin2.m_recept
+        GROUP BY
+            TO_CHAR(vystavenie, 'MM')
+        ) predchadzajuci_mesac
+    ON
+        TO_NUMBER(aktualny_mesac.mesiac) = TO_NUMBER(predchadzajuci_mesac.mesiac) + 1
+    ORDER BY
+        aktualny_mesac.mesiac
+    ''')
+
+    result = db.session.execute(query).fetchall()
+
+    data = []
+    for row in result:
+        data.append({
+            'mesiac': row[0],
+            'pocet_predpisov': row[1],
+            'percentualny_narast': row[2],
+            'poradove_cislo': row[3]
+        })
+
+    return jsonify(data)
+
+@pds_api.route('/trendy_novych_pacientov')
+def trendy_novych_pacientov():
+    query = text('''
+    SELECT
+        aktualny_mesac.mesiac,
+        aktualny_mesac.pocet_novych_pacientov,
+        ROUND(
+            (aktualny_mesac.pocet_novych_pacientov - predchadzajuci_mesac.pocet_novych_pacientov) * 100.0
+            / predchadzajuci_mesac.pocet_novych_pacientov,
+            2
+        ) AS percentualny_narast,
+        RANK() OVER (ORDER BY aktualny_mesac.pocet_novych_pacientov DESC) AS poradove_cislo
+    FROM
+        (SELECT
+            TO_CHAR(datum_od, 'MM') AS mesiac,
+            COUNT(id_poistenca) AS pocet_novych_pacientov
+        FROM
+            pavlanin2.m_pacient
+        GROUP BY
+            TO_CHAR(datum_od, 'MM')
+        ) aktualny_mesac
+    LEFT JOIN
+        (SELECT
+            TO_CHAR(datum_od, 'MM') AS mesiac,
+            COUNT(id_poistenca) AS pocet_novych_pacientov
+        FROM
+            pavlanin2.m_pacient
+        GROUP BY
+            TO_CHAR(datum_od, 'MM')
+        ) predchadzajuci_mesac
+    ON
+        TO_NUMBER(aktualny_mesac.mesiac) = TO_NUMBER(predchadzajuci_mesac.mesiac) + 1
+    ORDER BY
+        aktualny_mesac.mesiac
+    ''')
+
+    result = db.session.execute(query).fetchall()
+
+    data = []
+    for row in result:
+        data.append({
+            'mesiac': row[0],
+            'pocet_novych_pacientov': row[1],
+            'percentualny_narast': row[2],
+            'poradove_cislo': row[3]
+        })
+
+    return jsonify(data)
+
+
+@pds_api.route('/specializacie_rok', methods=['GET'])
+def get_specializacie_rok():
+    rok = request.args.get('rok')
+
+    sql = text("""
+    SELECT
+        s.NAZOV_SPECIALIZACIE,
+        EXTRACT(YEAR FROM zk.datum_vysetrenia) AS rok,
+        COUNT(zk.kod_diagnozy) AS pocet_zaznamov,
+        ROUND(
+            (COUNT(zk.kod_diagnozy) * 100.0) / 
+            (SELECT COUNT(*) FROM pavlanin2.m_zdravotny_zaznam 
+             WHERE EXTRACT(YEAR FROM datum_vysetrenia) = EXTRACT(YEAR FROM zk.datum_vysetrenia)
+            ), 
+            2
+        ) AS percentualny_podiel,
+        RANK() OVER (PARTITION BY EXTRACT(YEAR FROM zk.datum_vysetrenia) ORDER BY COUNT(zk.kod_diagnozy) DESC) AS poradove_cislo
+    FROM
+        pavlanin2.m_zdravotny_zaznam zk
+    JOIN
+        pavlanin2.m_zamestnanec d ON zk.lekar = d.id_zamestnanca
+    JOIN 
+        pavlanin2.m_specializacia s ON s.KOD_SPECIALIZACIE = d.SPECIALIZACIA
+    WHERE
+        EXTRACT(YEAR FROM zk.datum_vysetrenia) = :rok
+    GROUP BY
+        s.NAZOV_SPECIALIZACIE, EXTRACT(YEAR FROM zk.datum_vysetrenia)
+    ORDER BY
+        pocet_zaznamov DESC
+    """)
+
+    query = sql.bindparams(rok=rok)
+    result = db.session.execute(query).fetchall()
+
+    data = []
+    for row in result:
+        data.append({
+            'NAZOV_SPECIALIZACIE': row[0],  # First column is NAZOV_SPECIALIZACIE
+            'rok': row[1],  # Second column is rok
+            'pocet_zaznamov': row[2],  # Third column is pocet_zaznamov
+            'percentualny_podiel': row[3],  # Fourth column is percentualny_podiel
+            'poradove_cislo': row[4]  # Fifth column is poradove_cislo
+        })
+
+    return jsonify(data)
+
+@pds_api.route('/vekove-skupiny', methods=['GET'])
+def get_age_groups():
+    query = text("""
+        SELECT
+    vekova_skupina,
+    pocet_pacientov,
+    ROUND(
+        (pocet_pacientov * 100.0) / celkovy_pocet_pacientov, 
+        2
+    ) AS percentualny_podiel,
+    RANK() OVER (ORDER BY pocet_pacientov DESC) AS poradove_cislo
+FROM (
+    SELECT
+        CASE
+            WHEN EXTRACT(YEAR FROM CURRENT_DATE) - 
+                 (CASE
+                     WHEN TO_NUMBER(SUBSTR(rod_cislo, 1, 2)) < 50 THEN 2000 + TO_NUMBER(SUBSTR(rod_cislo, 1, 2))
+                     ELSE 1900 + TO_NUMBER(SUBSTR(rod_cislo, 1, 2))
+                 END) < 18 THEN 'Mladší ako 18'
+            WHEN EXTRACT(YEAR FROM CURRENT_DATE) - 
+                 (CASE
+                     WHEN TO_NUMBER(SUBSTR(rod_cislo, 1, 2)) < 50 THEN 2000 + TO_NUMBER(SUBSTR(rod_cislo, 1, 2))
+                     ELSE 1900 + TO_NUMBER(SUBSTR(rod_cislo, 1, 2))
+                 END) BETWEEN 18 AND 34 THEN '18-34'
+            WHEN EXTRACT(YEAR FROM CURRENT_DATE) - 
+                 (CASE
+                     WHEN TO_NUMBER(SUBSTR(rod_cislo, 1, 2)) < 50 THEN 2000 + TO_NUMBER(SUBSTR(rod_cislo, 1, 2))
+                     ELSE 1900 + TO_NUMBER(SUBSTR(rod_cislo, 1, 2))
+                 END) BETWEEN 35 AND 49 THEN '35-49'
+            WHEN EXTRACT(YEAR FROM CURRENT_DATE) - 
+                 (CASE
+                     WHEN TO_NUMBER(SUBSTR(rod_cislo, 1, 2)) < 50 THEN 2000 + TO_NUMBER(SUBSTR(rod_cislo, 1, 2))
+                     ELSE 1900 + TO_NUMBER(SUBSTR(rod_cislo, 1, 2))
+                 END) BETWEEN 50 AND 64 THEN '50-64'
+            WHEN EXTRACT(YEAR FROM CURRENT_DATE) - 
+                 (CASE
+                     WHEN TO_NUMBER(SUBSTR(rod_cislo, 1, 2)) < 50 THEN 2000 + TO_NUMBER(SUBSTR(rod_cislo, 1, 2))
+                     ELSE 1900 + TO_NUMBER(SUBSTR(rod_cislo, 1, 2))
+                 END) BETWEEN 65 AND 79 THEN '65-79'
+            ELSE '80 a viac'
+        END AS vekova_skupina,
+        COUNT(*) AS pocet_pacientov
+    FROM
+        pavlanin2.m_pacient
+    GROUP BY
+        CASE
+            WHEN EXTRACT(YEAR FROM CURRENT_DATE) - 
+                 (CASE
+                     WHEN TO_NUMBER(SUBSTR(rod_cislo, 1, 2)) < 50 THEN 2000 + TO_NUMBER(SUBSTR(rod_cislo, 1, 2))
+                     ELSE 1900 + TO_NUMBER(SUBSTR(rod_cislo, 1, 2))
+                 END) < 18 THEN 'Mladší ako 18'
+            WHEN EXTRACT(YEAR FROM CURRENT_DATE) - 
+                 (CASE
+                     WHEN TO_NUMBER(SUBSTR(rod_cislo, 1, 2)) < 50 THEN 2000 + TO_NUMBER(SUBSTR(rod_cislo, 1, 2))
+                     ELSE 1900 + TO_NUMBER(SUBSTR(rod_cislo, 1, 2))
+                 END) BETWEEN 18 AND 34 THEN '18-34'
+            WHEN EXTRACT(YEAR FROM CURRENT_DATE) - 
+                 (CASE
+                     WHEN TO_NUMBER(SUBSTR(rod_cislo, 1, 2)) < 50 THEN 2000 + TO_NUMBER(SUBSTR(rod_cislo, 1, 2))
+                     ELSE 1900 + TO_NUMBER(SUBSTR(rod_cislo, 1, 2))
+                 END) BETWEEN 35 AND 49 THEN '35-49'
+            WHEN EXTRACT(YEAR FROM CURRENT_DATE) - 
+                 (CASE
+                     WHEN TO_NUMBER(SUBSTR(rod_cislo, 1, 2)) < 50 THEN 2000 + TO_NUMBER(SUBSTR(rod_cislo, 1, 2))
+                     ELSE 1900 + TO_NUMBER(SUBSTR(rod_cislo, 1, 2))
+                 END) BETWEEN 50 AND 64 THEN '50-64'
+            WHEN EXTRACT(YEAR FROM CURRENT_DATE) - 
+                 (CASE
+                     WHEN TO_NUMBER(SUBSTR(rod_cislo, 1, 2)) < 50 THEN 2000 + TO_NUMBER(SUBSTR(rod_cislo, 1, 2))
+                     ELSE 1900 + TO_NUMBER(SUBSTR(rod_cislo, 1, 2))
+                 END) BETWEEN 65 AND 79 THEN '65-79'
+            ELSE '80 a viac'
+        END
+) subquery,
+(
+    SELECT COUNT(*) AS celkovy_pocet_pacientov FROM pavlanin2.m_pacient
+) total
+ORDER BY
+    vekova_skupina
+    """)
+
+    # Vykonanie dopytu
+    result = db.session.execute(query).fetchall()
+
+    data = []
+    for row in result:
+        data.append({
+            'vekova_skupina': row[0],  # Prvý stĺpec je vekova_skupina
+            'pocet_pacientov': row[1],
+            'percentualny_podiel': row[2], # Druhý stĺpec je pocet_pacientov
+            'poradove_cislo': row[3]  ,
+        })
+
+    # Vrátenie dát ako JSON
+    return jsonify(data)

@@ -94,7 +94,7 @@ const ZdravotnaKarta: React.FC = () => {
                                 <Card.Body>
                                     <Card.Title>Osobné údaje</Card.Title>
                                     <p><strong>Dátum narodenia:</strong> {Pacient.datumNarodenia}</p>
-                                    <p><strong>Rodné číslo:</strong> {Pacient.rodneCislo}</p>
+                                    <p><strong>IČP:</strong> {Pacient.rodneCislo}</p>
                                     <p><strong>Adresa:</strong> {Pacient.adresa.ulica}, {Pacient.adresa.mesto} {Pacient.adresa.psc}
                                     </p>
                                     <p><strong>Telefón:</strong> {Pacient.telefon}</p>

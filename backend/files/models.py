@@ -201,6 +201,12 @@ class ZdravotnyZaznam(db.Model):
     datum_vysetrenia = db.Column(DATE, nullable=False)
     popis = db.Column(CLOB, nullable=True)
 
+    def to_vysledok_vysetrenia(self):
+        return {
+            'datum': self.datum_vysetrenia.strftime('%Y-%m-%d'),
+            'vysledok': self.popis,
+            'lekar': self.lekar
+        }
 
 class Miestnost(db.Model):
     """Model for the table m_miestnost

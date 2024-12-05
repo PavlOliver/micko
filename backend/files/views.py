@@ -267,7 +267,7 @@ def get_zdravotna_karta(id_poistenca):
         hospitalizacie = [h.to_dic2() for h in hosp]
         rec = Recept.query.filter_by(pacient=id_poistenca).all()
         zdrav_zaznamy = ZdravotnyZaznam.query.filter_by(pacient=id_poistenca).all()
-        zdrav_zaznamy = [z.zaznam() for z in zdrav_zaznamy]
+        zdrav_zaznamy = [z.to_vysledok_vysetrenia() for z in zdrav_zaznamy]
         print('recept ', rec)
         rec = [r.zaznam() for r in rec]
         print(hospitalizacie)
@@ -285,7 +285,7 @@ def get_zdravotna_karta(id_poistenca):
                 # 'alergie': pacient.alergie,
                 # 'diagnozy': pacient.diagnozy,
                 'hospitalizacie': hospitalizacie,
-                'zdravZaznamy': zdrav_zaznamy,
+                'vysledkyVysetreni': zdrav_zaznamy,
                 'recepty': rec
             }
             return jsonify({'zdravotna_karta': zdravotna_karta})

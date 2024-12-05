@@ -19,6 +19,10 @@ import HospitalizationAnalysis from "./components/HospitalizationAnalysis";
 import AppointmentAnalysis from "./components/AppointmentAnalysis";
 import DiagnosisAnalysis from "./components/DiagnosisAnalysis";
 import HospDischargeAnalysis from "./components/HospDischageAnalysis";
+import ReceptyZaMesiac from "./components/ReceptyZaMesiac";
+import TrendyNovychPacientov from "./components/TrendyNovychPacientov";
+import SpecializaciePodlaRoku from "./components/SpecializaciePodlaRoku";
+import VekoveSkupiny from "./components/VekSkupiny";
 
 axios.defaults.baseURL = 'http://localhost:5000';
 axios.defaults.withCredentials = true;
@@ -82,6 +86,10 @@ function AppContent() {
                 <Route path={"/appointment-analysis"} element={<AppointmentAnalysis/>}/>
                 <Route path={"/diagnosis-analysis"} element={<DiagnosisAnalysis/>}/>
                 <Route path={"/hosp-discharge-analysis"} element={<HospDischargeAnalysis/>}/>
+                <Route path="/predpisane_recepty_mesiac"  element={<ReceptyZaMesiac/>}/>
+                <Route path={"/trendy_novych_pacientov"} element={<TrendyNovychPacientov/>}/>
+                <Route path={"/specializacie_podla_roku"} element={<SpecializaciePodlaRoku/>}/>
+                <Route path="/vek-skupina" element={<VekoveSkupiny/>}/>
             </Routes>
         </Router>
     );

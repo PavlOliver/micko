@@ -54,7 +54,7 @@ def insert_new_order(reason, patient, doctor, room, blocks, date, time):
 
 
 def select_patients():
-    patients = Pacient.query.limit(1000).all()
+    patients = Pacient.query.limit(300).all()
     to_return = []
     for patient in patients:
         to_return.append(patient.to_dic())

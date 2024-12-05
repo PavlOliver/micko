@@ -108,6 +108,27 @@ const SideBar: React.FC<SidebarProps> = ({isOpen, toggleSidebar, username}) => {
                             <i className="bi bi-file-earmark-medical"></i>
                             {isOpen && <span className="ms-2">Prijatý a Prepustený</span>}
                         </Nav.Link>
+                        <Nav.Link href="/predpisane_recepty_mesiac"
+                                  className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
+                            <i className="bi bi-file-earmark-medical"></i>
+                            {isOpen && <span className="ms-2">ReceptyNarast</span>}
+                        </Nav.Link>
+                        <Nav.Link href="/trendy_novych_pacientov"
+                                  className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
+                            <i className="bi bi-file-earmark-medical"></i>
+                            {isOpen && <span className="ms-2">Trendy novych pacientov</span>}
+                        </Nav.Link>
+                        <Nav.Link href="/specializacie_podla_roku"
+                                  className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
+                            <i className="bi bi-file-earmark-medical"></i>
+                            {isOpen && <span className="ms-2">Specializacie podla roku</span>}
+                        </Nav.Link>
+                        <Nav.Link href="/vek-skupina"
+                                  className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
+                            <i className="bi bi-file-earmark-medical"></i>
+                            {isOpen && <span className="ms-2">Vek-Skupiny</span>}
+                        </Nav.Link>
+
                     </div>
                 )}
 
