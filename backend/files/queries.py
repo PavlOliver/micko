@@ -58,7 +58,6 @@ def select_patients():
     to_return = []
     for patient in patients:
         to_return.append(patient.to_dic())
-    print(to_return)
     return to_return
 
 

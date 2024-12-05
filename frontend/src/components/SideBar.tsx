@@ -36,7 +36,7 @@ const SideBar: React.FC<SidebarProps> = ({isOpen, toggleSidebar, username}) => {
 
     return (
         <div
-            className={`bg-light p-3 shadow`}
+            className={`bg-light p-3 shadow sidebar-container`}
             style={{
                 height: '100vh',
                 transition: 'width 0.3s',
@@ -50,7 +50,7 @@ const SideBar: React.FC<SidebarProps> = ({isOpen, toggleSidebar, username}) => {
                 <i className={`bi ${isOpen ? "bi-chevron-left" : "bi-list"}`}></i>
             </Button>
 
-            <Nav defaultActiveKey="/home" className="flex-column px-0">
+            <Nav defaultActiveKey="/home" className="flex-column px-0 sidebar-nav">
                 <Nav.Link href="/home" className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
                     <i className="bi bi-house"></i>
                     {isOpen && <span className="ms-2">Domov</span>}
@@ -107,6 +107,26 @@ const SideBar: React.FC<SidebarProps> = ({isOpen, toggleSidebar, username}) => {
                                   className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
                             <i className="bi bi-file-earmark-medical"></i>
                             {isOpen && <span className="ms-2">Prijatý a Prepustený</span>}
+                        </Nav.Link>
+                        <Nav.Link href="/shift-analysis"
+                                  className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
+                            <i className="bi bi-file-earmark-medical"></i>
+                            {isOpen && <span className="ms-2">Zmeny</span>}
+                        </Nav.Link>
+                        <Nav.Link href="/room-analysis"
+                                  className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
+                            <i className="bi bi-file-earmark-medical"></i>
+                            {isOpen && <span className="ms-2">Miestnosti</span>}
+                        </Nav.Link>
+                        <Nav.Link href="/monthly-prescription-analysis"
+                                  className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
+                            <i className="bi bi-file-earmark-medical"></i>
+                            {isOpen && <span className="ms-2">Recepty mesačne</span>}
+                        </Nav.Link>
+                        <Nav.Link href="/doctor-prescription-analysis"
+                                  className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
+                            <i className="bi bi-file-earmark-medical"></i>
+                            {isOpen && <span className="ms-2">Recepty doktorov</span>}
                         </Nav.Link>
                         <Nav.Link href="/predpisane_recepty_mesiac"
                                   className={`nav-link-button ${isOpen ? '' : 'text-center'}`}>
