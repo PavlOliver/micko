@@ -413,23 +413,16 @@ ORDER BY
 @pds_api.route('/shift_analysis/')
 def shift_analysis_json():
     query = text('''
-       SELECT
+     SELECT
         z.id_zamestnanca,
-        o.meno, o.priezvisko,
+        o.meno,
+        o.priezvisko,
         ROUND(
-            SUM(
-                (EXTRACT(DAY FROM (zm.do_kedy - zm.od_kedy)) * 24) +
-                (EXTRACT(HOUR FROM (zm.do_kedy - zm.od_kedy))) +
-                (EXTRACT(MINUTE FROM (zm.do_kedy - zm.od_kedy)) / 60)
-            ), 
+            SUM((zm.do_kedy - zm.od_kedy) * 24), 
             2
         ) AS total_hours,
         DENSE_RANK() OVER (
-            ORDER BY SUM(
-                (EXTRACT(DAY FROM (zm.do_kedy - zm.od_kedy)) * 24) +
-                (EXTRACT(HOUR FROM (zm.do_kedy - zm.od_kedy))) +
-                (EXTRACT(MINUTE FROM (zm.do_kedy - zm.od_kedy)) / 60)
-            ) DESC
+            ORDER BY SUM((zm.do_kedy - zm.od_kedy) * 24) DESC
         ) AS doctor_rank
     FROM
         pavlanin2.m_zmena zm
