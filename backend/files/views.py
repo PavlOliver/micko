@@ -6,9 +6,6 @@ from flask import Blueprint, jsonify, request, send_file, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_required
 
-from . import db
-from .models import Pacient, Zamestnanec, Pouzivatel, Osoba, Hospitalizacia
-from .models import Zamestnanec, Osoba, Specializacia
 from .queries import *
 
 views = Blueprint('views', __name__)

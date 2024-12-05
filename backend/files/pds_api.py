@@ -166,3 +166,50 @@ ORDER BY
             'total_discharges': row[2]
         })
     return jsonify(to_return)
+
+
+@pds_api.route('/shift_analysis/')
+def shift_analysis_json():
+    query = text('''
+        SELECT
+            z.id_zamestnanca,
+            o.meno, o.priezvisko,
+            COUNT(*) AS shifts_count,
+            DENSE_RANK() OVER (ORDER BY COUNT(*) DESC) AS doctor_rank
+        FROM
+            pavlanin2.m_zmena zm
+        JOIN
+            pavlanin2.m_zamestnanec z ON zm.zamestnanec = z.id_zamestnanca
+        JOIN
+            pavlanin2.m_osoba o ON z.rod_cislo = o.rod_cislo
+        WHERE
+            zm.od_kedy BETWEEN TO_DATE(:start_date, 'YYYY-MM-DD') AND TO_DATE(:end_date, 'YYYY-MM-DD')
+            AND zm.do_kedy BETWEEN TO_DATE(:start_date, 'YYYY-MM-DD') AND TO_DATE(:end_date, 'YYYY-MM-DD')
+        GROUP BY
+            z.id_zamestnanca,
+            o.meno,
+            o.priezvisko
+        ORDER BY
+            doctor_rank
+    ''')
+
+    start_date = request.args.get('start_date', '2023-01-01')
+    end_date = request.args.get('end_date', '2024-12-31')
+
+    results = db.session.execute(query, {'start_date': start_date, 'end_date': end_date}).fetchall()
+
+    shifts = []
+    for row in results:
+        shifts.append({
+            'id_zamestnanca': row[0],
+            'meno': row[1],
+            'priezvisko': row[2],
+            'shifts_count': row[3],
+            'doctor_rank': row[4]
+        })
+
+    to_return = {
+        'username': select_current_user().login,
+        'shift_analysis': shifts
+    }
+    return jsonify(to_return)
