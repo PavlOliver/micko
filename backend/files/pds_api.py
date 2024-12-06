@@ -541,7 +541,7 @@ def room_usage_analysis():
             m.typ,
             m.kapacita,
             COUNT(h.id_hospitalizacie) as total_usage,
-            RANK() OVER (ORDER BY COUNT(*) DESC) as room_rank
+            DENSE_RANK() OVER (ORDER BY COUNT(*) DESC) as room_rank
         FROM 
             pavlanin2.m_miestnost m
         JOIN 
@@ -639,7 +639,7 @@ def doctor_prescription_analysis():
         o.meno,
         o.priezvisko,
         COUNT(*) AS prescriptions_count,
-        RANK() OVER (ORDER BY COUNT(*) DESC) AS doctor_rank
+        DENSE_RANK() OVER (ORDER BY COUNT(*) DESC) AS doctor_rank
     FROM
         pavlanin2.m_recept r
     JOIN
