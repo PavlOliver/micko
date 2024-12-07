@@ -109,14 +109,14 @@ const HospitalizationBarChart = () => {
                                     data={data}
                                     margin={{
                                         top: 20,
-                                        bottom: 5,
+                                        bottom: 70,
                                     }}>
                                     <CartesianGrid strokeDasharray="3 3"/>
-                                    <XAxis dataKey="fullName"/>
+                                    <XAxis dataKey="fullName" angle={-45} textAnchor="end"/>
                                     <YAxis/>
                                     <Tooltip/>
-                                    <Legend/>
-                                    <Bar dataKey="pocet_dni" fill="#8884d8" name="Počet dní"/>
+                                    <Legend verticalAlign="bottom"/>
+                                    <Bar dataKey="pocet_dni" fill="#ff0000" name="Počet dní"/>
                                 </BarChart>
                             </ResponsiveContainer>
                             <Table striped bordered hover className="mt-4">
