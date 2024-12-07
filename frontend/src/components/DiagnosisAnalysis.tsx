@@ -12,7 +12,7 @@ import {Col, Container, Row, Form, Table, Button, Spinner} from 'react-bootstrap
 
 interface DiagnosisAnalysisItem {
     kod_diagnozy: string;
-    choroba: string;
+    nazov_diagnozy: string;
     pacienti: string;
     pocet_pacientov: number;
 }
@@ -105,7 +105,7 @@ const DiagnosisAnalysis = () => {
                                             <Pie
                                                 data={prevYearData}
                                                 dataKey="pocet_pacientov"
-                                                nameKey="choroba"
+                                                nameKey="nazov_diagnozy"
                                                 cx="50%"
                                                 cy="50%"
                                                 outerRadius={150}
@@ -127,7 +127,7 @@ const DiagnosisAnalysis = () => {
                                             <Pie
                                                 data={data}
                                                 dataKey="pocet_pacientov"
-                                                nameKey="choroba"
+                                                nameKey="nazov_diagnozy"
                                                 cx="50%"
                                                 cy="50%"
                                                 outerRadius={150}
@@ -146,17 +146,17 @@ const DiagnosisAnalysis = () => {
                             <Table striped bordered hover className="mt-4">
                                 <thead>
                                 <tr>
-                                    <th>Diagnosis Code</th>
-                                    <th>Diagnosis</th>
-                                    <th>Patients</th>
-                                    <th>Number of Patients</th>
+                                    <th>Kód diagnózy</th>
+                                    <th>Názov diagnózy</th>
+                                    <th>Pacienti</th>
+                                    <th>Počet pacientov</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 {data.map((item, index) => (
                                     <tr key={index}>
                                         <td>{item.kod_diagnozy}</td>
-                                        <td>{item.choroba}</td>
+                                        <td>{item.nazov_diagnozy}</td>
                                         <td>{item.pacienti}</td>
                                         <td>{item.pocet_pacientov}</td>
                                     </tr>
