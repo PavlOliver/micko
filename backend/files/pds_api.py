@@ -221,36 +221,27 @@ def recepty_za_mesiac_narast():
 def trendy_novych_pacientov():
     query = text('''
     SELECT
-        aktualny_mesac.mesiac,
-        aktualny_mesac.pocet_novych_pacientov,
-        ROUND(
-            (aktualny_mesac.pocet_novych_pacientov - predchadzajuci_mesac.pocet_novych_pacientov) * 100.0
-            / predchadzajuci_mesac.pocet_novych_pacientov,
-            2
-        ) AS percentualny_narast,
-        RANK() OVER (ORDER BY aktualny_mesac.pocet_novych_pacientov DESC) AS poradove_cislo
+    mesiac,
+    pocet_novych_pacientov,
+    ROUND(
+        CASE 
+            WHEN LAG(pocet_novych_pacientov) OVER (ORDER BY mesiac) IS NULL THEN NULL  -- Nepriradiť percentuálny nárast pre prvý mesiac
+            ELSE (pocet_novych_pacientov - LAG(pocet_novych_pacientov) OVER (ORDER BY mesiac)) * 100.0
+                 / LAG(pocet_novych_pacientov) OVER (ORDER BY mesiac)
+        END,
+        2
+    ) AS percentualny_narast,
+    RANK() OVER (ORDER BY pocet_novych_pacientov DESC) AS poradove_cislo
+FROM (
+    SELECT
+        TO_CHAR(datum_od, 'MM') AS mesiac,
+        COUNT(id_poistenca) AS pocet_novych_pacientov
     FROM
-        (SELECT
-            TO_CHAR(datum_od, 'MM') AS mesiac,
-            COUNT(id_poistenca) AS pocet_novych_pacientov
-        FROM
-            pavlanin2.m_pacient
-        GROUP BY
-            TO_CHAR(datum_od, 'MM')
-        ) aktualny_mesac
-    LEFT JOIN
-        (SELECT
-            TO_CHAR(datum_od, 'MM') AS mesiac,
-            COUNT(id_poistenca) AS pocet_novych_pacientov
-        FROM
-            pavlanin2.m_pacient
-        GROUP BY
-            TO_CHAR(datum_od, 'MM')
-        ) predchadzajuci_mesac
-    ON
-        TO_NUMBER(aktualny_mesac.mesiac) = TO_NUMBER(predchadzajuci_mesac.mesiac) + 1
-    ORDER BY
-        aktualny_mesac.mesiac
+        pavlanin2.m_pacient
+    GROUP BY
+        TO_CHAR(datum_od, 'MM')
+) subquery
+ORDER BY mesiac
     ''')
 
     result = db.session.execute(query).fetchall()
@@ -289,7 +280,7 @@ def get_specializacie_rok():
     JOIN
         pavlanin2.m_zamestnanec d ON zk.lekar = d.id_zamestnanca
     JOIN 
-        pavlanin2.m_specializacia s ON s.KOD_SPECIALIZACIE = d.SPECIALIZACIA
+        pavlanin2.m_specializacia@dblinkx s ON s.KOD_SPECIALIZACIE = d.SPECIALIZACIA
     WHERE
         EXTRACT(YEAR FROM zk.datum_vysetrenia) = :rok
     GROUP BY

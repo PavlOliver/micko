@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 import {PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer} from 'recharts';
 import SideBar from './SideBar'; // Predpokladám, že máš komponent SideBar
-import {Col, Container, Row} from 'react-bootstrap';
+import {Col, Container, Row, Table} from 'react-bootstrap';
 
 interface AgeGroupData {
     vekova_skupina: string;
@@ -76,6 +76,33 @@ const VekoveSkupiny: React.FC = () => {
                             <Legend/>
                         </PieChart>
                     </ResponsiveContainer>
+                    {/* Tabuľka pod grafom */}
+                    <h3 className="mt-4">Podrobné údaje</h3>
+                    <Table striped bordered hover>
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Veková skupina</th>
+                            <th>Počet pacientov</th>
+                            <th>Percentuálny podiel</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {ageGroups.map((item, index) => (
+                            <tr key={index}>
+                                <td>{item.poradove_cislo}</td>
+                                <td>{item.vekova_skupina}</td>
+                                <td>{item.pocet_pacientov}</td>
+                                <td>
+                                    {item.percentualny_podiel ?
+                                        parseFloat(item.percentualny_podiel.toString()).toFixed(2) :
+                                        "0.00"
+                                    } %
+                                </td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </Table>
                 </Col>
             </Row>
         </Container>

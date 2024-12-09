@@ -45,7 +45,7 @@ const ReceptyZaMesiac = () => {
                     <SideBar isOpen={isSideBarOpen} toggleSidebar={toggleSidebar} username={username}/>
                 </Col>
                 <Col md={isSideBarOpen ? 10 : 11} className="content-column">
-                    <h2>Percentuálny nárast počtu predpísaných liekov</h2>
+                    <h2>Nárast počtu predpísaných liekov</h2>
                     {loading ? (
                         <div className="d-flex justify-content-center align-items-center" style={{height: '400px'}}>
                             <Spinner animation="border" role="status">
@@ -54,7 +54,6 @@ const ReceptyZaMesiac = () => {
                         </div>
                     ) : (
                         <>
-                            {/* Graf */}
                             <ResponsiveContainer width="100%" height={400}>
                                 <LineChart data={data}>
                                     <CartesianGrid strokeDasharray="3 3"/>
@@ -64,16 +63,9 @@ const ReceptyZaMesiac = () => {
                                     <Legend/>
                                     <Line type="monotone" dataKey="pocet_predpisov" stroke="#8884d8"
                                           name="Počet predpisov"/>
-                                    <Line
-                                        type="monotone"
-                                        dataKey="percentualny_narast"
-                                        stroke="#82ca9d"
-                                        name="Percentuálny nárast"
-                                    />
                                 </LineChart>
                             </ResponsiveContainer>
 
-                            {/* Tabuľka */}
                             <Table striped bordered hover className="mt-4">
                                 <thead>
                                 <tr>
