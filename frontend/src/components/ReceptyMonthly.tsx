@@ -1,8 +1,8 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
-    BarChart,
-    Bar,
+    LineChart,
+    Line,
     XAxis,
     YAxis,
     CartesianGrid,
@@ -10,25 +10,25 @@ import {
     Legend,
     ResponsiveContainer,
 } from 'recharts';
-import SideBar from "./SideBar";
-import {Col, Container, Row, Form, Table, Button, Spinner} from "react-bootstrap";
+import SideBar from './SideBar';
+import { Col, Container, Row, Form, Table, Button, Spinner } from 'react-bootstrap';
 
-interface HospAnalysisItem {
+interface PrescriptionData {
+    month_year: string;
+    id_poistenca: string;
     meno: string;
     priezvisko: string;
-    rod_cislo: string;
-    pocet_dni: number;
-    rank: number;
+    prescription_count: number;
+    patient_order: number;
 }
 
-const HospitalizationBarChart = () => {
+const ReceptyMonthly = () => {
     const [username, setUsername] = useState('');
-    const [data, setData] = useState<HospAnalysisItem[]>([]);
+    const [data, setData] = useState<PrescriptionData[]>([]);
     const [isSideBarOpen, setIsSidebarOpen] = useState(true);
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
+    const [startDate, setStartDate] = useState('2024-01-01');
+    const [endDate, setEndDate] = useState('2024-12-31');
     const [loading, setLoading] = useState(true);
-
 
     const toggleSidebar = () => setIsSidebarOpen(!isSideBarOpen);
 
@@ -37,14 +37,11 @@ const HospitalizationBarChart = () => {
     }, []);
 
     const fetchData = (start: string, end: string) => {
+        setLoading(true);
         axios
-            .get(`analysis/hosp_analysis?start_date=${start}&end_date=${end}`)
+            .get(`/analysis/prescription_monthly_analysis/?start_date=${start}&end_date=${end}`)
             .then((response) => {
-                const transformedData = response.data.analysis.map((item: HospAnalysisItem) => ({
-                    ...item,
-                    fullName: `${item.meno} ${item.priezvisko}`,
-                }));
-                setData(transformedData);
+                setData(response.data.prescription_analysis);
                 setUsername(response.data.username);
                 setLoading(false);
             })
@@ -55,7 +52,7 @@ const HospitalizationBarChart = () => {
     };
 
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const {id, value} = e.target;
+        const { id, value } = e.target;
         if (id === 'startDate') {
             setStartDate(value);
         } else if (id === 'endDate') {
@@ -71,13 +68,13 @@ const HospitalizationBarChart = () => {
         <Container fluid className="p-4">
             <Row>
                 <Col md={isSideBarOpen ? 2 : 1} className="p-0">
-                    <SideBar isOpen={isSideBarOpen} toggleSidebar={toggleSidebar} username={username}/>
+                    <SideBar isOpen={isSideBarOpen} toggleSidebar={toggleSidebar} username={username} />
                 </Col>
                 <Col md={isSideBarOpen ? 10 : 11} className="content-column">
                     <div className="d-flex justify-content-between align-items-center mb-4">
-                        <h2>Hospitalization Analysis</h2>
+                        <h2>Pacienti ktorý majú najviac receptov za mesiac</h2>
                         <Form.Group>
-                            <Form.Label>Select Date Range</Form.Label>
+                            <Form.Label>Vyber rozsah dátumu</Form.Label>
                             <div className="d-flex">
                                 <Form.Control
                                     type="date"
@@ -94,10 +91,12 @@ const HospitalizationBarChart = () => {
                                 />
                             </div>
                         </Form.Group>
-                        <Button onClick={handleRefresh} className="ms-2">Refresh</Button>
+                        <Button onClick={handleRefresh} className="ms-2">
+                            Refresh
+                        </Button>
                     </div>
                     {loading ? (
-                        <div className="d-flex justify-content-center align-items-center" style={{height: '400px'}}>
+                        <div className="d-flex justify-content-center align-items-center" style={{ height: '400px' }}>
                             <Spinner animation="border" role="status">
                                 <span className="visually-hidden">Loading...</span>
                             </Spinner>
@@ -105,40 +104,42 @@ const HospitalizationBarChart = () => {
                     ) : (
                         <>
                             <ResponsiveContainer width="100%" height={400}>
-                                <BarChart
-                                    data={data}
-                                    margin={{
-                                        top: 20,
-                                        bottom: 70,
-                                    }}>
-                                    <CartesianGrid strokeDasharray="3 3"/>
-                                    <XAxis dataKey="fullName" angle={-45} textAnchor="end"/>
-                                    <YAxis/>
-                                    <Tooltip/>
-                                    <Legend verticalAlign="bottom"/>
-                                    <Bar dataKey="pocet_dni" fill="#ff0000" name="Počet dní"/>
-                                </BarChart>
+                                <LineChart data={data}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="month_year" />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Legend />
+                                    <Line
+                                        type="monotone"
+                                        dataKey="prescription_count"
+                                        stroke="#8884d8"
+                                        name="Počet receptov"
+                                    />
+                                </LineChart>
                             </ResponsiveContainer>
+
                             <Table striped bordered hover className="mt-4">
                                 <thead>
                                 <tr>
-                                    <th>Por. číslo</th>
-                                    <th>Meno</th>
-                                    <th>Priezvisko</th>
-                                    <th>Rodné číslo</th>
-                                    <th>Počet dní</th>
+                                    <th>Rok-Mesiac Poradie</th>
+                                    <th>Číslo poistenca</th>
+                                    <th>Poradie</th>
+                                    <th>Meno Priezvisko</th>
+                                    <th>Predpísaných receptov</th>
+
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {data.map((item, index) => (
-                                    <tr key={index}>
-                                        <td>{item.rank}</td>
-                                        <td>{item.meno}</td>
-                                        <td>{item.priezvisko}</td>
-                                        <td>{item.rod_cislo}</td>
-                                        <td>{item.pocet_dni}</td>
-                                    </tr>
-                                ))}
+                                    {data.map((item, index) => (
+                                        <tr key={index}>
+                                            <td>{item.month_year}</td>
+                                            <td>{item.id_poistenca}</td>
+                                            <td>{item.patient_order}</td>
+                                            <td>{item.meno} {item.priezvisko}</td>
+                                            <td>{item.prescription_count}</td>
+                                        </tr>
+                                    ))}
                                 </tbody>
                             </Table>
                         </>
@@ -149,4 +150,4 @@ const HospitalizationBarChart = () => {
     );
 };
 
-export default HospitalizationBarChart;
+export default ReceptyMonthly;

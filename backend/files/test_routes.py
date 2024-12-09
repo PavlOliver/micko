@@ -150,4 +150,3 @@ def img():
     result = db.session.query(db.func.get_file_name(Zamestnanec.fotka)).all()
     print(result)
     return 'x'
-

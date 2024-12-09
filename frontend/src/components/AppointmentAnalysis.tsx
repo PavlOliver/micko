@@ -117,17 +117,17 @@ const AppointmentAnalysis = () => {
                             <Table striped bordered hover className="mt-4">
                                 <thead>
                                 <tr>
-                                    <th>Doctor</th>
-                                    <th>Total Orders</th>
-                                    <th>Rank</th>
+                                    <th>por. číslo</th>
+                                    <th>Lekár</th>
+                                    <th>počet objednávok</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 {data.map((item, index) => (
                                     <tr key={index}>
+                                        <td>{item.doctor_rank}</td>
                                         <td>{item.lekar}</td>
                                         <td>{item.total_orders}</td>
-                                        <td>{item.doctor_rank}</td>
                                     </tr>
                                 ))}
                                 </tbody>

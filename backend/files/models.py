@@ -354,5 +354,6 @@ class SkladLiekov(db.Model):
     pocet = db.Column(NUMBER(38, 0), nullable=False)
     datum_dodania = db.Column(DATE, nullable=False)
     expiracia = db.Column(DATE, nullable=False)
-    faktura_scan = db.Column(VARCHAR2(20), nullable=False)
+    faktura_scan = db.Column(CLOB, nullable=True)
+    lekar = db.Column(CHAR(4), db.ForeignKey('m_zamestnanec.id_zamestnanca'), nullable=True)
     pohyb = db.Column(CHAR(1), nullable=False)  # P - prichod, V - vydanie

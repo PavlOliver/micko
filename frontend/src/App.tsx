@@ -23,29 +23,13 @@ import ReceptyZaMesiac from "./components/ReceptyZaMesiac";
 import TrendyNovychPacientov from "./components/TrendyNovychPacientov";
 import SpecializaciePodlaRoku from "./components/SpecializaciePodlaRoku";
 import VekoveSkupiny from "./components/VekSkupiny";
+import ShiftAnalysis from "./components/ShiftAnalysis";
+import RoomAnalysis from "./components/RoomAnalysis";
+import ReceptyMonthly from "./components/ReceptyMonthly";
+import ReceptyDoktor from "./components/ReceptyDoktor";
 
 axios.defaults.baseURL = 'http://localhost:5000';
 axios.defaults.withCredentials = true;
-
-// const App: React.FC = () => {
-//     return (
-//         <UserProvider>
-//             <Router>
-//                 <Routes>
-//                     <Route path="/" element={<Domaca/>} />
-//                     <Route path="/home" element={<Domaca/>} />
-//                     <Route path="/login" element={<Login/>} />
-//                     <Route path={"/profile"} element={<Profile/>} />
-//                     <Route path={"/orders"} element={<Order/>} />
-//                     <Route path="/pacient/:id_poistenca/recepty" element={<Recept/>} />
-//                     <Route path={"/patients"} element={<Patients/>} />
-//                     <Route path="/user-management" element={<UserManagement />} />
-//                 </Routes>
-//             </Router>
-//         </UserProvider>
-//     );
-// };
-
 
 function AppContent() {
     const {setCurrentUser} = useUser();
@@ -90,6 +74,10 @@ function AppContent() {
                 <Route path={"/trendy_novych_pacientov"} element={<TrendyNovychPacientov/>}/>
                 <Route path={"/specializacie_podla_roku"} element={<SpecializaciePodlaRoku/>}/>
                 <Route path="/vek-skupina" element={<VekoveSkupiny/>}/>
+                <Route path={"/shift-analysis"} element={<ShiftAnalysis/>}/>
+                <Route path={"/room-analysis"} element={<RoomAnalysis/>}/>
+                <Route path={"/monthly-prescription-analysis"} element={<ReceptyMonthly/>}/>
+                <Route path={"/doctor-prescription-analysis"} element={<ReceptyDoktor/>}/>
             </Routes>
         </Router>
     );

@@ -88,9 +88,9 @@ const HospDischargeAnalysis = () => {
                             <Table striped bordered hover className="mt-4">
                                 <thead>
                                 <tr>
-                                    <th>Year</th>
-                                    <th>Total Hospitalizations</th>
-                                    <th>Total Discharges</th>
+                                    <th>Rok</th>
+                                    <th>Počet prijatých pacientov</th>
+                                    <th>Počet prepustených pacientov</th>
                                 </tr>
                                 </thead>
                                 <tbody>
