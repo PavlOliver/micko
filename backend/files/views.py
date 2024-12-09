@@ -78,7 +78,6 @@ def profile():
         if select_current_user():
             return jsonify({
                 'username': select_current_user().login
-                # 'picture': select_current_user().get_profile_picture()
             })
         return jsonify({'error': 'User not found'})
     else:
@@ -164,9 +163,6 @@ def user_management():
                 Osoba,
                 Zamestnanec.rod_cislo == Osoba.rod_cislo
             ).all()
-
-            # print("Debug - Users:", users) # Debug print
-
             return jsonify({
                 'users': [{
                     'id': u.id_zamestnanca.strip(),
@@ -178,7 +174,7 @@ def user_management():
             })
 
         except Exception as e:
-            print("Database error:", str(e))  # Debug
+            print("Database error:", str(e))
             return jsonify({'error': str(e)}), 500
 
 
@@ -210,8 +206,6 @@ def search_patients():
             query = query.join(Osoba).filter(Osoba.adresa.ilike(f'%{adresa}%'))
 
         patients = query.all()
-
-        # Filter by age after fetching
         if vek:
             vek = int(vek)
             patients = [
@@ -234,6 +228,7 @@ def extract_age_from_date_of_birth(date_of_birth):
     if (today.month, today.day) < (date_of_birth.month, date_of_birth.day):
         age -= 1
     return age
+
 
 def extract_date_of_birth(rodne_cislo):
     rc_part = rodne_cislo[:6]
@@ -278,9 +273,6 @@ def get_zdravotna_karta(id_poistenca):
                 'rodneCislo': pacient.to_dic()['id_poistenca'],
                 'adresa': osoba.to_dic()['adresa'],
                 'telefon': osoba.to_dic()['tel_cislo'],
-                # 'krvnaSkupina': pacient.krvna_skupina,
-                # 'alergie': pacient.alergie,
-                # 'diagnozy': pacient.diagnozy,
                 'hospitalizacie': hospitalizacie,
                 'vysledkyVysetreni': zdrav_zaznamy,
                 'recepty': rec
@@ -313,14 +305,15 @@ def add_diagnoza(id_poistenca):
         except Exception as e:
             return jsonify({'error': str(e)}), 500
 
+
 @views.route('/staff', methods=['GET'])
 @login_required
 def get_zamestnanci():
     try:
-        print("Fetching employees...")  # Debug log
+        print("Fetching employees...")
         zamestnanci = select_zamestnanci()
-        print(f"Found {len(zamestnanci)} employees")  # Debug log
+        print(f"Found {len(zamestnanci)} employees")
         return jsonify({'zamestnanci': zamestnanci})
     except Exception as e:
-        print("Error in get_zamestnanci:", str(e))  # Detailed error
+        print("Error in get_zamestnanci:", str(e))
         return jsonify({'error': str(e)}), 500

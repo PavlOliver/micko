@@ -156,12 +156,12 @@ const Order: React.FC = () => {
 
             if (dovodElement) {
                 dovodElement.value = appointment.reason;
-                setPatientInput(appointment.patient); // Set patient input state
+                setPatientInput(appointment.patient);
                 document.querySelector('[name="ePatient"]')?.setAttribute('value', appointment.patient);
                 document.querySelector('[name="eDoctor"]')?.setAttribute('value', appointment.doctor);
-                setDoctorName(appointment.doctor); // Set doctor name state
+                setDoctorName(appointment.doctor);
                 document.querySelector('[name="eRoom"]')?.setAttribute('value', appointment.room);
-                setRoomInput(appointment.room); // Set room input state
+                setRoomInput(appointment.room);
                 document.querySelector('[name="eBlocks"]')?.setAttribute('value', appointment.blocks.toString());
                 const [day, month, year] = appointment.date.split('.');
                 const date = `${year}-${month}-${day}`;
@@ -322,7 +322,7 @@ const Order: React.FC = () => {
                                                 name="patient"
                                                 value={patientInput}
                                                 onChange={handlePatientInputChange}
-                                                onClick={() => setPatientSuggestions([])} // Clear suggestions on click
+                                                onClick={() => setPatientSuggestions([])}
                                             />
                                             {patientSuggestions.length > 0 && (
                                                 <ul className="suggestions-list">
@@ -330,8 +330,8 @@ const Order: React.FC = () => {
                                                         <li
                                                             key={index}
                                                             onClick={() => {
-                                                                setPatientInput(suggestion); // Set the selected input
-                                                                setPatientSuggestions([]); // Clear suggestions to close the list
+                                                                setPatientInput(suggestion);
+                                                                setPatientSuggestions([]);
                                                             }}
                                                         >
                                                             {suggestion}
@@ -511,8 +511,8 @@ const Order: React.FC = () => {
                                                         <li
                                                             key={index}
                                                             onClick={() => {
-                                                                setDoctorName(suggestion); // Set the selected input
-                                                                setDoctorSuggestions([]); // Clear suggestions to close the list
+                                                                setDoctorName(suggestion);
+                                                                setDoctorSuggestions([]);
                                                             }}
                                                         >
                                                             {suggestion}

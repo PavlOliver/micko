@@ -23,7 +23,6 @@ const Zamestnanci: React.FC = () => {
     const [uniqueSpecializacie, setUniqueSpecializacie] = useState<string[]>([]);
 
     useEffect(() => {
-        // Fetch username
         axios.get('/home', { withCredentials: true })
             .then(response => {
                 setUsername(response.data.username);
@@ -32,7 +31,6 @@ const Zamestnanci: React.FC = () => {
                 console.error('Error fetching username:', error);
             });
 
-        // Fetch employees
         const fetchZamestnanci = async () => {
             try {
                 const response = await axios.get('/staff', { withCredentials: true });

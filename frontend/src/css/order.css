@@ -58,7 +58,7 @@
     color: #666;
 }
 
-/* order.css */
+
 .event-cell {
     vertical-align: top;
     padding: 10px;
@@ -78,26 +78,25 @@
 }
 
 .suggestions-list {
-    list-style: none; /* Remove default list styling */
-    padding: 0; /* Remove default padding */
+    list-style: none;
+    padding: 0;
     margin-top: 5px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
-    max-height: 200px; /* Limit height */
-    overflow-y: auto; /* Scroll if too many items */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-height: 200px;
+    overflow-y: auto;
     background-color: #fff;
 }
 
-/* Styles for individual suggestion items */
 .suggestions-list li {
-    padding: 10px; /* Add padding for better spacing */
-    cursor: pointer; /* Change cursor on hover */
-    transition: background-color 0.2s ease; /* Smooth transition for hover effect */
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
 .suggestions-list li:hover {
-    background-color: #f0f0f0; /* Change color on hover */
+    background-color: #f0f0f0;
 }
 
 .table td {

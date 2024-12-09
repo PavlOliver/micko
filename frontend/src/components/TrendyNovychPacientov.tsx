@@ -11,7 +11,7 @@ import {
     ResponsiveContainer
 } from 'recharts';
 import { Container, Row, Col, Spinner, Table } from 'react-bootstrap';
-import SideBar from './SideBar'; // Predpokladám, že už máte vytvorený SideBar komponent
+import SideBar from './SideBar';
 
 interface PacientData {
     mesiac: string;
@@ -24,14 +24,14 @@ const TrendyPacientov: React.FC = () => {
     const [data, setData] = useState<PacientData[]>([]);
     const [loading, setLoading] = useState(true);
     const [isSideBarOpen, setIsSidebarOpen] = useState(true);
-    const [username, setUsername] = useState(''); // Ak potrebujete zobraziť meno používateľa
+    const [username, setUsername] = useState('');
 
     useEffect(() => {
         axios
             .get('/analysis/trendy_novych_pacientov')
             .then((response) => {
                 setData(response.data);
-                setUsername(response.data.username); // Ak sa meno vracia v odpovedi
+                setUsername(response.data.username);
                 setLoading(false);
             })
             .catch((error) => {

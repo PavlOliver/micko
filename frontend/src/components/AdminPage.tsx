@@ -49,7 +49,7 @@ const UserManagement: React.FC = () => {
     const fetchUsers = () => {
         axios.get('/user-management', { withCredentials: true })
             .then(response => {
-                console.log('Received users:', response.data.users); //Debug
+                console.log('Received users:', response.data.users);
                 setUsers(response.data.users);
             })
             .catch(error => {
