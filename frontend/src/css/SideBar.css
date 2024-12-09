@@ -1,0 +1,51 @@
+.nav-link-button {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #333;
+    background-color: #f8f9fa;
+    transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+}
+
+.nav-link-button:hover {
+    background-color: #e2e6ea;
+    border-color: #ccc;
+    color: #000;
+}
+
+.nav-link-button i {
+    margin-right: 8px;
+}
+
+.nav-link-button.active {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+}
+
+.sidebar-container {
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #888 #f8f9fa;
+}
+
+.sidebar-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-container::-webkit-scrollbar-track {
+    background: #f8f9fa;
+}
+
+.sidebar-container::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 3px;
+}
+
+.sidebar-nav {
+    max-height: calc(100vh - 60px);
+}

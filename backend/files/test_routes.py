@@ -1,32 +1,108 @@
 import csv
 import datetime
-
-from flask import Blueprint, jsonify
+import os
+import re
+import oracledb
+import cx_Oracle
+from flask import Blueprint, jsonify, render_template, send_file
+from sqlalchemy.dialects.oracle import oracledb
 
 from backend.files import db
-from backend.files.models import Diagnoza
+from backend.files.models import Diagnoza, Zamestnanec
 
 test_routes = Blueprint('test_routes', __name__)
 
 
 @test_routes.route('/load')
 def load():
-    with open('diagnozyAB.csv', newline='') as csvfile:
-        csvreader = csv.reader(csvfile, delimiter=';')
+    try:
+        with open('Prvz.csv', newline='') as csvfile:
+            csvreader = csv.reader(csvfile, delimiter=';')
 
-        for row in csvreader:
-            row = [cell.replace('\n', '') for cell in row]
-            if len(row[0]) <= 6:
+            for row in csvreader:
+                row = [cell.replace('\n', '') for cell in row]
+
+                # Vypíšte obsah riadku na kontrolu
+                # print(f"Spracovávaný riadok: {row}")
+
+                # Skontrolujte, či kod_diagnozy neobsahuje viac ako 1 písmeno
+                if len(re.findall(r'[A-Za-z]', row[0])) > 1:
+                    print(f'Porušenie: kod_diagnozy "{row[0]}" obsahuje viac ako 1 písmeno.')
+                    continue  # Preskočiť tento riadok
+
+                # Skontrolujte dĺžku hodnoty kod_diagnozy
+                if len(row[0]) > 7:
+                    print(f'Porušenie: kod_diagnozy "{row[0]}" je dlhé {len(row[0])} znakov.')
+                    # Vypíšte celý riadok, kde došlo k chybe
+                    print(f'Riadiaci záznam s chybou: {row}')
+                    continue  # Preskočiť tento riadok
+
+                # Ak je dĺžka v poriadku, pridajte nový záznam do databázy
                 new_diag = Diagnoza(
                     kod_diagnozy=row[0],
                     nazov_diagnozy=row[1],
                     doplnujuce_info=None if row[2] == '' else row[2]
                 )
-                print(new_diag.kod_diagnozy)
                 db.session.add(new_diag)
-        db.session.commit()
 
-    return 'load'
+            print("Nové objekty v session pred commitom:")
+            for obj in db.session.new:
+                print(obj)  # Uložte záznamy do databázy
+            db.session.commit()  # Odkomentuj, keď overíš dáta
+            print("Údaje boli úspešne uložené do databázy.")
+
+    except Exception as e:
+        print(f'Chyba pri spracovaní CSV alebo ukladaní do databázy: {str(e)}')
+
+    return 'Kontrola dokončená'
+
+
+@test_routes.route('/load2')
+def load2():
+    try:
+        with open('Prvz.csv', newline='') as csvfile:
+            csvreader = csv.reader(csvfile, delimiter=';')
+
+            for row in csvreader:
+                row = [cell.replace('\n', '') for cell in row]
+
+                # Vypíšte obsah riadku na kontrolu
+                print(f"Spracovávaný riadok: {row}")
+
+                # Skontrolujte, či je kod_diagnozy príliš dlhý
+                if len(re.findall(r'[A-Za-z]', row[0])) > 1:
+                    print(f'Porušenie: kod_diagnozy "{row[0]}" obsahuje viac ako 1 písmeno.')
+                    print(f"Riadok s chybou: {row}")
+                    continue  # Preskoč tento riadok
+
+                # Skontrolujte dĺžku kod_diagnozy
+                elif len(row[0]) > 7:
+                    print(f'Porušenie: kod_diagnozy "{row[0]}" je dlhé {len(row[0])} znakov.')
+                    print(f'Riadiaci záznam s chybou: {row}')
+                    continue  # Preskoč tento riadok
+
+                # Skontrolujte dĺžku doplnjujuce_info a vypíšte riadok, ak je dlhší než 700
+                elif len(row[2]) > 700:
+                    print(f"Varovanie: doplnjujuce_info v riadku {row} je príliš dlhé ({len(row[2])} znakov).")
+                    print(f"Riadok s chybou: {row}")
+                    row[2] = row[2][:700]  # Orezanie na 700 znakov
+
+                else:
+                    # Ak sú všetky kontroly v poriadku, pridajte nový záznam
+                    new_diag = Diagnoza(
+                        kod_diagnozy=row[0],
+                        nazov_diagnozy=row[1],
+                        doplnujuce_info=None if row[2] == '' else row[2]
+                    )
+                    db.session.add(new_diag)
+
+            db.session.commit()
+            print("Údaje boli úspešne uložené do databázy.")
+
+    except Exception as e:
+        print(f'Chyba pri spracovaní CSV alebo ukladaní do databázy: {str(e)}')
+
+    return 'Kontrola dokončená'
 
 
 @test_routes.route('/vek')
@@ -42,3 +118,35 @@ def get_time():
         "Date": datetime.datetime.now(),
         "programming": "python"
     }
+
+
+@test_routes.route('/xx')
+def xx():
+    return jsonify({'username': 'current_user.login'})
+
+
+# use it to show imahe
+"""
+DECLARE
+    v_lob_loc BFILE;
+    v_file_loc VARCHAR2(100);
+BEGIN
+    v_file_loc := 'PHOTO_DIR:o.png';
+    v_lob_loc := BFILENAME('PHOTO_DIR', 'o.png');
+    DBMS_LOB.fileopen(v_lob_loc, DBMS_LOB.file_readonly);
+END;
+/"""
+
+import cx_Oracle
+
+
+@test_routes.route('/img', methods=['GET'])
+def img():
+    # from sqlalchemy import text
+    # query = text("SELECT get_file_name(fotka) FROM M_ZAMESTNANEC")
+    # result = db.session.execute(query).fetchall()
+    # print(result)
+    from backend.files.models import Zamestnanec
+    result = db.session.query(db.func.get_file_name(Zamestnanec.fotka)).all()
+    print(result)
+    return 'x'
