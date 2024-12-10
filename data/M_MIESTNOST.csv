@@ -1,0 +1,59 @@
+L401,Laboratórium,6,F
+L402,Laboratórium,6,F
+O301,Operačná sála,2,F
+O302,Operačná sála,2,F
+A101,Ambulancia,5,F
+A102,Ambulancia,5,F
+I201,Izba pacienta,1,F
+I202,Izba pacienta,1,F
+V301,Vyšetrovňa,3,F
+V302,Vyšetrovňa,3,F
+S001,Sklad liekov,0,F
+S002,Sklad liekov,0,F
+T401,Intenzívna starostlivosť,4,F
+T402,Intenzívna starostlivosť,4,F
+I203,Izba pacienta,1,F
+I204,Izba pacienta,1,F
+O303,Operačná sála,2,F
+O304,Operačná sála,2,F
+A103,Ambulancia,5,F
+A104,Ambulancia,5,F
+V303,Vyšetrovňa,3,F
+V304,Vyšetrovňa,3,F
+S003,Sklad liekov,0,F
+S004,Sklad liekov,0,F
+T403,Intenzívna starostlivosť,4,F
+T404,Intenzívna starostlivosť,4,F
+I105,Izba pacienta,2,F
+I101,Izba pacienta,2,F
+I102,Izba pacienta,2,F
+I103,Izba pacienta,2,F
+I104,Izba pacienta,2,F
+I106,Izba pacienta,2,F
+I107,Izba pacienta,2,F
+I108,Izba pacienta,2,F
+I109,Izba pacienta,2,F
+I110,Izba pacienta,2,F
+I111,Izba pacienta,2,F
+I112,Izba pacienta,2,F
+I301,Izba pacienta,4,F
+I302,Izba pacienta,4,F
+I303,Izba pacienta,4,F
+I304,Izba pacienta,4,F
+I305,Izba pacienta,4,F
+I306,Izba pacienta,4,F
+T405,Intenzívna starostlivosť,4,F
+T406,Intenzívna starostlivosť,4,F
+Z001,Záchod,8,F
+Z002,Záchod,8,F
+Z101,Záchod,4,F
+Z102,Záchod,4,F
+Z103,Záchod,8,N
+Z201,Záchod,4,F
+Z202,Záchod,4,F
+Z301,Záchod,4,F
+Z302,Záchod,4,N
+Z401,Záchod,4,F
+Z402,Záchod,4,F
+R001,Serverovňa,1,F
+R002,Serverovňa,1,F

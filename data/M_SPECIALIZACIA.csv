@@ -1,0 +1,37 @@
+0,Admin systému,Správca nemocničného inf. systému
+1,Anestéziológ,"Špecialista na anestéziu a intenzívnu medicínu, ktorý zabezpečuje bezbolestné zákroky a starostlivosť o kriticky chorých pacientov."
+2,Angiológ,"Odborník na diagnostiku a liečbu cievnych ochorení vrátane artérií, žíl a lymfatických ciest."
+3,Dermatológ,"Lekár špecializovaný na ochorenia kože, vlasov a nechtov, vrátane kožných nádorov a alergií."
+4,Diabetológ,Odborník na diagnostiku a liečbu cukrovky a s ňou spojených komplikácií.
+5,Endokrinológ,"Špecialista na hormóny a endokrinný systém, vrátane štítnej žľazy a metabolických porúch."
+6,Fyziater,"Lekár zameraný na fyzikálnu medicínu a rehabilitáciu, podporujúci obnovu pohyblivosti a funkčnosti"
+7,Gastroenterológ,"Odborník na choroby tráviaceho systému, vrátane žalúdka, čriev a pečene"
+8,Geriater,Lekár špecializovaný na zdravotnú starostlivosť o starších pacientov a ich špecifické potreby
+9,Gynekológ,"Odborník na ženské reprodukčné zdravie, tehotenstvo a ochorenia ženských orgánov"
+10,Hematológ,"Špecialista na ochorenia krvi a krvotvorných orgánov, ako sú anémie a leukémie"
+11,Hepatológ,"Odborník na ochorenia pečene, vrátane hepatitídy, cirhózy a nádorov"
+12,Chirurg,Lekár vykonávajúci operačné zákroky na odstránenie alebo liečbu zdravotných problémov
+13,Infektológ,"Špecialista na infekčné ochorenia spôsobené baktériami, vírusmi, hubami alebo parazitmi"
+14,Kardiochirurg,Lekár vykonávajúci chirurgické zákroky na srdci a veľkých cievach
+15,Kardiológ,"Odborník na srdcové ochorenia, ako sú arytmie, infarkty a vysoký krvný tlak"
+16,Nefrológ,Špecialista na ochorenia obličiek a poruchy ich funkcie vrátane dialýzy
+17,Neurochirurg,"Lekár operujúci mozog, miechu a nervy pri ochoreniach alebo úrazoch"
+18,Neurológ,"Odborník na nervový systém a jeho poruchy, ako sú epilepsia, mŕtvica a migrény"
+19,Neuropsychiater,"Lekár zameraný na poruchy, ktoré ovplyvňujú nervový aj psychický stav pacienta"
+20,Oftalmológ,Špecialista na ochorenia očí a poruchy zraku vrátane chirurgických zákrokov
+21,Ortopéd,"Lekár liečiaci ochorenia a poranenia pohybového aparátu, vrátane kostí a kĺbov"
+22,Otorinolaryngológ,"Odborník na ochorenia uší, nosa, hrdla a súvisiacich oblastí hlavy a krku"
+23,Pediater,Lekár špecializovaný na zdravotnú starostlivosť o deti a adolescentov
+24,Plastický chirurg,Špecialista na rekonštrukčné a estetické chirurgické zákroky
+25,Pneumológ,"Odborník na ochorenia dýchacích ciest a pľúc, vrátane astmy a zápalu pľúc"
+26,Psychiater,Lekár zameraný na diagnostiku a liečbu duševných porúch a emocionálnych problémov
+27,Detský psychiater,Špecialista na duševné zdravie detí a dospievajúcich
+28,Onkológ,Lekár zameraný na diagnostiku a liečbu rakoviny
+29,Rádiológ,"Odborník na diagnostické zobrazovacie metódy, ako sú röntgen, CT a MRI"
+30,Reumatológ,"Špecialista na ochorenia kĺbov, svalov a spojivových tkanív, ako je reumatoidná artritída"
+31,Úrazový chirurg,"Lekár vykonávajúci operácie po úrazoch, vrátane zlomenín a poranení mäkkých tkanív"
+32,Urológ,Špecialista na ochorenia močového systému a mužského reprodukčného systému
+33,Imunológ,"Odborník na imunitný systém a jeho poruchy, ako sú alergie a autoimunitné ochorenia"
+34,Parazitológ,Špecialista na ochorenia spôsobené parazitmi a ich prevenciu
+35,Stomatológ,"Lekár zameraný na ochorenia ústnej dutiny, zubov a ďasien"
+36,Všeobecný lekár,Lekár poskytujúci primárnu zdravotnú starostlivosť a základnú diagnostiku ochorení
