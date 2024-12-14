@@ -34,11 +34,11 @@ const Login: React.FC = () => {
     return (
         <div className="d-flex justify-content-center align-items-center vh-100">
             <div className="card p-4" style={{width: '400px'}}>
-                <h3 className="text-center mb-4">Login</h3>
+                <h3 className="text-center mb-4">Prihlásenie do NIS</h3>
                 {error && <div className="alert alert-danger" role="alert">{error}</div>}
                 <form onSubmit={handleLogin}>
                     <div className="mb-3">
-                        <label htmlFor="username" className="form-label">Username</label>
+                        <label htmlFor="username" className="form-label">Používateľské meno</label>
                         <input
                             type="text"
                             id="username"
@@ -49,7 +49,7 @@ const Login: React.FC = () => {
                         />
                     </div>
                     <div className="mb-3">
-                        <label htmlFor="password" className="form-label">Password</label>
+                        <label htmlFor="password" className="form-label">Heslo</label>
                         <input
                             type="password"
                             id="password"
