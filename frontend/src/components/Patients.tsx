@@ -92,7 +92,7 @@ const Patients: React.FC = () => {
                                 <Row>
                                     <Col md={6}>
                                         <Form.Group controlId="formName">
-                                            <Form.Label>ID_Poistenca</Form.Label>
+                                            <Form.Label>ID Poistenca</Form.Label>
                                             <FormControl type="text"
                                                          placeholder="Zadajte meno"
                                                          value={ID_Poistenca}
