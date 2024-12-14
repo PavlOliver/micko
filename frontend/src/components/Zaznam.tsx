@@ -116,7 +116,7 @@ const Zaznam: React.FC = () => {
                                     <Form.Control type="text" name="pacient" value={formData.pacient} readOnly/>
                                 </Form.Group>
                                 <Form.Group controlId="diagnoza">
-                                    <Form.Label>Diagnoza</Form.Label>
+                                    <Form.Label>Diagnóza</Form.Label>
                                     <Form.Control
                                         type="text"
                                         name="liek"
@@ -145,7 +145,7 @@ const Zaznam: React.FC = () => {
                                     )}
                                 </Form.Group>
                                 <Form.Group controlId="popis">
-                                    <Form.Label>Popis diagnozy</Form.Label>
+                                    <Form.Label>Popis diagnózy</Form.Label>
                                     <Form.Control
                                         as="textarea"
                                         rows={2}
