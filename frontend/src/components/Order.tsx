@@ -85,24 +85,6 @@ const Order: React.FC = () => {
         }
     };
 
-    const handleDoctorInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setDoctorName(value);
-        if (value.length >= 3) {
-            axios.get(`/doctors_list?query=${value}`)
-                .then(response => {
-                    console.log('Doctor suggestions', response.data.doctors);
-                    setDoctorSuggestions(response.data.doctors);
-                    console.log('Doctor suggestions', doctorSuggestions);
-                })
-                .catch(error => {
-                    console.error('Error fetching doctor list', error);
-                });
-        } else {
-            setDoctorSuggestions([]);
-        }
-    }
-
     const handleRoomInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setRoomInput(value);
@@ -134,7 +116,9 @@ const Order: React.FC = () => {
 
         axios.post('/orders', newOrder, {withCredentials: true})
             .then(response => {
-                setAppointments([...appointments, response.data.last_order]);
+                if (response.data.last_order) {
+                    setAppointments([...appointments, response.data.last_order]);
+                }
             })
             .catch(error => {
                 console.error('Error adding order', error);
@@ -168,7 +152,7 @@ const Order: React.FC = () => {
                 document.querySelector('[name="eDatum"]')?.setAttribute('value', date);
                 let [hours, minutes] = appointment.time.split(':');
                 minutes === '00' ? minutes = '0' : minutes = '30';
-                (document.querySelector('[name="eHours"]') as HTMLSelectElement).value = hours;
+                (document.querySelector('[name="eHours"]') as HTMLSelectElement).value = Number(hours).toString();
                 (document.querySelector('[name="eMinutes"]') as HTMLSelectElement).value = minutes;
             }
         }, 1);
@@ -275,7 +259,7 @@ const Order: React.FC = () => {
                     <SideBar isOpen={isSideBarOpen} toggleSidebar={toggleSidebar} username={username}/>
                 </Col>
                 <Col md={isSideBarOpen ? 10 : 11} className="content-column">
-                    <div className="container-fluid">
+                    <div className="container-fluid mt-2">
                         <div className="text-center">
                             <div className="d-flex flex-wrap justify-content-between align-items-center mb-4">
                                 <h1 className="mb-3 mb-md-0">Rozvrh {username}</h1>
@@ -347,7 +331,7 @@ const Order: React.FC = () => {
                                                 placeholder="Zadať meno lekára"
                                                 name="doctor"
                                                 value={doctorName}
-                                                onChange={handleDoctorInputChange}
+                                                readOnly
                                             />
                                             {doctorSuggestions.length > 0 && (
                                                 <ul className="suggestions-list">
@@ -401,7 +385,7 @@ const Order: React.FC = () => {
                                                         placeholder="Zadajte počet blokov"
                                                         name="blocks"
                                                         value={blocks}
-                                                        onChange={(e) => setBlocks(Number(e.target.value))}
+                                                        onChange={(e) => setBlocks(Math.max(1, Number(e.target.value)))}
                                                     />
                                                 </Form.Group>
                                             </Col>
@@ -503,7 +487,7 @@ const Order: React.FC = () => {
                                                 placeholder="Zadať meno lekára"
                                                 name="eDoctor"
                                                 value={doctorName}
-                                                onChange={(e) => setDoctorName(e.target.value)}
+                                                readOnly
                                             />
                                             {doctorSuggestions.length > 0 && (
                                                 <ul className="suggestions-list">
@@ -556,6 +540,7 @@ const Order: React.FC = () => {
                                                         type="number"
                                                         placeholder="Zadaj počet blokov"
                                                         name="eBlocks"
+                                                        onChange={(e) => setBlocks(Math.max(1, Number(e.target.value)))}
                                                     />
                                                 </Form.Group>
                                             </Col>

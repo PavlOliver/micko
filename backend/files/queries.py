@@ -71,11 +71,10 @@ def delete_order(id):
 
 def update_order(id, reason, patient, doctor, room, blocks, date, time):
     """this updates an order"""
-    order = Objednavka.query.filter(Objednavka.id_objednavky == id).first()
+    order = Objednavka.query.filter_by(id_objednavky=id).first()
     date_time_str = f"{date} {time}"
     order.datum_objednavky = datetime.strptime(date_time_str, '%Y-%m-%d %H:%M')
     order.pacient = patient.split('-')[1][1:]
-    order.lekar = Pouzivatel.query.filter(Pouzivatel.login == doctor).first().id_zamestnanca
     order.miestnost = room
     order.pocet_blokov = blocks
     order.dovod = reason
@@ -156,6 +155,18 @@ def insert_new_diagnoza(diagnoza_kod, datum_vysetrenia, pacient, popis):
     db.session.add(new_diagnoza)
     db.session.commit()
     return new_diagnoza
+
+
+def update_diagnosis(diagnoza_kod, datum_vysetrenia, pacient, popis):
+    """this updates a diagnosis"""
+    diagnoza = ZdravotnyZaznam.query.filter_by(
+        id_zaznamu=diagnoza_kod
+    ).first()
+    diagnoza.popis = popis
+    diagnoza.pacient = pacient
+    diagnoza.datum_vysetrenia = datum_vysetrenia
+    db.session.commit()
+    return diagnoza
 
 
 def select_zamestnanci():

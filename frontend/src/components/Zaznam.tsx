@@ -79,6 +79,27 @@ const Zaznam: React.FC = () => {
             });
     }
 
+    const handleEdit = (recordId: number) => {
+        axios.put(`/pacient/${id_poistenca}/zaznam/${recordId}`, {...formData, id: recordId}, {withCredentials: true})
+            .then(response => {
+                setMessage('Záznam bol úspešne upravený');
+                navigate(`/pacient/${id_poistenca}/zaznam`);
+            })
+            .catch(error => {
+                setErrorMessage(error.response.data.error);
+                setShowErrorModal(true);
+            });
+    }
+
+    const handleChose = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (id_zaznamu) {
+            handleEdit(parseInt(id_zaznamu));
+        } else {
+            handleSubmit(e);
+        }
+    }
+
     const handleRecordInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setFormData({...formData, diagnoza_nazov: value, diagnoza_kod: ''});
@@ -112,7 +133,7 @@ const Zaznam: React.FC = () => {
                                 right: '10px',
                                 zIndex: 1000
                             }}>{message}</Alert>}
-                            <Form onSubmit={handleSubmit}>
+                            <Form onSubmit={handleChose}>
                                 <Form.Group controlId="lekar">
                                     <Form.Label>Lekár</Form.Label>
                                     <Form.Control type="text" name="lekar" value={formData.lekar} readOnly/>
@@ -142,8 +163,7 @@ const Zaznam: React.FC = () => {
                                                             diagnoza_kod: diagnosis.kod_diagnozy
                                                         });
                                                         setdiagnosisSuggestion([]);
-                                                    }}
-                                                >
+                                                    }}>
                                                     {diagnosis.nazov_diagnozy}
                                                 </li>
                                             ))}
@@ -166,7 +186,10 @@ const Zaznam: React.FC = () => {
                                         type="date"
                                         name="datum_vysetrenia"
                                         value={formData.datum_vysetrenia}
-                                        onChange={(e) => setFormData({...formData, datum_vysetrenia: e.target.value})}
+                                        onChange={(e) => setFormData({
+                                            ...formData,
+                                            datum_vysetrenia: e.target.value
+                                        })}
                                     />
                                 </Form.Group>
                                 <Button className="mt-3" variant="primary" type="submit">

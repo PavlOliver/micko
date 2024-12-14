@@ -48,9 +48,9 @@ def orders():
         new_order = insert_new_order(request.json['reason'], request.json['patient'], request.json['doctor'],
                                      request.json['room'],
                                      request.json['blocks'], request.json['date'], request.json['time'])
-        return jsonify({'last_order': new_order.to_dic()})
+        return jsonify({'last_order': new_order.to_dic()}) if new_order.datum_objednavky.isocalendar().week == datetime.now().isocalendar().week else jsonify(
+            {'message': 'Order created'})
     elif request.method == 'PUT':
-        print(request.json)
         edited_order = update_order(request.json['id'], request.json['reason'], request.json['patient'],
                                     request.json['doctor'],
                                     request.json['room'],
@@ -281,7 +281,7 @@ def get_zdravotna_karta(id_poistenca):
 
 
 @views.route('/pacient/<id_poistenca>/zaznam', defaults={'id_zaznamu': None}, methods=['GET', 'POST'])
-@views.route('/pacient/<id_poistenca>/zaznam/<id_zaznamu>', methods=['GET', 'POST'])
+@views.route('/pacient/<id_poistenca>/zaznam/<id_zaznamu>', methods=['GET', 'POST', 'PUT'])
 @login_required
 def add_diagnoza(id_poistenca, id_zaznamu):
     if request.method == 'GET':
@@ -302,6 +302,16 @@ def add_diagnoza(id_poistenca, id_zaznamu):
                 pacient=id_poistenca,
                 popis=request.json['popis'])
             return jsonify({'message': 'Diagnosis created'}), 201
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    elif request.method == 'PUT':
+        try:
+            updated_diagnoza = update_diagnosis(
+                diagnoza_kod=request.json['id'],
+                datum_vysetrenia=datetime.strptime(request.json['datum_vysetrenia'], '%Y-%m-%d'),
+                pacient=id_poistenca,
+                popis=request.json['popis'])
+            return jsonify({'message': 'Diagnosis updated'}), 200
         except Exception as e:
             return jsonify({'error': str(e)}), 500
 
