@@ -152,7 +152,7 @@ const Order: React.FC = () => {
         setTimeout(() => {
             const dovodElement = document.querySelector('[name="eDovod"]') as HTMLInputElement;
             const modalTitle = document.querySelector('.modal-title') as HTMLElement;
-            modalTitle.innerText = `Edit Order ${appointment.id}`;
+            modalTitle.innerText = `Editovať objednávku ${appointment.id}`;
 
             if (dovodElement) {
                 dovodElement.value = appointment.reason;
