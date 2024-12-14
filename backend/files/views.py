@@ -251,19 +251,14 @@ def get_zdravotna_karta(id_poistenca):
     if not current_user_log or current_user_log.rola != 'A' and current_user_log.rola != 'L':
         return jsonify({'error': 'Unauthorized access'}), 403
     try:
-        print("Received parameters: ID_Poistenca=", id_poistenca)
         pacient = Pacient.query.filter_by(id_poistenca=id_poistenca).first()
-        print('meno:', pacient.to_dic()['meno'])
         osoba = Osoba.query.filter_by(rod_cislo=pacient.rod_cislo).first()
         hosp = Hospitalizacia.query.filter_by(pacient=id_poistenca).all()
         hospitalizacie = [h.to_dic2() for h in hosp]
         rec = Recept.query.filter_by(pacient=id_poistenca).all()
         zdrav_zaznamy = ZdravotnyZaznam.query.filter_by(pacient=id_poistenca).all()
         zdrav_zaznamy = [z.to_vysledok_vysetrenia() for z in zdrav_zaznamy]
-        print('recept ', rec)
         rec = [r.zaznam() for r in rec]
-        print(hospitalizacie)
-        print('meno:', osoba.to_dic())
         if pacient:
             datum_narodenia = extract_date_of_birth(pacient.rod_cislo)
             zdravotna_karta = {
@@ -285,16 +280,21 @@ def get_zdravotna_karta(id_poistenca):
         return jsonify({'error': 'An internal error occurred'}), 500
 
 
-@views.route('/pacient/<id_poistenca>/zaznam', methods=['GET', 'POST'])
+@views.route('/pacient/<id_poistenca>/zaznam', defaults={'id_zaznamu': None}, methods=['GET', 'POST'])
+@views.route('/pacient/<id_poistenca>/zaznam/<id_zaznamu>', methods=['GET', 'POST'])
 @login_required
-def add_diagnoza(id_poistenca):
+def add_diagnoza(id_poistenca, id_zaznamu):
     if request.method == 'GET':
-        to_return = select_patient_and_doctor_data(id_poistenca)
+        print(id_poistenca, id_zaznamu)
+        id_zaznamu = id_zaznamu if id_zaznamu != 'undefined' else None
+        if id_zaznamu:
+            to_return = select_patient_and_doctor_data(id_poistenca, id_zaznamu)
+        else:
+            to_return = select_patient_and_doctor_data(id_poistenca, None)
         if to_return:
             return jsonify(to_return)
         return jsonify({'error': 'Patient not found'})
     elif request.method == 'POST':
-        print(request.json)
         try:
             new_diagnoza = insert_new_diagnoza(
                 diagnoza_kod=request.json['diagnoza_kod'],
@@ -304,6 +304,19 @@ def add_diagnoza(id_poistenca):
             return jsonify({'message': 'Diagnosis created'}), 201
         except Exception as e:
             return jsonify({'error': str(e)}), 500
+
+
+# @views.route('/pacient/<id_poistenca>/zaznam/<id_zaznamu>', methods=['GET'])
+# @login_required
+# def get_zaznam(id_poistenca, id_zaznamu):
+#     try:
+#         zaznam = ZdravotnyZaznam.query.filter_by(id_zaznamu=id_zaznamu).first()
+#         if zaznam:
+#             return jsonify(zaznam.to_dic())
+#         return jsonify({'error': 'Record not found'})
+#     except Exception as e:
+#         print("Error:", str(e))
+#         return jsonify({'error': 'An internal error occurred'}), 500
 
 
 @views.route('/staff', methods=['GET'])

@@ -29,6 +29,7 @@
 
 .sidebar-container {
     overflow-y: auto;
+    overflow-x: hidden;
     scrollbar-width: thin;
     scrollbar-color: #888 #f8f9fa;
 }

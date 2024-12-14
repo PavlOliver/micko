@@ -3,15 +3,21 @@ import SideBar from "./SideBar";
 import React, {useEffect, useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
 import axios from "axios";
+import {data} from "jquery";
+import diagnoza from "./Diagnoza";
 
 const Zaznam: React.FC = () => {
     useEffect(() => {
-        axios.get(`/pacient/${id_poistenca}/zaznam`, {withCredentials: true})
+        axios.get(`/pacient/${id_poistenca}/zaznam/${id_zaznamu}`, {withCredentials: true})
             .then(response => {
+                console.log(response.data);
                 setFormData(prevFormData => ({
                     ...prevFormData,
                     pacient: response.data.pacient_meno,
-                    lekar: response.data.lekar_meno
+                    lekar: response.data.lekar_meno,
+                    diagnoza_nazov: ((response.data.zaznam) ? response.data.zaznam.diagnosis : ''),
+                    popis: ((response.data.zaznam) ? response.data.zaznam.description : ''),
+                    datum_vysetrenia: ((response.data.zaznam) ? response.data.zaznam.date : ''),
                 }));
                 setIDs({
                     lekar_id: response.data.lekar_id,
@@ -25,7 +31,7 @@ const Zaznam: React.FC = () => {
     }, []);
 
     const {id_poistenca} = useParams<{ id_poistenca: string }>();
-
+    const {id_zaznamu} = useParams<{ id_zaznamu: string }>();
     const [IDs, setIDs] = useState({lekar_id: '', pacient_id: ''});
     const [message, setMessage] = useState('');
     const [isSideBarOpen, setIsSidebarOpen] = useState(true);
@@ -163,7 +169,9 @@ const Zaznam: React.FC = () => {
                                         onChange={(e) => setFormData({...formData, datum_vysetrenia: e.target.value})}
                                     />
                                 </Form.Group>
-                                <Button className="mt-3" variant="primary" type="submit">Pridať zdravotný záznam</Button>
+                                <Button className="mt-3" variant="primary" type="submit">
+                                    {id_zaznamu ? 'Upraviť zdravotný záznam' : 'Pridať zdravotný záznam'}
+                                </Button>
                             </Form>
                         </Col>
                     </Row>

@@ -121,7 +121,7 @@ def update_profile_picture(filename):
     return user
 
 
-def select_patient_and_doctor_data(id_poistenca):
+def select_patient_and_doctor_data(id_poistenca, id_zaznamu):
     if select_current_user():
         pacient = Pacient.query.filter_by(id_poistenca=id_poistenca).first()
     pacient_meno = pacient.get_full_name()
@@ -130,11 +130,16 @@ def select_patient_and_doctor_data(id_poistenca):
     lekar_meno = Zamestnanec.query.filter_by(
         id_zamestnanca=select_current_user().id_zamestnanca).first().get_full_name()
     lekar_id = select_current_user().id_zamestnanca
+    if id_zaznamu is None:
+        zaznam = None
+    else:
+        zaznam = ZdravotnyZaznam.query.filter_by(id_zaznamu=id_zaznamu).first()
     if pacient:
         return {
             'pacient_meno': pacient_meno, 'pacient_id': pacient_id,
             'username': lekar_login, 'lekar_id': lekar_id,
             'lekar_meno': lekar_meno,
+            'zaznam': zaznam.to_dic() if zaznam else None
         }
     return None
 

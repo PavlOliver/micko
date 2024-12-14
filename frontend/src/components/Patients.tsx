@@ -30,10 +30,8 @@ const Patients: React.FC = () => {
     useEffect(() => {
         axios.get('/patients')
             .then(response => {
-                console.log('Patients:', response.data);
                 setPatients(response.data.patients);
                 setUsername(response.data.username);
-                console.log('Patients25:', patients);
             })
             .catch(error => {
                 console.error('Error fetching patients', error);
