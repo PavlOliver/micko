@@ -93,16 +93,12 @@ def employees_not_users():
             ~Zamestnanec.id_zamestnanca.in_(subquery)
         ).all()
 
-        print("Query executed successfully. Number of employees found:", len(employees))
-
         employee_list = [{
             'id_zamestnanca': emp.id_zamestnanca,
             'meno': emp.meno,
             'priezvisko': emp.priezvisko,
             'specializacia': emp.nazov_specializacie
         } for emp in employees]
-
-        print("Employee list prepared:", employee_list)
 
         return jsonify({'employees': employee_list})
     except Exception as e:
