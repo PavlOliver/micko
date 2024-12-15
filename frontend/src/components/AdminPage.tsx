@@ -18,8 +18,6 @@ interface User {
   rola: string;
 }
 
-
-
 const AdminPage: React.FC = () => {
   const [isSideBarOpen, setIsSidebarOpen] = useState(true);
   const [username, setUsername] = useState('');
@@ -167,22 +165,18 @@ const AdminPage: React.FC = () => {
   return (
     <Container fluid>
       <Row style={{ height: '100vh' }}>
-        <Col md={3} className="p-0">
+        <Col md={isSideBarOpen ? 2 : 1} className="p-0">
           <SideBar
             isOpen={isSideBarOpen}
             toggleSidebar={toggleSidebar}
             username={username}
           />
         </Col>
-        <Col
-          md={9}
-          className="p-4"
-          style={{
-            marginLeft: isSideBarOpen ? '250px' : '60px',
-            transition: 'margin-left 0.3s'
-          }}
-        >
-          <h2>Správa používateľov</h2>
+
+        <Col md={isSideBarOpen ? 10 : 11} className="p-4">
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <h2>Správa používateľov</h2>
+          </div>
           {message && <Alert variant="success">{message}</Alert>}
           {error && <Alert variant="danger">{error}</Alert>}
 
@@ -285,16 +279,17 @@ const AdminPage: React.FC = () => {
               <h3 className="mt-4">Existujúci používatelia</h3>
               <table className="table">
                 <thead>
-                <tr>
-                  <th>Login</th>
-                  <th>ID Zamestnanca</th>
-                  <th>Meno</th>
-                  <th>Priezvisko</th>
-                  <th>Rola</th>
-                </tr>
+                  <tr>
+                    <th>Login</th>
+                    <th>ID Zamestnanca</th>
+                    <th>Meno</th>
+                    <th>Priezvisko</th>
+                    <th>Rola</th>
+                    <th>Akcie</th>
+                  </tr>
                 </thead>
                 <tbody>
-                {users.map(user => (
+                  {users.map(user => (
                     <tr key={user.login}>
                       <td>{user.login}</td>
                       <td>{user.id_zamestnanca}</td>
@@ -302,17 +297,30 @@ const AdminPage: React.FC = () => {
                       <td>{user.priezvisko}</td>
                       <td>{getFullRoleName(user.rola)}</td>
                       <td>
-                        <Button variant="warning" size="sm" onClick={() => handleEdit(user)}>Upraviť</Button>{' '}
-                        <Button variant="danger" size="sm" onClick={() => handleDelete(user.login)}>Vymazať</Button>
+                        <Button
+                          variant="warning"
+                          size="sm"
+                          onClick={() => handleEdit(user)}
+                        >
+                          Upraviť
+                        </Button>{' '}
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleDelete(user.login)}
+                        >
+                          Vymazať
+                        </Button>
                       </td>
                     </tr>
-                ))}
+                  ))}
                 </tbody>
               </table>
             </>
           )}
         </Col>
       </Row>
+
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Upraviť Používateľa</Modal.Title>
