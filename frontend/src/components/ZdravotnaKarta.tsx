@@ -43,7 +43,7 @@ interface os_udaje {
     hospitalizacie: Hospitalizacia[];
     recepty: Recept[];
     vysledkyVysetreni: VysledokVysetrenia[];
-    krvnaSkupina: string;
+    krvna_skupina: string;
     alergie: string[];
 
 }
@@ -78,7 +78,7 @@ const ZdravotnaKarta: React.FC = () => {
             .then(response => {
                 setPacient(response.data.zdravotna_karta);
                 setUsername(response.data.username);
-                //console.log(response.data.zdravotna_karta.alergie);
+                console.log(response.data.zdravotna_karta);
                 setAlergie(response.data.zdravotna_karta.alergie);
                 console.log(alergie);
             })
@@ -108,7 +108,8 @@ const ZdravotnaKarta: React.FC = () => {
                 <Col md={isSideBarOpen ? 10 : 11} className="content-column">
                     <Row>
                         <Col md={12}>
-                            <h2>Zdravotná karta: {Pacient.meno} {Pacient.priezvisko}</h2>
+                            <h2 className="mt-2">Zdravotná karta: {Pacient.meno} {Pacient.priezvisko}</h2>
+
                         </Col>
                     </Row>
                     <Row>
@@ -129,10 +130,15 @@ const ZdravotnaKarta: React.FC = () => {
                             <Card className="mb-4">
                                 <Card.Body>
                                     <Card.Title>Zdravotné údaje</Card.Title>
-                                    <p><strong>Krvná skupina:</strong> {Pacient.krvnaSkupina}</p>
-                                    <p><strong>Alergie:</strong> {alergie.map(a =><span><br/>{a.nazov_alergie}</span>)}</p>
+                                    <p><strong>Krvná skupina:</strong> {Pacient.krvna_skupina}</p>
+                                    <p><strong>Alergie:</strong> {alergie?.length > 0 ? (
+                                        alergie.map(a => <span key={a.kod_alergie}><br/>{a.nazov_alergie}</span>)
+                                    ) : (
+                                        <span>Žiadne alergie</span>
+                                    )}</p>
                                 </Card.Body>
                             </Card>
+
                         </Col>
                     </Row>
                     <Row>
