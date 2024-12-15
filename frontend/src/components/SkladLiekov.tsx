@@ -9,6 +9,7 @@ interface InventoryItem {
     pocet: number;
     datum_dodania: string;
     expiracia: string;
+    pohyb: string;
 }
 
 const SkladLiekov: React.FC = () => {
@@ -24,6 +25,7 @@ const SkladLiekov: React.FC = () => {
         pocet: '',
         datum_dodania: '',
         expiracia: '',
+        pohyb: 'P',
         faktura_scan: null
     });
 
@@ -31,6 +33,14 @@ const SkladLiekov: React.FC = () => {
 
     useEffect(() => {
         fetchData();
+
+        axios.get('/home', { withCredentials: true })
+            .then(response => {
+                setUsername(response.data.username);
+            })
+            .catch(error => {
+                console.error('Error fetching username:', error);
+            });
     }, []);
 
     const fetchData = () => {
@@ -63,6 +73,7 @@ const SkladLiekov: React.FC = () => {
                     pocet: '',
                     datum_dodania: '',
                     expiracia: '',
+                    pohyb: 'P',
                     faktura_scan: null
                 });
             })
@@ -70,6 +81,10 @@ const SkladLiekov: React.FC = () => {
                 console.error('Error adding inventory item:', error);
                 setError('Failed to add inventory item');
             });
+    };
+
+    const getPohybDisplay = (pohyb: string) => {
+        return pohyb === 'P' ? 'Príchod' : 'Výber';
     };
 
     return (
@@ -85,9 +100,9 @@ const SkladLiekov: React.FC = () => {
                 <Col md={isSideBarOpen ? 10 : 11} className="p-4">
                     <div className="d-flex justify-content-between align-items-center mb-4">
                         <h2>Sklad liekov</h2>
-                        {/*<Button variant="primary" onClick={() => setShowModal(true)}>*/}
-                        {/*    + Pridať položku*/}
-                        {/*</Button>*/}
+                        <Button variant="primary" onClick={() => setShowModal(true)}>
+                            + Pridať položku
+                        </Button>
                     </div>
 
                     {error && <Alert variant="danger">{error}</Alert>}
@@ -103,6 +118,7 @@ const SkladLiekov: React.FC = () => {
                                     <th>Počet</th>
                                     <th>Dátum dodania</th>
                                     <th>Expirácia</th>
+                                    <th>Pohyb</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -113,6 +129,7 @@ const SkladLiekov: React.FC = () => {
                                         <td>{item.pocet}</td>
                                         <td>{item.datum_dodania}</td>
                                         <td>{item.expiracia}</td>
+                                        <td>{getPohybDisplay(item.pohyb)}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -172,6 +189,18 @@ const SkladLiekov: React.FC = () => {
                                 required
                             />
                         </Form.Group>
+                        <Form.Group>
+                            <Form.Label>Pohyb</Form.Label>
+                            <Form.Control
+                                as="select"
+                                value={formData.pohyb}
+                                onChange={(e) => setFormData({ ...formData, pohyb: e.target.value })}
+                                required
+                            >
+                                <option value="P">Príchod</option>
+                                <option value="V">Výber</option>
+                            </Form.Control>
+                        </Form.Group>
                         <Button variant="primary" type="submit" className="mt-3">
                             Pridať
                         </Button>
@@ -180,6 +209,7 @@ const SkladLiekov: React.FC = () => {
             </Modal>
         </Container>
     );
+
 };
 
 export default SkladLiekov;

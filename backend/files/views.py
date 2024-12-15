@@ -432,23 +432,30 @@ def get_hospitalizacia(id_poistenca):
 def sklad_liekov():
     if request.method == 'GET':
         try:
+            print("Fetching inventory from database...")
             inventory = db.session.query(
                 SkladLiekov.sarza,
                 Liek.nazov.label('nazov'),
                 SkladLiekov.pocet,
                 SkladLiekov.datum_dodania,
-                SkladLiekov.expiracia
+                SkladLiekov.expiracia,
+                SkladLiekov.pohyb
             ).join(
                 Liek, SkladLiekov.liek == Liek.kod
             ).all()
+            print(f"Number of inventory items fetched: {len(inventory)}")
 
             inventory_list = [{
                 'sarza': item.sarza,
                 'nazov': item.nazov,
                 'pocet': item.pocet,
                 'datum_dodania': item.datum_dodania.strftime('%Y-%m-%d'),
-                'expiracia': item.expiracia.strftime('%Y-%m-%d')
+                'expiracia': item.expiracia.strftime('%Y-%m-%d'),
+                'pohyb': item.pohyb
             } for item in inventory]
+
+            if not inventory_list:
+                print("Sklad je prázdny.")
 
             return jsonify({
                 'username': select_current_user().login,
