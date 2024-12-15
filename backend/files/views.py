@@ -50,7 +50,7 @@ def orders():
                                      request.json['room'],
                                      request.json['blocks'], request.json['date'], request.json['time'])
         return jsonify({
-                           'last_order': new_order.to_dic()}) if new_order.datum_objednavky.isocalendar().week == datetime.now().isocalendar().week else jsonify(
+            'last_order': new_order.to_dic()}) if new_order.datum_objednavky.isocalendar().week == datetime.now().isocalendar().week else jsonify(
             {'message': 'Order created'})
     elif request.method == 'PUT':
         edited_order = update_order(request.json['id'], request.json['reason'], request.json['patient'],
@@ -315,6 +315,7 @@ def add_diagnoza(id_poistenca, id_zaznamu):
         except Exception as e:
             return jsonify({'error': str(e)}), 500
 
+
 @views.route('/user-management/<login>', methods=['PUT', 'DELETE'])
 @login_required
 def manage_user(login):
@@ -353,6 +354,7 @@ def manage_user(login):
         except Exception as e:
             print("Error deleting user:", str(e))
             return jsonify({'error': 'Failed to delete user'}), 500
+
 
 # @views.route('/pacient/<id_poistenca>/zaznam/<id_zaznamu>', methods=['GET'])
 # @login_required
