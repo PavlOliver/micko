@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_required
-from .models import Pacient, Osoba, Pouzivatel, Zamestnanec, Liek, Miestnost, Diagnoza
+from .models import Pacient, Osoba, Pouzivatel, Zamestnanec, Liek, Miestnost, Diagnoza, Specializacia
 from . import db
 from .queries import select_current_user
 
@@ -74,3 +74,37 @@ def rooms_list():
         Miestnost.typ.ilike(f'%{query_filter}%')
     ).all()
     return {'rooms': [room.cislo_miestnosti for room in rooms]}
+
+@api.route('/employees-not-users')
+@login_required
+def employees_not_users():
+    try:
+        subquery = db.session.query(Pouzivatel.id_zamestnanca).subquery()
+        employees = db.session.query(
+            Zamestnanec.id_zamestnanca,
+            Osoba.meno,
+            Osoba.priezvisko,
+            Specializacia.nazov_specializacie
+        ).join(
+            Osoba, Zamestnanec.rod_cislo == Osoba.rod_cislo
+        ).join(
+            Specializacia, Zamestnanec.specializacia == Specializacia.kod_specializacie
+        ).filter(
+            ~Zamestnanec.id_zamestnanca.in_(subquery)
+        ).all()
+
+        print("Query executed successfully. Number of employees found:", len(employees))
+
+        employee_list = [{
+            'id_zamestnanca': emp.id_zamestnanca,
+            'meno': emp.meno,
+            'priezvisko': emp.priezvisko,
+            'specializacia': emp.nazov_specializacie
+        } for emp in employees]
+
+        print("Employee list prepared:", employee_list)
+
+        return jsonify({'employees': employee_list})
+    except Exception as e:
+        print("Error executing query:", str(e))
+        return jsonify({'error': 'Failed to load employees'}), 500
