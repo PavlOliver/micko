@@ -27,6 +27,7 @@ import ShiftAnalysis from "./components/ShiftAnalysis";
 import RoomAnalysis from "./components/RoomAnalysis";
 import ReceptyMonthly from "./components/ReceptyMonthly";
 import ReceptyDoktor from "./components/ReceptyDoktor";
+import Hospitalizacia from "./components/Hospitalizacia";
 
 axios.defaults.baseURL = 'http://localhost:5000';
 axios.defaults.withCredentials = true;
@@ -63,6 +64,7 @@ function AppContent() {
                 <Route path="/pacient/:id_poistenca/recepty" element={<Recept/>}/>
                 <Route path="/pacient/:id_poistenca/zdravotna_karta" element={<ZdravotnaKarta/>}/>
                 <Route path="/pacient/:id_poistenca/zaznam" element={<Zaznam/>}/>
+                <Route path="/pacient/:id_poistenca/hospitalizacia" element={<Hospitalizacia/>}/>
                 <Route path={"/patients"} element={<Patients/>}/>
                 <Route path="/user-management" element={<UserManagement/>}/>
                 <Route path="/staff" element={<Zamestnanci/>}/>

@@ -57,6 +57,7 @@ const ZdravotnaKarta: React.FC = () => {
         axios.get(`/pacient/${id_poistenca}/zdravotna-karta`, { withCredentials: true, params: { id_poistenca } })
             .then(response => {
                 setPacient(response.data.zdravotna_karta);
+                setUsername(response.data.username);
                 console.log(response.data.zdravotna_karta.recepty);
             })
             .catch(error => {

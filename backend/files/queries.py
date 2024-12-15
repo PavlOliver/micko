@@ -2,7 +2,7 @@ from datetime import datetime
 
 from flask_login import current_user
 from . import db
-from .models import Objednavka, Pouzivatel, Pacient, Recept, Hospitalizacia, Zamestnanec, ZdravotnyZaznam
+from .models import Objednavka, Pouzivatel, Pacient, Recept, Hospitalizacia, Zamestnanec, ZdravotnyZaznam, Miestnost
 from .models import Objednavka, Pouzivatel, Pacient, Recept, Hospitalizacia, Zamestnanec, Osoba, Specializacia
 
 
@@ -174,3 +174,24 @@ def select_zamestnanci():
         'specializacia': specializacia.nazov_specializacie,
         'popis_specializacie': specializacia.popis
     } for zamestnanec, osoba, specializacia in zamestnanci]
+
+def select_rooms(query):
+    """this returns all rooms"""
+    rooms = Miestnost.query.filter(
+        Miestnost.cislo_miestnosti.ilike(f'%{query}%') |
+        Miestnost.typ.ilike(f'%{query}%')
+    ).all()
+    return [room.to_dic() for room in rooms]
+
+def insert_new_hospitalizacia(datum_od, datum_do, pacient, lekar, miestnost, dovod):
+    new_hospitalizacia = Hospitalizacia(
+        datum_od=datum_od,
+        datum_do=datum_do,
+        pacient=pacient,
+        lekar=lekar,
+        miestnost=miestnost,
+        dovod=dovod
+    )
+    db.session.add(new_hospitalizacia)
+    db.session.commit()
+    return new_hospitalizacia

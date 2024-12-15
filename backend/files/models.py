@@ -220,6 +220,13 @@ class Miestnost(db.Model):
     kapacita = db.Column(NUMBER(38, 0), nullable=False)
     stav = db.Column(CHAR(1), nullable=False)
 
+    def to_dic(self):
+        return {
+            'cislo_miestnosti': self.cislo_miestnosti,
+            'typ': self.typ,
+            'kapacita': self.kapacita,
+            'stav': self.stav
+        }
 
 class Zmena(db.Model):
     __tablename__ = 'm_zmena'
