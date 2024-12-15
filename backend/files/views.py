@@ -501,3 +501,24 @@ def host():
         return jsonify({'error': str(e)}), 500
 
 
+
+
+@views.route('/pacient/<id_poistenca>/zmenaUdajov', methods=['POST'])
+@login_required
+def update_patient_info(id_poistenca):
+    try:
+        updated_data = request.get_json()
+        print(f"Received updated data: {updated_data}")
+        print(id_poistenca)
+
+        update_patient_info_in_database(id_poistenca, updated_data)
+
+       # updated_patient = update_patient_in_database(id_poistenca, updated_data)
+
+        #if updated_patient:
+         #   return jsonify({'zdravotna_karta': updated_patient}), 200
+        #else:
+        return jsonify({'error': 'Patient not found'}), 404
+    except Exception as e:
+        print(f'Error updating patient data: {e}')
+        return jsonify({'error': 'Internal server error'}), 500

@@ -1,9 +1,10 @@
 from datetime import datetime
 
 from flask_login import current_user
+
 from . import db
-from .models import Objednavka, Pouzivatel, Pacient, Recept, Hospitalizacia, Zamestnanec, ZdravotnyZaznam, Miestnost
 from .models import Objednavka, Pouzivatel, Pacient, Recept, Hospitalizacia, Zamestnanec, Osoba, Specializacia
+from .models import ZdravotnyZaznam, Miestnost
 
 
 def select_current_user():
@@ -227,3 +228,15 @@ def select_hospitalized():
     hospitalized = Pacient.query.join(Hospitalizacia).filter(Hospitalizacia.datum_do.is_(None)).all()
     print(hospitalized)
     return [hospitalizacia.to_dic() for hospitalizacia in hospitalized]
+
+def update_patient_info_in_database(id_poistenca, updated_data):
+    print('daco')
+    pacient = Pacient.query.filter_by(id_poistenca=id_poistenca).first()
+    rodnecislo = pacient.rod_cislo
+    print(rodnecislo)
+    osoba = Osoba.query.filter_by(rod_cislo=rodnecislo).first()
+    osoba.tel_cislo = updated_data['telefon']
+    db.session.commit()
+
+    pass
+
