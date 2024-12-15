@@ -142,6 +142,22 @@ def select_patient_and_doctor_data(id_poistenca, id_zaznamu):
         }
     return None
 
+def select_patient_and_doctor_data2(id_poistenca):
+    if select_current_user():
+        pacient = Pacient.query.filter_by(id_poistenca=id_poistenca).first()
+    pacient_meno = pacient.get_full_name()
+    pacient_id = pacient.id_poistenca
+    lekar_login = select_current_user().login
+    lekar_meno = Zamestnanec.query.filter_by(
+        id_zamestnanca=select_current_user().id_zamestnanca).first().get_full_name()
+    lekar_id = select_current_user().id_zamestnanca
+    if pacient:
+        return {
+            'pacient_meno': pacient_meno, 'pacient_id': pacient_id,
+            'username': lekar_login, 'lekar_id': lekar_id,
+            'lekar_meno': lekar_meno,
+        }
+    return None
 
 def insert_new_diagnoza(diagnoza_kod, datum_vysetrenia, pacient, popis):
     """this creates a new diagnosis"""

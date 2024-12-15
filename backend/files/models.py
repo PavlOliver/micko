@@ -79,14 +79,15 @@ class TAtc(UserDefinedType):
 
         return process
 
-class TAlergia(UserDefinedType):
+
+class TAlergie(UserDefinedType):
     def get_col_spec(self):
         return "m_t_alergie"
 
     def bind_processor(self, dialect):
         def process(value):
             if value is not None:
-                return f"{value['kod_alergie ']},{value['nazov_alergie ']}"
+                return f"{value['kod_alergie']},{value['nazov_alergie']}"
             return value
 
         return process
@@ -96,11 +97,33 @@ class TAlergia(UserDefinedType):
             if value is not None:
                 return {
                     'kod_alergie': value.KOD_ALERGIE,
-                    'nazov_alergie ': value.nazov_alergie,
+                    'nazov_alergie': value.NAZOV_ALERGIE
                 }
             return value
 
         return process
+
+
+class TAlergieTab(UserDefinedType):
+    def get_col_spec(self):
+        return "M_T_ALERGIE_TAB"
+
+    def bind_processor(self, dialect):
+        def process(value):
+            if value is not None:
+                return [f"{item['kod_alergie']},{item['nazov_alergie']}" for item in value]
+            return value
+
+        return process
+
+    def result_processor(self, dialect, coltype):
+        def process(value):
+            if value is not None:
+                return [{'kod_alergie': item.KOD_ALERGIE, 'nazov_alergie': item.NAZOV_ALERGIE} for item in value]
+            return value
+
+        return process
+
 
 class Diagnoza(db.Model):
     __tablename__ = 'm_diagnoza'
@@ -142,7 +165,8 @@ class Pacient(db.Model):
     rod_cislo = db.Column(VARCHAR2(10), db.ForeignKey('m_osoba.rod_cislo'), nullable=False)
     datum_od = db.Column(DATE, nullable=False)
     nudzovy_kontakt = db.Column(TNudzovyKontakt, nullable=True)
-    alergie = db.Column(TAlergia, nullable=True)
+    alergie = db.Column(TAlergieTab, nullable=True, unique=True)
+
     def get_full_name(self):
         osoba = Osoba.query.filter(Osoba.rod_cislo == self.rod_cislo).first()
         return f"{osoba.meno} {osoba.priezvisko}" if osoba else None
@@ -167,6 +191,7 @@ class Pacient(db.Model):
             'meno': osoba.meno,
             'priezvisko': osoba.priezvisko,
         }
+
     def alergie_dict(self):
         if self.alergie:
             return {
@@ -174,6 +199,7 @@ class Pacient(db.Model):
                 'nazov_alergie': self.alergie.nazov_alergie
             }
         return None
+
 
 
 class Specializacia(db.Model):
@@ -270,6 +296,7 @@ class Miestnost(db.Model):
             'kapacita': self.kapacita,
             'stav': self.stav
         }
+
 
 class Zmena(db.Model):
     __tablename__ = 'm_zmena'

@@ -48,12 +48,20 @@ interface os_udaje {
 
 }
 
+interface alergia {
+    kod_alergie: string;
+    nazov_alergie: string;
+}
+
 
 const ZdravotnaKarta: React.FC = () => {
     const {id_poistenca} = useParams<{ id_poistenca: string }>();
     const [Pacient, setPacient] = useState<os_udaje | null>(null);
     const [isSideBarOpen, setIsSideBarOpen] = useState(true);
     const [username, setUsername] = useState('');
+    const [alergie, setAlergie] = useState<alergia[]>([]);
+
+
     const navigate = useNavigate();
 
 
@@ -70,7 +78,9 @@ const ZdravotnaKarta: React.FC = () => {
             .then(response => {
                 setPacient(response.data.zdravotna_karta);
                 setUsername(response.data.username);
-                console.log(response.data.zdravotna_karta.recepty);
+                //console.log(response.data.zdravotna_karta.alergie);
+                setAlergie(response.data.zdravotna_karta.alergie);
+                console.log(alergie);
             })
             .catch(error => {
                 console.error('Error fetching patient data:', error);
@@ -119,7 +129,8 @@ const ZdravotnaKarta: React.FC = () => {
                             <Card className="mb-4">
                                 <Card.Body>
                                     <Card.Title>Zdravotné údaje</Card.Title>
-                                    <p><strong>Alergie:</strong> {Pacient.alergie.join(', ')}</p>
+                                    <p><strong>Krvná skupina:</strong> {Pacient.krvnaSkupina}</p>
+                                    <p><strong>Alergie:</strong> {alergie.map(a =><span><br/>{a.nazov_alergie}</span>)}</p>
                                 </Card.Body>
                             </Card>
                         </Col>

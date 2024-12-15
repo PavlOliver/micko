@@ -2,8 +2,8 @@ import os
 from datetime import timedelta
 from io import BytesIO
 
-
 from flask import Blueprint, jsonify, request, send_file, url_for
+
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_required
 
@@ -49,7 +49,8 @@ def orders():
         new_order = insert_new_order(request.json['reason'], request.json['patient'], request.json['doctor'],
                                      request.json['room'],
                                      request.json['blocks'], request.json['date'], request.json['time'])
-        return jsonify({'last_order': new_order.to_dic()}) if new_order.datum_objednavky.isocalendar().week == datetime.now().isocalendar().week else jsonify(
+        return jsonify({
+                           'last_order': new_order.to_dic()}) if new_order.datum_objednavky.isocalendar().week == datetime.now().isocalendar().week else jsonify(
             {'message': 'Order created'})
     elif request.method == 'PUT':
         edited_order = update_order(request.json['id'], request.json['reason'], request.json['patient'],
@@ -257,11 +258,6 @@ def get_zdravotna_karta(id_poistenca):
         zdrav_zaznamy = ZdravotnyZaznam.query.filter_by(pacient=id_poistenca).all()
         zdrav_zaznamy = [z.to_vysledok_vysetrenia() for z in zdrav_zaznamy]
         rec = [r.zaznam() for r in rec]
-        print(hospitalizacie)
-        print('meno:', osoba.to_dic())
-        print (zdrav_zaznamy)
-
-
         if pacient:
             datum_narodenia = extract_date_of_birth(pacient.rod_cislo)
             zdravotna_karta = {
@@ -274,7 +270,7 @@ def get_zdravotna_karta(id_poistenca):
                 'hospitalizacie': hospitalizacie,
                 'vysledkyVysetreni': zdrav_zaznamy,
                 'recepty': rec,
-                'alergie': pacient.alergie()
+                'alergie': pacient.alergie
             }
             return jsonify({'zdravotna_karta': zdravotna_karta, 'username': select_current_user().login})
         return jsonify({'error': 'Pacient not found'})
@@ -383,6 +379,7 @@ def get_zamestnanci():
         print("Error in get_zamestnanci:", str(e))
         return jsonify({'error': str(e)}), 500
 
+
 @views.route('/room_list', methods=['GET'])
 @login_required
 def get_rooms():
@@ -407,7 +404,7 @@ def get_rooms():
 @login_required
 def get_hospitalizacia(id_poistenca):
     if request.method == 'GET':
-        to_return = select_patient_and_doctor_data(id_poistenca)
+        to_return = select_patient_and_doctor_data2(id_poistenca)
         if to_return:
             return jsonify(to_return)
         return jsonify({'error': 'Patient not found'})
@@ -415,7 +412,7 @@ def get_hospitalizacia(id_poistenca):
         print(request.json)
         try:
             print("Request data:", request.json)
-            id_lekara = select_patient_and_doctor_data(id_poistenca)['lekar_id']
+            id_lekara = select_patient_and_doctor_data2(id_poistenca)['lekar_id']
             insert_new_hospitalizacia(
                 datum_od=datetime.strptime(request.json['datum_od'], '%Y-%m-%d'),
                 datum_do=datetime.strptime(request.json['datum_do'], '%Y-%m-%d'),
