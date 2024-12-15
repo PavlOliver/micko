@@ -139,7 +139,7 @@ const Zamestnanci: React.FC = () => {
                         <h2>Zamestnanci nemocnice</h2>
                         {userRole === 'A' && (
                             <Button variant="primary" onClick={handleShowModal}>
-                                + Pridať zamestnanca
+                                Pridať zamestnanca
                             </Button>
                         )}
                     </div>

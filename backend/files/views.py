@@ -188,6 +188,14 @@ def patients():
 @views.route('/search_patients', methods=['GET'])
 @login_required
 def search_patients():
+    def to_dict(row):
+        return {
+            'id_poistenca': row[0],
+            'rodne_cislo': row[1],
+            'meno': row[2],
+            'priezvisko': row[3],
+        }
+
     try:
         ID_Poistenca = request.args.get('ID_Poistenca')
         rodne_cislo = request.args.get('rodne_cislo')
@@ -200,11 +208,19 @@ def search_patients():
         if ID_Poistenca:
             query = query.filter(Pacient.id_poistenca.ilike(f'%{ID_Poistenca}%'))
         if rodne_cislo:
-            query = query.filter(Pacient.rod_cislo.ilike(f'%{rodne_cislo}%'))
+            query = query.filter_by(rod_cislo=rodne_cislo)
         if adresa:
-            query = query.join(Osoba).filter(Osoba.adresa.ilike(f'%{adresa}%'))
+            from sqlalchemy import text
+            query = text(
+                '''select ID_POISTENCA,ROD_CISLO, MENO, PRIEZVISKO  from PAVLANIN2.M_PACIENT join PAVLANIN2.M_OSOBA o using(rod_cislo)
+                 where o.adresa.ulica like :adr or o.adresa.mesto like :adr or o.adresa.psc like :adr
+                 fetch first 100 rows only''')
+            query = query.bindparams(adr=f'%{adresa}%')
+            result = db.session.execute(query).fetchall()
+            print(to_dict(result[0]))
+            return jsonify({'patients': [to_dict(row) for row in result]})
 
-        patients = query.all()
+        patients = query.limit(100).all()
         if vek:
             vek = int(vek)
             patients = [
