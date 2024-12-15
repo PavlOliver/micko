@@ -6,6 +6,7 @@ from flask import Blueprint, jsonify, request, send_file, url_for
 
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_required
+from .models import Liek, SkladLiekov
 
 from .queries import *
 
@@ -424,3 +425,38 @@ def get_hospitalizacia(id_poistenca):
         except Exception as e:
             return jsonify({'error': str(e)}), 500
     return jsonify({'error': 'Invalid request method'})
+
+
+@views.route('/sklad-liekov', methods=['GET', 'POST'])
+@login_required
+def sklad_liekov():
+    if request.method == 'GET':
+        try:
+            inventory = db.session.query(
+                SkladLiekov.sarza,
+                Liek.nazov.label('nazov'),
+                SkladLiekov.pocet,
+                SkladLiekov.datum_dodania,
+                SkladLiekov.expiracia
+            ).join(
+                Liek, SkladLiekov.liek == Liek.kod
+            ).all()
+
+            inventory_list = [{
+                'sarza': item.sarza,
+                'nazov': item.nazov,
+                'pocet': item.pocet,
+                'datum_dodania': item.datum_dodania.strftime('%Y-%m-%d'),
+                'expiracia': item.expiracia.strftime('%Y-%m-%d')
+            } for item in inventory]
+
+            return jsonify({
+                'username': select_current_user().login,
+                'inventory': inventory_list
+            })
+        except Exception as e:
+            print("Error fetching inventory:", str(e))
+            return jsonify({'error': 'Failed to load inventory'}), 500
+
+
+
