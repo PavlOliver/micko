@@ -448,7 +448,6 @@ def get_hospitalizacia(id_poistenca):
 def sklad_liekov():
     if request.method == 'GET':
         try:
-            print("Fetching inventory from database...")
             inventory = db.session.query(
                 SkladLiekov.sarza,
                 Liek.nazov.label('nazov'),
@@ -458,9 +457,7 @@ def sklad_liekov():
                 SkladLiekov.pohyb
             ).join(
                 Liek, SkladLiekov.liek == Liek.kod
-            ).all()
-            print(f"Number of inventory items fetched: {len(inventory)}")
-
+            ).limit(100).all()
             inventory_list = [{
                 'sarza': item.sarza,
                 'nazov': item.nazov,
@@ -469,17 +466,38 @@ def sklad_liekov():
                 'expiracia': item.expiracia.strftime('%Y-%m-%d'),
                 'pohyb': item.pohyb
             } for item in inventory]
-
-            if not inventory_list:
-                print("Sklad je prázdny.")
-
             return jsonify({
                 'username': select_current_user().login,
                 'inventory': inventory_list
             })
         except Exception as e:
-            print("Error fetching inventory:", str(e))
             return jsonify({'error': 'Failed to load inventory'}), 500
+    elif request.method == 'POST':
+        try:
+            new_item = SkladLiekov(
+                sarza=request.json['sarza'],
+                liek=request.json['liek'],
+                pocet=request.json['pocet'],
+                datum_dodania=datetime.strptime(request.json['datum_dodania'], '%Y-%m-%d'),
+                expiracia=datetime.strptime(request.json['expiracia'], '%Y-%m-%d'),
+                pohyb=request.json['pohyb']
+            )
+            db.session.add(new_item)
+            db.session.commit()
+            return jsonify({'message': 'Inventory item created'}), 201
+        except Exception as e:
+            print("Error creating inventory item:", str(e))
+            return jsonify({'error': str(e)}), 500
 
+@views.route('/hosp', methods=['GET'])
+@login_required
+def host():
+    """return all patients that are hospitized"""
+    try:
+        patients = select_hospitalized()
+        return jsonify({'patients': patients})
+    except Exception as e:
+        print("Error in get_zamestnanci:", str(e))
+        return jsonify({'error': str(e)}), 500
 
 

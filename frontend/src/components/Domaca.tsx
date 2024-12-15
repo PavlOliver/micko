@@ -34,19 +34,11 @@ const Home: React.FC = () => {
                     </Col>
                     <Col md={isSideBarOpen ? 10 : 11} className="content-column">
                         <Row className="mb-4">
-                            <Col>
+                            <Col className="mt-3">
                                 <h1>Vitajte v Nemocničnom Informačnom Systéme</h1>
-                                <p>Nemocničný informačný systém poskytuje kompletnú správu pacientov, zamestnancov,
-                                    vyšetrení, hospitalizácií a rozvrhov miestností. Zjednodušuje správu nemocnice a
+                                <p className="mt-5">Nemocničný informačný systém poskytuje kompletnú správu pacientov, zamestnancov,
+                                    vyšetrení, hospitalizácií a rozvrhov lekárov. Zjednodušuje správu nemocnice a
                                     pomáha efektívne organizovať prácu všetkým pracovníkom.</p>
-                            </Col>
-                        </Row>
-                        <Row className="mb-4">
-                            <Col>
-                                <Alert variant="info">
-                                    <strong>Oznam:</strong> Na zajtrajšok sú plánované pravidelné údržbové práce na
-                                    systéme medzi 2:00 a 5:00. Systém môže byť dočasne nedostupný.
-                                </Alert>
                             </Col>
                         </Row>
                         <Row>

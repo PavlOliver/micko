@@ -19,9 +19,9 @@ const Patients: React.FC = () => {
     const [rodneCislo, setRodneCislo] = useState('');
     const [vek, setVek] = useState<number | ''>('');
     const [adresa, setAdresa] = useState('');
+    const [showHospitalizedOnly, setShowHospitalizedOnly] = useState(false);
     const navigate = useNavigate();
     const [username, setUsername] = useState('');
-
 
     const toggleSidebar = () => {
         setIsSideBarOpen(!isSideBarOpen);
@@ -41,7 +41,7 @@ const Patients: React.FC = () => {
 
     const handleSearch = () => {
         axios.get('/search_patients', {
-            params: {ID_Poistenca, rodne_cislo: rodneCislo, vek, adresa}
+            params: {ID_Poistenca, rodne_cislo: rodneCislo, vek, adresa, showHospitalizedOnly}
         })
             .then(response => {
                 console.log('Search results:', response.data);
@@ -58,6 +58,20 @@ const Patients: React.FC = () => {
             });
     };
 
+    const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setShowHospitalizedOnly(e.target.checked);
+        if (e.target.checked) {
+            axios.get('/hosp')
+                .then(response => {
+                    setPatients(response.data.patients);
+                })
+                .catch(error => {
+                    console.error('Error fetching hospitalized patients:', error);
+                });
+        } else {
+            handleSearch();
+        }
+    };
 
     const handleAddRecept = (id_poistenca: number) => {
         console.log('Add recept');
@@ -123,7 +137,6 @@ const Patients: React.FC = () => {
                                                 }}
                                             />
                                         </Form.Group>
-
                                     </Col>
                                     <Col md={6}>
                                         <Form.Group controlId="formAdresa">
@@ -133,6 +146,18 @@ const Patients: React.FC = () => {
                                                 placeholder="Zadajte adresu"
                                                 value={adresa}
                                                 onChange={(e) => setAdresa(e.target.value)}
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
+                                <Row className="mt-3">
+                                    <Col md={6}>
+                                        <Form.Group controlId="formHospitalizedOnly">
+                                            <Form.Check
+                                                type="checkbox"
+                                                label="Zobraziť len hospitalizovaných pacientov"
+                                                checked={showHospitalizedOnly}
+                                                onChange={handleCheckboxChange}
                                             />
                                         </Form.Group>
                                     </Col>

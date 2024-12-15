@@ -81,16 +81,6 @@ def update_order(id, reason, patient, doctor, room, blocks, date, time):
     db.session.commit()
     return order
 
-
-def select_hospitalisations():
-    """this returns all hospitalisations"""
-    hospitalisations = Hospitalizacia.query.all()
-    to_return = []
-    for hospitalisation in hospitalisations:
-        to_return.append(hospitalisation.to_dic())
-    return to_return
-
-
 def insert_new_recept(liek, pacient, lekar, pocet, poznamka, vystavenie):
     """creates a new recept"""
     if pocet <= 0:
@@ -231,3 +221,9 @@ def insert_new_hospitalizacia(datum_od, datum_do, pacient, lekar, miestnost, dov
     db.session.add(new_hospitalizacia)
     db.session.commit()
     return new_hospitalizacia
+
+
+def select_hospitalized():
+    hospitalized = Pacient.query.join(Hospitalizacia).filter(Hospitalizacia.datum_do.is_(None)).all()
+    print(hospitalized)
+    return [hospitalizacia.to_dic() for hospitalizacia in hospitalized]

@@ -427,7 +427,7 @@ class SkladLiekov(db.Model):
     __tablename__ = 'm_sklad_liekov'
 
     sarza = db.Column(NUMBER(38, 0), primary_key=True)
-    liek = db.Column(CHAR(5), db.ForeignKey('m_liek.kod_lieku'), primary_key=True)
+    liek = db.Column(CHAR(5), db.ForeignKey('m_liek.kod'), primary_key=True)
     pocet = db.Column(NUMBER(38, 0), nullable=False)
     datum_dodania = db.Column(DATE, nullable=False)
     expiracia = db.Column(DATE, nullable=False)
