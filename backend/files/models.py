@@ -166,6 +166,7 @@ class Pacient(db.Model):
     datum_od = db.Column(DATE, nullable=False)
     nudzovy_kontakt = db.Column(TNudzovyKontakt, nullable=True)
     alergie = db.Column(TAlergieTab, nullable=True, unique=True)
+    krvna_skupina = db.Column(VARCHAR2(10), nullable=True)
 
     def get_full_name(self):
         osoba = Osoba.query.filter(Osoba.rod_cislo == self.rod_cislo).first()

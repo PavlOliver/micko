@@ -270,7 +270,8 @@ def get_zdravotna_karta(id_poistenca):
                 'hospitalizacie': hospitalizacie,
                 'vysledkyVysetreni': zdrav_zaznamy,
                 'recepty': rec,
-                'alergie': pacient.alergie
+                'alergie': pacient.alergie,
+                'krvna_skupina': pacient.krvna_skupina
             }
             return jsonify({'zdravotna_karta': zdravotna_karta, 'username': select_current_user().login})
         return jsonify({'error': 'Pacient not found'})
