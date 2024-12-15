@@ -2,6 +2,7 @@ import os
 from datetime import timedelta
 from io import BytesIO
 
+from dns.e164 import query
 from flask import Blueprint, jsonify, request, send_file, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_required
@@ -259,6 +260,10 @@ def get_zdravotna_karta(id_poistenca):
         zdrav_zaznamy = ZdravotnyZaznam.query.filter_by(pacient=id_poistenca).all()
         zdrav_zaznamy = [z.to_vysledok_vysetrenia() for z in zdrav_zaznamy]
         rec = [r.zaznam() for r in rec]
+        print(hospitalizacie)
+        print('meno:', osoba.to_dic())
+        print (zdrav_zaznamy)
+
         if pacient:
             datum_narodenia = extract_date_of_birth(pacient.rod_cislo)
             zdravotna_karta = {
@@ -272,7 +277,7 @@ def get_zdravotna_karta(id_poistenca):
                 'vysledkyVysetreni': zdrav_zaznamy,
                 'recepty': rec
             }
-            return jsonify({'zdravotna_karta': zdravotna_karta})
+            return jsonify({'zdravotna_karta': zdravotna_karta, 'username': select_current_user().login})
         return jsonify({'error': 'Pacient not found'})
 
     except Exception as e:
@@ -340,3 +345,49 @@ def get_zamestnanci():
     except Exception as e:
         print("Error in get_zamestnanci:", str(e))
         return jsonify({'error': str(e)}), 500
+
+@views.route('/room_list', methods=['GET'])
+@login_required
+def get_rooms():
+    try:
+        query = request.args.get('query')
+        print(f"Fetching rooms for query: '{query}'")  # Debug log
+        if not query:
+            return jsonify({'rooms': []}), 200  # Return empty list if query is empty
+
+            # Predpokladáme, že select_rooms() akceptuje filter
+        rooms = select_rooms(query=query)
+        print(f"Found {len(rooms)} rooms matching query '{query}'")  # Debug log
+
+        return jsonify({'rooms': rooms}), 200
+
+    except Exception as e:
+        print("Error in get_rooms:", str(e))
+        return jsonify({'error': 'Failed to fetch rooms'}), 500
+
+
+@views.route('/pacient/<id_poistenca>/hospitalizacia', methods=['GET', 'POST'])
+@login_required
+def get_hospitalizacia(id_poistenca):
+    if request.method == 'GET':
+        to_return = select_patient_and_doctor_data(id_poistenca)
+        if to_return:
+            return jsonify(to_return)
+        return jsonify({'error': 'Patient not found'})
+    elif request.method == 'POST':
+        print(request.json)
+        try:
+            print("Request data:", request.json)
+            id_lekara = select_patient_and_doctor_data(id_poistenca)['lekar_id']
+            insert_new_hospitalizacia(
+                datum_od=datetime.strptime(request.json['datum_od'], '%Y-%m-%d'),
+                datum_do=datetime.strptime(request.json['datum_do'], '%Y-%m-%d'),
+                pacient=id_poistenca,
+                lekar=id_lekara,
+                miestnost=request.json['miestnost'],
+                dovod=request.json['dovod']
+            )
+            return jsonify({'message': 'Hospitalization created'}), 201
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    return jsonify({'error': 'Invalid request method'})
