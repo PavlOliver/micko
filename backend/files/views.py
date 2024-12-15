@@ -277,7 +277,7 @@ def get_zdravotna_karta(id_poistenca):
                 'hospitalizacie': hospitalizacie,
                 'vysledkyVysetreni': zdrav_zaznamy,
                 'recepty': rec,
-                'alergie': pacient.alergie()
+                #'alergie': pacient.alergie()
             }
             return jsonify({'zdravotna_karta': zdravotna_karta, 'username': select_current_user().login})
         return jsonify({'error': 'Pacient not found'})
@@ -372,7 +372,7 @@ def get_rooms():
 @login_required
 def get_hospitalizacia(id_poistenca):
     if request.method == 'GET':
-        to_return = select_patient_and_doctor_data(id_poistenca)
+        to_return = select_patient_and_doctor_data2(id_poistenca)
         if to_return:
             return jsonify(to_return)
         return jsonify({'error': 'Patient not found'})
@@ -380,7 +380,7 @@ def get_hospitalizacia(id_poistenca):
         print(request.json)
         try:
             print("Request data:", request.json)
-            id_lekara = select_patient_and_doctor_data(id_poistenca)['lekar_id']
+            id_lekara = select_patient_and_doctor_data2(id_poistenca)['lekar_id']
             insert_new_hospitalizacia(
                 datum_od=datetime.strptime(request.json['datum_od'], '%Y-%m-%d'),
                 datum_do=datetime.strptime(request.json['datum_do'], '%Y-%m-%d'),
