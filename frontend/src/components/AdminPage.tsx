@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Form, Button, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Alert, Modal } from 'react-bootstrap';
 import axios from 'axios';
 import SideBar from './SideBar';
 
@@ -18,6 +18,8 @@ interface User {
   rola: string;
 }
 
+
+
 const AdminPage: React.FC = () => {
   const [isSideBarOpen, setIsSidebarOpen] = useState(true);
   const [username, setUsername] = useState('');
@@ -32,6 +34,14 @@ const AdminPage: React.FC = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [viewOption, setViewOption] = useState('employees-not-users');
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editFormData, setEditFormData] = useState<User>({
+    login: '',
+    id_zamestnanca: '',
+    meno: '',
+    priezvisko: '',
+    rola: ''
+  });
 
   useEffect(() => {
     axios
@@ -119,6 +129,39 @@ const AdminPage: React.FC = () => {
       default:
         return abbreviation;
     }
+  };
+
+  const handleEdit = (user: User) => {
+    setEditFormData(user);
+    setShowEditModal(true);
+  };
+
+  const handleDelete = (login: string) => {
+    if (window.confirm(`Naozaj chcete vymazať používateľa ${login}?`)) {
+      axios
+        .delete(`/user-management/${login}`, { withCredentials: true })
+        .then(response => {
+          setMessage('Používateľ vymazaný');
+          fetchData();
+        })
+        .catch(error => {
+          setError('Vymazanie používateľa zlyhalo');
+        });
+    }
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    axios
+      .put(`/user-management/${editFormData.login}`, editFormData, { withCredentials: true })
+      .then(response => {
+        setMessage('Používateľ upravený úspešne');
+        fetchData();
+        setShowEditModal(false);
+      })
+      .catch(error => {
+        setError('Úprava používateľa zlyhala');
+      });
   };
 
   return (
@@ -242,30 +285,80 @@ const AdminPage: React.FC = () => {
               <h3 className="mt-4">Existujúci používatelia</h3>
               <table className="table">
                 <thead>
-                  <tr>
-                    <th>Login</th>
-                    <th>ID Zamestnanca</th>
-                    <th>Meno</th>
-                    <th>Priezvisko</th>
-                    <th>Rola</th>
-                  </tr>
+                <tr>
+                  <th>Login</th>
+                  <th>ID Zamestnanca</th>
+                  <th>Meno</th>
+                  <th>Priezvisko</th>
+                  <th>Rola</th>
+                </tr>
                 </thead>
                 <tbody>
-                  {users.map(user => (
+                {users.map(user => (
                     <tr key={user.login}>
                       <td>{user.login}</td>
                       <td>{user.id_zamestnanca}</td>
                       <td>{user.meno}</td>
                       <td>{user.priezvisko}</td>
                       <td>{getFullRoleName(user.rola)}</td>
+                      <td>
+                        <Button variant="warning" size="sm" onClick={() => handleEdit(user)}>Upraviť</Button>{' '}
+                        <Button variant="danger" size="sm" onClick={() => handleDelete(user.login)}>Vymazať</Button>
+                      </td>
                     </tr>
-                  ))}
+                ))}
                 </tbody>
               </table>
             </>
           )}
         </Col>
       </Row>
+      <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Upraviť Používateľa</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleEditSubmit}>
+            <Form.Group>
+              <Form.Label>Login</Form.Label>
+              <Form.Control type="text" value={editFormData.login} readOnly />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Meno</Form.Label>
+              <Form.Control
+                type="text"
+                value={editFormData.meno}
+                onChange={e => setEditFormData({ ...editFormData, meno: e.target.value })}
+                required
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Priezvisko</Form.Label>
+              <Form.Control
+                type="text"
+                value={editFormData.priezvisko}
+                onChange={e => setEditFormData({ ...editFormData, priezvisko: e.target.value })}
+                required
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Rola</Form.Label>
+              <Form.Control
+                as="select"
+                value={editFormData.rola}
+                onChange={e => setEditFormData({ ...editFormData, rola: e.target.value })}
+                required
+              >
+                <option value="A">Admin</option>
+                <option value="L">Lekár</option>
+              </Form.Control>
+            </Form.Group>
+            <Button variant="primary" type="submit" className="mt-3">
+              Uložiť Zmeny
+            </Button>
+          </Form>
+        </Modal.Body>
+      </Modal>
     </Container>
   );
 };

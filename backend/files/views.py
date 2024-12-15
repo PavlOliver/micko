@@ -319,6 +319,44 @@ def add_diagnoza(id_poistenca, id_zaznamu):
         except Exception as e:
             return jsonify({'error': str(e)}), 500
 
+@views.route('/user-management/<login>', methods=['PUT', 'DELETE'])
+@login_required
+def manage_user(login):
+    current_user_log = select_current_user()
+    if not current_user_log or current_user_log.rola != 'A':
+        return jsonify({'error': 'Unauthorized access'}), 403
+
+    if request.method == 'PUT':
+        try:
+            data = request.json
+            user = Pouzivatel.query.filter_by(login=login).first()
+            if not user:
+                return jsonify({'error': 'User not found'}), 404
+
+            user.rola = data['rola']
+
+            employee = Zamestnanec.query.filter_by(id_zamestnanca=user.id_zamestnanca).first()
+            person = Osoba.query.filter_by(rod_cislo=employee.rod_cislo).first()
+            person.meno = data['meno']
+            person.priezvisko = data['priezvisko']
+
+            db.session.commit()
+            return jsonify({'message': 'User updated successfully'})
+        except Exception as e:
+            print("Error updating user:", str(e))
+            return jsonify({'error': 'Failed to update user'}), 500
+
+    elif request.method == 'DELETE':
+        try:
+            user = Pouzivatel.query.filter_by(login=login).first()
+            if not user:
+                return jsonify({'error': 'User not found'}), 404
+            db.session.delete(user)
+            db.session.commit()
+            return jsonify({'message': 'User deleted successfully'})
+        except Exception as e:
+            print("Error deleting user:", str(e))
+            return jsonify({'error': 'Failed to delete user'}), 500
 
 # @views.route('/pacient/<id_poistenca>/zaznam/<id_zaznamu>', methods=['GET'])
 # @login_required
