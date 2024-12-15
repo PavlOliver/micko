@@ -64,10 +64,13 @@ function AppContent() {
                 <Route path="/pacient/:id_poistenca/recepty" element={<Recept/>}/>
                 <Route path="/pacient/:id_poistenca/zdravotna_karta" element={<ZdravotnaKarta/>}/>
                 <Route path="/pacient/:id_poistenca/zaznam" element={<Zaznam/>}/>
+                <Route path="/pacient/:id_poistenca/zaznam/:id_zaznamu" element={<Zaznam/>}/>
                 <Route path="/pacient/:id_poistenca/hospitalizacia" element={<Hospitalizacia/>}/>
                 <Route path={"/patients"} element={<Patients/>}/>
                 <Route path="/user-management" element={<UserManagement/>}/>
                 <Route path="/staff" element={<Zamestnanci/>}/>
+
+
                 <Route path="/hospitalization-analysis" element={<HospitalizationAnalysis/>}/>
                 <Route path={"/appointment-analysis"} element={<AppointmentAnalysis/>}/>
                 <Route path={"/diagnosis-analysis"} element={<DiagnosisAnalysis/>}/>

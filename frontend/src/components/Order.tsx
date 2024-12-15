@@ -85,24 +85,6 @@ const Order: React.FC = () => {
         }
     };
 
-    const handleDoctorInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setDoctorName(value);
-        if (value.length >= 3) {
-            axios.get(`/doctors_list?query=${value}`)
-                .then(response => {
-                    console.log('Doctor suggestions', response.data.doctors);
-                    setDoctorSuggestions(response.data.doctors);
-                    console.log('Doctor suggestions', doctorSuggestions);
-                })
-                .catch(error => {
-                    console.error('Error fetching doctor list', error);
-                });
-        } else {
-            setDoctorSuggestions([]);
-        }
-    }
-
     const handleRoomInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setRoomInput(value);
@@ -134,7 +116,9 @@ const Order: React.FC = () => {
 
         axios.post('/orders', newOrder, {withCredentials: true})
             .then(response => {
-                setAppointments([...appointments, response.data.last_order]);
+                if (response.data.last_order) {
+                    setAppointments([...appointments, response.data.last_order]);
+                }
             })
             .catch(error => {
                 console.error('Error adding order', error);
@@ -152,23 +136,23 @@ const Order: React.FC = () => {
         setTimeout(() => {
             const dovodElement = document.querySelector('[name="eDovod"]') as HTMLInputElement;
             const modalTitle = document.querySelector('.modal-title') as HTMLElement;
-            modalTitle.innerText = `Edit Order ${appointment.id}`;
+            modalTitle.innerText = `Editovať objednávku ${appointment.id}`;
 
             if (dovodElement) {
                 dovodElement.value = appointment.reason;
-                setPatientInput(appointment.patient); // Set patient input state
+                setPatientInput(appointment.patient);
                 document.querySelector('[name="ePatient"]')?.setAttribute('value', appointment.patient);
                 document.querySelector('[name="eDoctor"]')?.setAttribute('value', appointment.doctor);
-                setDoctorName(appointment.doctor); // Set doctor name state
+                setDoctorName(appointment.doctor);
                 document.querySelector('[name="eRoom"]')?.setAttribute('value', appointment.room);
-                setRoomInput(appointment.room); // Set room input state
+                setRoomInput(appointment.room);
                 document.querySelector('[name="eBlocks"]')?.setAttribute('value', appointment.blocks.toString());
                 const [day, month, year] = appointment.date.split('.');
                 const date = `${year}-${month}-${day}`;
                 document.querySelector('[name="eDatum"]')?.setAttribute('value', date);
                 let [hours, minutes] = appointment.time.split(':');
                 minutes === '00' ? minutes = '0' : minutes = '30';
-                (document.querySelector('[name="eHours"]') as HTMLSelectElement).value = hours;
+                (document.querySelector('[name="eHours"]') as HTMLSelectElement).value = Number(hours).toString();
                 (document.querySelector('[name="eMinutes"]') as HTMLSelectElement).value = minutes;
             }
         }, 1);
@@ -275,7 +259,7 @@ const Order: React.FC = () => {
                     <SideBar isOpen={isSideBarOpen} toggleSidebar={toggleSidebar} username={username}/>
                 </Col>
                 <Col md={isSideBarOpen ? 10 : 11} className="content-column">
-                    <div className="container-fluid">
+                    <div className="container-fluid mt-2">
                         <div className="text-center">
                             <div className="d-flex flex-wrap justify-content-between align-items-center mb-4">
                                 <h1 className="mb-3 mb-md-0">Rozvrh {username}</h1>
@@ -297,20 +281,20 @@ const Order: React.FC = () => {
                                         setRoomInput('');
                                         setDoctorName(username);
                                     }}>
-                                    Add Order
+                                    Pridať novú objednávku
                                 </Button>
                             </div>
                             <Modal show={showAddModal} onHide={toggleAddModal}>
                                 <Modal.Header closeButton>
-                                    <Modal.Title>Add New Order</Modal.Title>
+                                    <Modal.Title>Pridať novú objednávku</Modal.Title>
                                 </Modal.Header>
                                 <Modal.Body>
                                     <Form>
                                         <Form.Group controlId="formDovod">
-                                            <Form.Label>Reason</Form.Label>
+                                            <Form.Label>Dôvod</Form.Label>
                                             <Form.Control
                                                 type="text"
-                                                placeholder="Enter reason for appointment"
+                                                placeholder="Zadaj dôvod objednávky"
                                                 name="dovod"
                                             />
                                         </Form.Group>
@@ -318,11 +302,11 @@ const Order: React.FC = () => {
                                             <Form.Label>Pacient</Form.Label>
                                             <Form.Control
                                                 type="text"
-                                                placeholder="Enter patient name"
+                                                placeholder="Zadať meno pacienta"
                                                 name="patient"
                                                 value={patientInput}
                                                 onChange={handlePatientInputChange}
-                                                onClick={() => setPatientSuggestions([])} // Clear suggestions on click
+                                                onClick={() => setPatientSuggestions([])}
                                             />
                                             {patientSuggestions.length > 0 && (
                                                 <ul className="suggestions-list">
@@ -330,8 +314,8 @@ const Order: React.FC = () => {
                                                         <li
                                                             key={index}
                                                             onClick={() => {
-                                                                setPatientInput(suggestion); // Set the selected input
-                                                                setPatientSuggestions([]); // Clear suggestions to close the list
+                                                                setPatientInput(suggestion);
+                                                                setPatientSuggestions([]);
                                                             }}
                                                         >
                                                             {suggestion}
@@ -344,10 +328,10 @@ const Order: React.FC = () => {
                                             <Form.Label>Lekár</Form.Label>
                                             <Form.Control
                                                 type="text"
-                                                placeholder="Enter doctor name"
+                                                placeholder="Zadať meno lekára"
                                                 name="doctor"
                                                 value={doctorName}
-                                                onChange={handleDoctorInputChange}
+                                                readOnly
                                             />
                                             {doctorSuggestions.length > 0 && (
                                                 <ul className="suggestions-list">
@@ -371,7 +355,7 @@ const Order: React.FC = () => {
                                                     <Form.Label>Miestnosť</Form.Label>
                                                     <Form.Control
                                                         type="text"
-                                                        placeholder="Enter room name"
+                                                        placeholder="Zadať miestnosť"
                                                         name="room"
                                                         value={roomInput}
                                                         onChange={handleRoomInputChange}
@@ -395,13 +379,13 @@ const Order: React.FC = () => {
                                             </Col>
                                             <Col md={6}>
                                                 <Form.Group controlId="formBlock">
-                                                    <Form.Label>Pocet blokov</Form.Label>
+                                                    <Form.Label>Počet blokov</Form.Label>
                                                     <Form.Control
                                                         type="number"
-                                                        placeholder="Enter number of blocks"
+                                                        placeholder="Zadajte počet blokov"
                                                         name="blocks"
                                                         value={blocks}
-                                                        onChange={(e) => setBlocks(Number(e.target.value))}
+                                                        onChange={(e) => setBlocks(Math.max(1, Number(e.target.value)))}
                                                     />
                                                 </Form.Group>
                                             </Col>
@@ -409,7 +393,7 @@ const Order: React.FC = () => {
                                         <Row>
                                             <Col md={6}>
                                                 <Form.Group controlId="formDatum">
-                                                    <Form.Label>Date</Form.Label>
+                                                    <Form.Label>Dátum</Form.Label>
                                                     <Form.Control
                                                         type="date"
                                                         name="datum_objednavky"
@@ -420,7 +404,7 @@ const Order: React.FC = () => {
                                                 <Row>
                                                     <Col md={6}>
                                                         <Form.Group controlId="formHours">
-                                                            <Form.Label>Hours</Form.Label>
+                                                            <Form.Label>Hodina</Form.Label>
                                                             <Form.Control
                                                                 as="select"
                                                                 name="hours">
@@ -432,7 +416,7 @@ const Order: React.FC = () => {
                                                     </Col>
                                                     <Col md={6}>
                                                         <Form.Group controlId="formMinutes">
-                                                            <Form.Label>Minutes</Form.Label>
+                                                            <Form.Label>Minúta</Form.Label>
                                                             <Form.Control
                                                                 as="select"
                                                                 name="minutes">
@@ -448,24 +432,24 @@ const Order: React.FC = () => {
                                 </Modal.Body>
                                 <Modal.Footer>
                                     <Button variant="secondary" onClick={toggleAddModal}>
-                                        Close
+                                        Zavrieť
                                     </Button>
                                     <Button variant="primary" onClick={AddOrder}>
-                                        Add Order
+                                        Pridať objednávku
                                     </Button>
                                 </Modal.Footer>
                             </Modal>
                             <Modal show={showEditModal} onHide={toggleEditModal}>
                                 <Modal.Header closeButton>
-                                    <Modal.Title>Edit Order</Modal.Title>
+                                    <Modal.Title>Editovať objednávku</Modal.Title>
                                 </Modal.Header>
                                 <Modal.Body>
                                     <Form>
                                         <Form.Group controlId="formDovod">
-                                            <Form.Label>Reason</Form.Label>
+                                            <Form.Label>Dôvod</Form.Label>
                                             <Form.Control
                                                 type="text"
-                                                placeholder="Enter reason for appointment"
+                                                placeholder="Zadaj dôvod objednávky"
                                                 name="eDovod"
                                             />
                                         </Form.Group>
@@ -473,7 +457,7 @@ const Order: React.FC = () => {
                                             <Form.Label>Pacient</Form.Label>
                                             <Form.Control
                                                 type="text"
-                                                placeholder="Enter patient name"
+                                                placeholder="Zadaj meno pacienta"
                                                 name="ePatient"
                                                 value={patientInput}
                                                 onChange={handlePatientInputChange}
@@ -500,10 +484,10 @@ const Order: React.FC = () => {
                                             <Form.Label>Lekár</Form.Label>
                                             <Form.Control
                                                 type="text"
-                                                placeholder="Enter doctor name"
+                                                placeholder="Zadať meno lekára"
                                                 name="eDoctor"
                                                 value={doctorName}
-                                                onChange={(e) => setDoctorName(e.target.value)}
+                                                readOnly
                                             />
                                             {doctorSuggestions.length > 0 && (
                                                 <ul className="suggestions-list">
@@ -511,8 +495,8 @@ const Order: React.FC = () => {
                                                         <li
                                                             key={index}
                                                             onClick={() => {
-                                                                setDoctorName(suggestion); // Set the selected input
-                                                                setDoctorSuggestions([]); // Clear suggestions to close the list
+                                                                setDoctorName(suggestion);
+                                                                setDoctorSuggestions([]);
                                                             }}
                                                         >
                                                             {suggestion}
@@ -527,7 +511,7 @@ const Order: React.FC = () => {
                                                     <Form.Label>Miestnosť</Form.Label>
                                                     <Form.Control
                                                         type="text"
-                                                        placeholder="Enter room name"
+                                                        placeholder="Zadaj miestnosť"
                                                         name="eRoom"
                                                         value={roomInput}
                                                         onChange={handleRoomInputChange}
@@ -554,8 +538,9 @@ const Order: React.FC = () => {
                                                     <Form.Label>Pocet blokov</Form.Label>
                                                     <Form.Control
                                                         type="number"
-                                                        placeholder="Enter number of blocks"
+                                                        placeholder="Zadaj počet blokov"
                                                         name="eBlocks"
+                                                        onChange={(e) => setBlocks(Math.max(1, Number(e.target.value)))}
                                                     />
                                                 </Form.Group>
                                             </Col>
@@ -563,7 +548,7 @@ const Order: React.FC = () => {
                                         <Row>
                                             <Col md={6}>
                                                 <Form.Group controlId="formDatum">
-                                                    <Form.Label>Date</Form.Label>
+                                                    <Form.Label>Dátum</Form.Label>
                                                     <Form.Control
                                                         type="date"
                                                         name="eDatum"
@@ -574,7 +559,7 @@ const Order: React.FC = () => {
                                                 <Row>
                                                     <Col md={6}>
                                                         <Form.Group controlId="formHours">
-                                                            <Form.Label>Hours</Form.Label>
+                                                            <Form.Label>Hodina</Form.Label>
                                                             <Form.Control
                                                                 as="select"
                                                                 name="eHours">
@@ -586,7 +571,7 @@ const Order: React.FC = () => {
                                                     </Col>
                                                     <Col md={6}>
                                                         <Form.Group controlId="formMinutes">
-                                                            <Form.Label>Minutes</Form.Label>
+                                                            <Form.Label>Minúta</Form.Label>
                                                             <Form.Control
                                                                 as="select"
                                                                 name="eMinutes">
@@ -602,13 +587,13 @@ const Order: React.FC = () => {
                                 </Modal.Body>
                                 <Modal.Footer className="d-flex justify-content-between">
                                     <Button variant="danger" onClick={DeleteOrder}>
-                                        Delete Order</Button>
+                                        Zmazať objednávku</Button>
                                     <div>
                                         <Button variant="secondary" onClick={toggleEditModal}>
-                                            Close
+                                            Zavrieť
                                         </Button>
                                         <Button className="ms-2" variant="primary" onClick={EditOrder}>
-                                            Edit Order
+                                            Editovať objednávku
                                         </Button>
                                     </div>
                                 </Modal.Footer>
@@ -619,7 +604,7 @@ const Order: React.FC = () => {
                             <table className="table table-bordered text-center">
                                 <thead>
                                 <tr className="bg-light-gray">
-                                    <th className="text-uppercase">Time</th>
+                                    <th className="text-uppercase">Čas</th>
                                     {days.map((day, index) => (
                                         <th key={index} className="text-uppercase">{day}</th>
                                     ))}

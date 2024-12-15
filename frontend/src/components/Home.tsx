@@ -8,35 +8,35 @@ interface Data {
 }
 
 const Home: React.FC = () => {
-    const [data, setData] = useState<Data | null>(null); // Typ stavu, buď Data alebo null
+    const [data, setData] = useState<Data | null>(null);
     const [vek, setVek] = useState<number>(0);
     useEffect(() => {
-        fetch("http://localhost:5000/data")  // URL API
+        fetch("http://localhost:5000/data")
             .then((response) => {
                 if (!response.ok) {
                     throw new Error("Network response was not ok");
                 }
                 return response.json();
             })
-            .then((data: Data) => { // Typ pre dáta, ktoré prichádzajú z API
+            .then((data: Data) => {
                 console.log(data);
-                setData(data); // Vypíše dáta do konzoly
+                setData(data);
             })
             .catch((error) => {
                 console.error("Fetch error:", error);
             });
     }, []);
     useEffect(() => {
-        fetch("http://localhost:5000/vek")  // URL API
+        fetch("http://localhost:5000/vek")
             .then((response) => {
                 if (!response.ok) {
                     throw new Error("Network response was not ok");
                 }
                 return response.json();
             })
-            .then((vek: number) => { // Typ pre dáta, ktoré prichádzajú z API
+            .then((vek: number) => {
                 console.log(vek);
-                setVek(vek); // Vypíše dáta do konzoly
+                setVek(vek);
             })
             .catch((error) => {
                 console.error("Fetch error:", error);

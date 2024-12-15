@@ -71,11 +71,10 @@ def delete_order(id):
 
 def update_order(id, reason, patient, doctor, room, blocks, date, time):
     """this updates an order"""
-    order = Objednavka.query.filter(Objednavka.id_objednavky == id).first()
+    order = Objednavka.query.filter_by(id_objednavky=id).first()
     date_time_str = f"{date} {time}"
     order.datum_objednavky = datetime.strptime(date_time_str, '%Y-%m-%d %H:%M')
     order.pacient = patient.split('-')[1][1:]
-    order.lekar = Pouzivatel.query.filter(Pouzivatel.login == doctor).first().id_zamestnanca
     order.miestnost = room
     order.pocet_blokov = blocks
     order.dovod = reason
@@ -121,7 +120,7 @@ def update_profile_picture(filename):
     return user
 
 
-def select_patient_and_doctor_data(id_poistenca):
+def select_patient_and_doctor_data(id_poistenca, id_zaznamu):
     if select_current_user():
         pacient = Pacient.query.filter_by(id_poistenca=id_poistenca).first()
     pacient_meno = pacient.get_full_name()
@@ -130,11 +129,16 @@ def select_patient_and_doctor_data(id_poistenca):
     lekar_meno = Zamestnanec.query.filter_by(
         id_zamestnanca=select_current_user().id_zamestnanca).first().get_full_name()
     lekar_id = select_current_user().id_zamestnanca
+    if id_zaznamu is None:
+        zaznam = None
+    else:
+        zaznam = ZdravotnyZaznam.query.filter_by(id_zaznamu=id_zaznamu).first()
     if pacient:
         return {
             'pacient_meno': pacient_meno, 'pacient_id': pacient_id,
             'username': lekar_login, 'lekar_id': lekar_id,
             'lekar_meno': lekar_meno,
+            'zaznam': zaznam.to_dic() if zaznam else None
         }
     return None
 
@@ -151,6 +155,18 @@ def insert_new_diagnoza(diagnoza_kod, datum_vysetrenia, pacient, popis):
     db.session.add(new_diagnoza)
     db.session.commit()
     return new_diagnoza
+
+
+def update_diagnosis(diagnoza_kod, datum_vysetrenia, pacient, popis):
+    """this updates a diagnosis"""
+    diagnoza = ZdravotnyZaznam.query.filter_by(
+        id_zaznamu=diagnoza_kod
+    ).first()
+    diagnoza.popis = popis
+    diagnoza.pacient = pacient
+    diagnoza.datum_vysetrenia = datum_vysetrenia
+    db.session.commit()
+    return diagnoza
 
 
 def select_zamestnanci():

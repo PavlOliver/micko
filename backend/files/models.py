@@ -203,10 +203,24 @@ class ZdravotnyZaznam(db.Model):
 
     def to_vysledok_vysetrenia(self):
         return {
+            'id': self.id_zaznamu,
             'datum': self.datum_vysetrenia.strftime('%Y-%m-%d'),
             'vysledok': self.popis,
             'lekar': self.lekar
         }
+
+    def to_dic(self):
+        pacient = Pacient.query.filter(Pacient.id_poistenca == self.pacient).first()
+        diagnoza = Diagnoza.query.filter(Diagnoza.kod_diagnozy == self.kod_diagnozy).first()
+        return {
+            'id': self.id_zaznamu,
+            'date': self.datum_vysetrenia.strftime('%Y-%m-%d'),
+            'patient': pacient.get_fullname_and_id(),
+            'diagnosis': diagnoza.nazov_diagnozy,
+            'doctor': self.lekar,
+            'description': self.popis
+        }
+
 
 class Miestnost(db.Model):
     """Model for the table m_miestnost

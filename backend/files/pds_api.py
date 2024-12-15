@@ -87,7 +87,7 @@ FROM (
         o.datum_objednavky BETWEEN TO_DATE(:start_date, 'YYYY-MM-DD') AND TO_DATE(:end_date, 'YYYY-MM-DD')
     GROUP BY
         z.id_zamestnanca, os.meno, os.priezvisko
-) ranked_data
+)
 WHERE doctor_rank <= 10
 ORDER BY doctor_rank
 ''')
@@ -186,9 +186,9 @@ ORDER BY
         })
     return jsonify(to_return)
 
+
 @pds_api.route('/recepty_za_mesiac_narast')
 def recepty_za_mesiac_narast():
-    # Váš SQL dotaz
     query = text('''
     SELECT
         aktualny_mesac.mesiac,
@@ -235,6 +235,7 @@ def recepty_za_mesiac_narast():
         })
 
     return jsonify(data)
+
 
 @pds_api.route('/trendy_novych_pacientov')
 def trendy_novych_pacientov():
@@ -314,14 +315,15 @@ def get_specializacie_rok():
     data = []
     for row in result:
         data.append({
-            'NAZOV_SPECIALIZACIE': row[0],  # First column is NAZOV_SPECIALIZACIE
-            'rok': row[1],  # Second column is rok
-            'pocet_zaznamov': row[2],  # Third column is pocet_zaznamov
-            'percentualny_podiel': row[3],  # Fourth column is percentualny_podiel
-            'poradove_cislo': row[4]  # Fifth column is poradove_cislo
+            'NAZOV_SPECIALIZACIE': row[0],
+            'rok': row[1],
+            'pocet_zaznamov': row[2],
+            'percentualny_podiel': row[3],
+            'poradove_cislo': row[4]
         })
 
     return jsonify(data)
+
 
 @pds_api.route('/vekove-skupiny', methods=['GET'])
 def get_age_groups():
@@ -403,20 +405,16 @@ FROM (
 ORDER BY
     vekova_skupina
     """)
-
-    # Vykonanie dopytu
     result = db.session.execute(query).fetchall()
-
     data = []
     for row in result:
         data.append({
-            'vekova_skupina': row[0],  # Prvý stĺpec je vekova_skupina
+            'vekova_skupina': row[0],
             'pocet_pacientov': row[1],
-            'percentualny_podiel': row[2], # Druhý stĺpec je pocet_pacientov
-            'poradove_cislo': row[3]  ,
+            'percentualny_podiel': row[2],
+            'poradove_cislo': row[3],
         })
 
-    # Vrátenie dát ako JSON
     return jsonify(data)
 
 
@@ -473,7 +471,6 @@ def shift_analysis_json():
     return jsonify(to_return)
 
 
-#TODO nefunguje nepouzivat !!
 @pds_api.route('/readmissions_analysis/')
 def readmissions_analysis():
     query = text('''
@@ -532,6 +529,7 @@ def readmissions_analysis():
     }
 
     return jsonify(to_return)
+
 
 @pds_api.route('/room_usage_analysis/')
 def room_usage_analysis():
@@ -639,6 +637,7 @@ def prescription_monthly_analysis():
     }
 
     return jsonify(to_return)
+
 
 @pds_api.route('/doctor_prescription_analysis/')
 def doctor_prescription_analysis():

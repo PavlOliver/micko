@@ -30,10 +30,8 @@ const Patients: React.FC = () => {
     useEffect(() => {
         axios.get('/patients')
             .then(response => {
-                console.log('Patients:', response.data);
                 setPatients(response.data.patients);
                 setUsername(response.data.username);
-                console.log('Patients25:', patients);
             })
             .catch(error => {
                 console.error('Error fetching patients', error);
@@ -92,7 +90,7 @@ const Patients: React.FC = () => {
                                 <Row>
                                     <Col md={6}>
                                         <Form.Group controlId="formName">
-                                            <Form.Label>ID_Poistenca</Form.Label>
+                                            <Form.Label>ID Poistenca</Form.Label>
                                             <FormControl type="text"
                                                          placeholder="Zadajte meno"
                                                          value={ID_Poistenca}

@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 import {PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer} from 'recharts';
-import SideBar from './SideBar'; // Predpokladám, že máš komponent SideBar
+import SideBar from './SideBar';
 import {Col, Container, Row, Table} from 'react-bootstrap';
 
 interface AgeGroupData {
@@ -14,8 +14,8 @@ interface AgeGroupData {
 const VekoveSkupiny: React.FC = () => {
     const [ageGroups, setAgeGroups] = useState<AgeGroupData[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [isSideBarOpen, setIsSideBarOpen] = useState<boolean>(false); // Stav pre bočný panel
-    const [username, setUsername] = useState<string>(''); // Používateľské meno (prípadne z tokenu alebo iného zdroja)
+    const [isSideBarOpen, setIsSideBarOpen] = useState<boolean>(false);
+    const [username, setUsername] = useState<string>('');
 
     useEffect(() => {
         const fetchAgeGroups = async () => {
@@ -35,7 +35,6 @@ const VekoveSkupiny: React.FC = () => {
 
     if (ageGroups.length === 0) return <p>Načítavam dáta...</p>;
 
-    // Príprava dát pre graf
     const chartData = ageGroups.map((item: any) => ({
         vekova_skupina: item.vekova_skupina,
         pocet_pacientov: item.pocet_pacientov,

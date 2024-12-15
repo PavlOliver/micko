@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Table, Button } from 'react-bootstrap';
+import React, {useEffect, useState} from 'react';
+import {Container, Row, Col, Card, Table, Button} from 'react-bootstrap';
 import SideBar from "./SideBar";
-import { useParams } from "react-router-dom";
+import {useParams} from "react-router-dom";
 import axios from "axios";
+import {useNavigate} from "react-router-dom";
+
 
 interface Hospitalizacia {
     datum_od: string;
@@ -25,6 +27,7 @@ interface Adresa {
 }
 
 interface VysledokVysetrenia {
+    id: number;
     datum: string;
     vysledok: string;
     lekar: string;
@@ -44,17 +47,23 @@ interface os_udaje {
 
 
 const ZdravotnaKarta: React.FC = () => {
-    const { id_poistenca } = useParams<{ id_poistenca: string }>();
+    const {id_poistenca} = useParams<{ id_poistenca: string }>();
     const [Pacient, setPacient] = useState<os_udaje | null>(null);
     const [isSideBarOpen, setIsSideBarOpen] = useState(true);
     const [username, setUsername] = useState('');
+    const navigate = useNavigate();
+
 
     const toggleSidebar = () => {
         setIsSideBarOpen(!isSideBarOpen);
     };
 
+    const handleEdit = (recordId: number) => {
+        navigate(`/pacient/${id_poistenca}/zaznam/${recordId}`);
+    }
+
     useEffect(() => {
-        axios.get(`/pacient/${id_poistenca}/zdravotna-karta`, { withCredentials: true, params: { id_poistenca } })
+        axios.get(`/pacient/${id_poistenca}/zdravotna-karta`, {withCredentials: true, params: {id_poistenca}})
             .then(response => {
                 setPacient(response.data.zdravotna_karta);
                 setUsername(response.data.username);
@@ -81,7 +90,7 @@ const ZdravotnaKarta: React.FC = () => {
         <Container fluid className="ms-2">
             <Row>
                 <Col md={isSideBarOpen ? 2 : 1} className="p-0">
-                    <SideBar isOpen={isSideBarOpen} toggleSidebar={toggleSidebar} username={username} />
+                    <SideBar isOpen={isSideBarOpen} toggleSidebar={toggleSidebar} username={username}/>
                 </Col>
                 <Col md={isSideBarOpen ? 10 : 11} className="content-column">
                     <Row>
@@ -96,7 +105,8 @@ const ZdravotnaKarta: React.FC = () => {
                                     <Card.Title>Osobné údaje</Card.Title>
                                     <p><strong>Dátum narodenia:</strong> {Pacient.datumNarodenia}</p>
                                     <p><strong>IČP:</strong> {Pacient.rodneCislo}</p>
-                                    <p><strong>Adresa:</strong> {Pacient.adresa.ulica}, {Pacient.adresa.mesto} {Pacient.adresa.psc}
+                                    <p>
+                                        <strong>Adresa:</strong> {Pacient.adresa.ulica}, {Pacient.adresa.mesto} {Pacient.adresa.psc}
                                     </p>
                                     <p><strong>Telefón:</strong> {Pacient.telefon}</p>
                                 </Card.Body>
@@ -110,26 +120,26 @@ const ZdravotnaKarta: React.FC = () => {
                                     <Card.Title>História hospitalizácií</Card.Title>
                                     <Table striped bordered hover>
                                         <thead>
-                                            <tr>
-                                                <th>Dátum od</th>
-                                                <th>Dátum do</th>
-                                                <th>Dôvod</th>
-                                                <th>Oddelenie</th>
-                                            </tr>
+                                        <tr>
+                                            <th>Dátum od</th>
+                                            <th>Dátum do</th>
+                                            <th>Dôvod</th>
+                                            <th>Oddelenie</th>
+                                        </tr>
                                         </thead>
                                         <tbody>
-                                            {Pacient.hospitalizacie?.map((hosp, index) => (
-                                                <tr key={index}>
-                                                    <td>{hosp.datum_od}</td>
-                                                    <td>{hosp.datum_do || "Neukončená"}</td>
-                                                    <td>{hosp.dovod}</td>
-                                                    <td>{hosp.miestnost}</td>
-                                                </tr>
-                                            )) || (
-                                                <tr>
-                                                    <td colSpan={4} className="text-center">Žiadne hospitalizácie</td>
-                                                </tr>
-                                            )}
+                                        {Pacient.hospitalizacie?.map((hosp, index) => (
+                                            <tr key={index}>
+                                                <td>{hosp.datum_od}</td>
+                                                <td>{hosp.datum_do || "Neukončená"}</td>
+                                                <td>{hosp.dovod}</td>
+                                                <td>{hosp.miestnost}</td>
+                                            </tr>
+                                        )) || (
+                                            <tr>
+                                                <td colSpan={4} className="text-center">Žiadne hospitalizácie</td>
+                                            </tr>
+                                        )}
                                         </tbody>
                                     </Table>
                                 </Card.Body>
@@ -137,38 +147,44 @@ const ZdravotnaKarta: React.FC = () => {
                         </Col>
                     </Row>
                     <Row>
-    <Col md={12}>
-        <Card className="mb-4">
-            <Card.Body>
-                <Card.Title>Výsledky vyšetrení</Card.Title>
-                <Table striped bordered hover>
-                    <thead>
-                        <tr>
-                            <th>Dátum</th>
-                            <th>Výsledok</th>
-                            <th>Lekár</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {Pacient.vysledkyVysetreni?.length > 0 ? (
-                            Pacient.vysledkyVysetreni.map((vysledok, index) => (
-                                <tr key={index}>
-                                    <td>{vysledok.datum}</td>
-                                    <td>{vysledok.vysledok}</td>
-                                    <td>{vysledok.lekar}</td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={3} className="text-center">Žiadne výsledky vyšetrení</td>
-                            </tr>
-                        )}
-                    </tbody>
-                </Table>
-            </Card.Body>
-        </Card>
-    </Col>
-</Row>
+                        <Col md={12}>
+                            <Card className="mb-4">
+                                <Card.Body>
+                                    <Card.Title>Výsledky vyšetrení</Card.Title>
+                                    <Table striped bordered hover>
+                                        <thead>
+                                        <tr>
+                                            <th>Dátum</th>
+                                            <th>Výsledok</th>
+                                            <th>Lekár</th>
+                                            <th>Akcie</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {Pacient.vysledkyVysetreni?.length > 0 ? (
+                                            Pacient.vysledkyVysetreni.map((vysledok, index) => (
+                                                <tr key={index}>
+                                                    <td>{vysledok.datum}</td>
+                                                    <td>{vysledok.vysledok}</td>
+                                                    <td>{vysledok.lekar}</td>
+                                                    <td>
+                                                        <Button variant="primary" className="me-2"
+                                                                onClick={() => handleEdit(vysledok.id)}>Upraviť</Button>
+                                                        <Button variant="danger">Vymazať</Button>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan={3} className="text-center">Žiadne výsledky vyšetrení</td>
+                                            </tr>
+                                        )}
+                                        </tbody>
+                                    </Table>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    </Row>
 
                     <Row>
                         <Col md={12}>
@@ -177,26 +193,26 @@ const ZdravotnaKarta: React.FC = () => {
                                     <Card.Title>Predpísané lieky</Card.Title>
                                     <Table striped bordered hover>
                                         <thead>
-                                            <tr>
-                                                <th>Názov</th>
-                                                <th>Poznámka</th>
-                                                <th>Vystavenie</th>
-                                                <th>Predpisujúci lekár</th>
-                                            </tr>
+                                        <tr>
+                                            <th>Názov</th>
+                                            <th>Poznámka</th>
+                                            <th>Vystavenie</th>
+                                            <th>Predpisujúci lekár</th>
+                                        </tr>
                                         </thead>
                                         <tbody>
-                                            {Pacient.recepty?.map((recept, index) => (
-                                                <tr key={index}>
-                                                    <td>{recept.liek}</td>
-                                                    <td>{recept.poznamka}</td>
-                                                    <td>{recept.vystavenie}</td>
-                                                    <td>{recept.lekar}</td>
-                                                </tr>
-                                            )) || (
-                                                <tr>
-                                                    <td colSpan={4} className="text-center">Žiadne predpísané lieky</td>
-                                                </tr>
-                                            )}
+                                        {Pacient.recepty?.map((recept, index) => (
+                                            <tr key={index}>
+                                                <td>{recept.liek}</td>
+                                                <td>{recept.poznamka}</td>
+                                                <td>{recept.vystavenie}</td>
+                                                <td>{recept.lekar}</td>
+                                            </tr>
+                                        )) || (
+                                            <tr>
+                                                <td colSpan={4} className="text-center">Žiadne predpísané lieky</td>
+                                            </tr>
+                                        )}
                                         </tbody>
                                     </Table>
                                 </Card.Body>

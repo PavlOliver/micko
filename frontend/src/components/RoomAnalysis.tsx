@@ -43,10 +43,9 @@ const RoomAnalysis = () => {
    const fetchData = (start: string, end: string) => {
         setLoading(true);
         axios
-            .get(`analysis/room_usage_analysis/?start_date=${start}&end_date=${end}`) // Add 'analysis/' prefix
+            .get(`analysis/room_usage_analysis/?start_date=${start}&end_date=${end}`)
             .then((response) => {
                 console.log('Response from server:', response);
-                // Parse the JSON string from response.data.room_usage
                 const roomData = JSON.parse(response.data.room_usage);
                 setData(roomData);
                 setUsername(response.data.username);

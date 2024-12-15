@@ -3,15 +3,21 @@ import SideBar from "./SideBar";
 import React, {useEffect, useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
 import axios from "axios";
+import {data} from "jquery";
+import diagnoza from "./Diagnoza";
 
 const Zaznam: React.FC = () => {
     useEffect(() => {
-        axios.get(`/pacient/${id_poistenca}/zaznam`, {withCredentials: true})
+        axios.get(`/pacient/${id_poistenca}/zaznam/${id_zaznamu}`, {withCredentials: true})
             .then(response => {
+                console.log(response.data);
                 setFormData(prevFormData => ({
                     ...prevFormData,
                     pacient: response.data.pacient_meno,
-                    lekar: response.data.lekar_meno
+                    lekar: response.data.lekar_meno,
+                    diagnoza_nazov: ((response.data.zaznam) ? response.data.zaznam.diagnosis : ''),
+                    popis: ((response.data.zaznam) ? response.data.zaznam.description : ''),
+                    datum_vysetrenia: ((response.data.zaznam) ? response.data.zaznam.date : ''),
                 }));
                 setIDs({
                     lekar_id: response.data.lekar_id,
@@ -25,7 +31,7 @@ const Zaznam: React.FC = () => {
     }, []);
 
     const {id_poistenca} = useParams<{ id_poistenca: string }>();
-
+    const {id_zaznamu} = useParams<{ id_zaznamu: string }>();
     const [IDs, setIDs] = useState({lekar_id: '', pacient_id: ''});
     const [message, setMessage] = useState('');
     const [isSideBarOpen, setIsSidebarOpen] = useState(true);
@@ -73,6 +79,27 @@ const Zaznam: React.FC = () => {
             });
     }
 
+    const handleEdit = (recordId: number) => {
+        axios.put(`/pacient/${id_poistenca}/zaznam/${recordId}`, {...formData, id: recordId}, {withCredentials: true})
+            .then(response => {
+                setMessage('Záznam bol úspešne upravený');
+                navigate(`/pacient/${id_poistenca}/zaznam`);
+            })
+            .catch(error => {
+                setErrorMessage(error.response.data.error);
+                setShowErrorModal(true);
+            });
+    }
+
+    const handleChose = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (id_zaznamu) {
+            handleEdit(parseInt(id_zaznamu));
+        } else {
+            handleSubmit(e);
+        }
+    }
+
     const handleRecordInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setFormData({...formData, diagnoza_nazov: value, diagnoza_kod: ''});
@@ -106,7 +133,7 @@ const Zaznam: React.FC = () => {
                                 right: '10px',
                                 zIndex: 1000
                             }}>{message}</Alert>}
-                            <Form onSubmit={handleSubmit}>
+                            <Form onSubmit={handleChose}>
                                 <Form.Group controlId="lekar">
                                     <Form.Label>Lekár</Form.Label>
                                     <Form.Control type="text" name="lekar" value={formData.lekar} readOnly/>
@@ -116,7 +143,7 @@ const Zaznam: React.FC = () => {
                                     <Form.Control type="text" name="pacient" value={formData.pacient} readOnly/>
                                 </Form.Group>
                                 <Form.Group controlId="diagnoza">
-                                    <Form.Label>Diagnoza</Form.Label>
+                                    <Form.Label>Diagnóza</Form.Label>
                                     <Form.Control
                                         type="text"
                                         name="liek"
@@ -136,8 +163,7 @@ const Zaznam: React.FC = () => {
                                                             diagnoza_kod: diagnosis.kod_diagnozy
                                                         });
                                                         setdiagnosisSuggestion([]);
-                                                    }}
-                                                >
+                                                    }}>
                                                     {diagnosis.nazov_diagnozy}
                                                 </li>
                                             ))}
@@ -145,7 +171,7 @@ const Zaznam: React.FC = () => {
                                     )}
                                 </Form.Group>
                                 <Form.Group controlId="popis">
-                                    <Form.Label>Popis diagnozy</Form.Label>
+                                    <Form.Label>Popis diagnózy</Form.Label>
                                     <Form.Control
                                         as="textarea"
                                         rows={2}
@@ -160,10 +186,15 @@ const Zaznam: React.FC = () => {
                                         type="date"
                                         name="datum_vysetrenia"
                                         value={formData.datum_vysetrenia}
-                                        onChange={(e) => setFormData({...formData, datum_vysetrenia: e.target.value})}
+                                        onChange={(e) => setFormData({
+                                            ...formData,
+                                            datum_vysetrenia: e.target.value
+                                        })}
                                     />
                                 </Form.Group>
-                                <Button className="mt-3" variant="primary" type="submit">Pridať zdravotný záznam</Button>
+                                <Button className="mt-3" variant="primary" type="submit">
+                                    {id_zaznamu ? 'Upraviť zdravotný záznam' : 'Pridať zdravotný záznam'}
+                                </Button>
                             </Form>
                         </Col>
                     </Row>

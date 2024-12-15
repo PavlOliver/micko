@@ -12,14 +12,12 @@ api = Blueprint('api', __name__)
 def patients_list():
     print('patients_list')
     query_filter = request.args.get('query')
-    #print(query_filter)
     patients = db.session.query(Pacient).select_from(Pacient).join(Osoba,
                                                                    Pacient.rod_cislo == Osoba.rod_cislo).filter(
         Osoba.meno.ilike(f'%{query_filter}%') |
         Osoba.priezvisko.ilike(f'%{query_filter}%') |
         Pacient.id_poistenca.ilike(f'%{query_filter}%')
     ).all()
-    #print([patient.get_fullname_and_id() for patient in patients])
     return {'patients': [patient.get_fullname_and_id() for patient in patients]}
 
 

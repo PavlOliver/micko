@@ -49,9 +49,9 @@ def orders():
         new_order = insert_new_order(request.json['reason'], request.json['patient'], request.json['doctor'],
                                      request.json['room'],
                                      request.json['blocks'], request.json['date'], request.json['time'])
-        return jsonify({'last_order': new_order.to_dic()})
+        return jsonify({'last_order': new_order.to_dic()}) if new_order.datum_objednavky.isocalendar().week == datetime.now().isocalendar().week else jsonify(
+            {'message': 'Order created'})
     elif request.method == 'PUT':
-        print(request.json)
         edited_order = update_order(request.json['id'], request.json['reason'], request.json['patient'],
                                     request.json['doctor'],
                                     request.json['room'],
@@ -79,7 +79,6 @@ def profile():
         if select_current_user():
             return jsonify({
                 'username': select_current_user().login
-                # 'picture': select_current_user().get_profile_picture()
             })
         return jsonify({'error': 'User not found'})
     else:
@@ -165,9 +164,6 @@ def user_management():
                 Osoba,
                 Zamestnanec.rod_cislo == Osoba.rod_cislo
             ).all()
-
-            # print("Debug - Users:", users) # Debug print
-
             return jsonify({
                 'users': [{
                     'id': u.id_zamestnanca.strip(),
@@ -179,7 +175,7 @@ def user_management():
             })
 
         except Exception as e:
-            print("Database error:", str(e))  # Debug
+            print("Database error:", str(e))
             return jsonify({'error': str(e)}), 500
 
 
@@ -211,8 +207,6 @@ def search_patients():
             query = query.join(Osoba).filter(Osoba.adresa.ilike(f'%{adresa}%'))
 
         patients = query.all()
-
-        # Filter by age after fetching
         if vek:
             vek = int(vek)
             patients = [
@@ -236,6 +230,7 @@ def extract_age_from_date_of_birth(date_of_birth):
         age -= 1
     return age
 
+
 def extract_date_of_birth(rodne_cislo):
     rc_part = rodne_cislo[:6]
     year = int(rc_part[:2])
@@ -257,16 +252,13 @@ def get_zdravotna_karta(id_poistenca):
     if not current_user_log or current_user_log.rola != 'A' and current_user_log.rola != 'L':
         return jsonify({'error': 'Unauthorized access'}), 403
     try:
-        print("Received parameters: ID_Poistenca=", id_poistenca)
         pacient = Pacient.query.filter_by(id_poistenca=id_poistenca).first()
-        print('meno:', pacient.to_dic()['meno'])
         osoba = Osoba.query.filter_by(rod_cislo=pacient.rod_cislo).first()
         hosp = Hospitalizacia.query.filter_by(pacient=id_poistenca).all()
         hospitalizacie = [h.to_dic2() for h in hosp]
         rec = Recept.query.filter_by(pacient=id_poistenca).all()
         zdrav_zaznamy = ZdravotnyZaznam.query.filter_by(pacient=id_poistenca).all()
         zdrav_zaznamy = [z.to_vysledok_vysetrenia() for z in zdrav_zaznamy]
-        print('recept ', rec)
         rec = [r.zaznam() for r in rec]
         print(hospitalizacie)
         print('meno:', osoba.to_dic())
@@ -281,9 +273,6 @@ def get_zdravotna_karta(id_poistenca):
                 'rodneCislo': pacient.to_dic()['id_poistenca'],
                 'adresa': osoba.to_dic()['adresa'],
                 'telefon': osoba.to_dic()['tel_cislo'],
-                # 'krvnaSkupina': pacient.krvna_skupina,
-                # 'alergie': pacient.alergie,
-                # 'diagnozy': pacient.diagnozy,
                 'hospitalizacie': hospitalizacie,
                 'vysledkyVysetreni': zdrav_zaznamy,
                 'recepty': rec
@@ -296,16 +285,21 @@ def get_zdravotna_karta(id_poistenca):
         return jsonify({'error': 'An internal error occurred'}), 500
 
 
-@views.route('/pacient/<id_poistenca>/zaznam', methods=['GET', 'POST'])
+@views.route('/pacient/<id_poistenca>/zaznam', defaults={'id_zaznamu': None}, methods=['GET', 'POST'])
+@views.route('/pacient/<id_poistenca>/zaznam/<id_zaznamu>', methods=['GET', 'POST', 'PUT'])
 @login_required
-def add_diagnoza(id_poistenca):
+def add_diagnoza(id_poistenca, id_zaznamu):
     if request.method == 'GET':
-        to_return = select_patient_and_doctor_data(id_poistenca)
+        print(id_poistenca, id_zaznamu)
+        id_zaznamu = id_zaznamu if id_zaznamu != 'undefined' else None
+        if id_zaznamu:
+            to_return = select_patient_and_doctor_data(id_poistenca, id_zaznamu)
+        else:
+            to_return = select_patient_and_doctor_data(id_poistenca, None)
         if to_return:
             return jsonify(to_return)
         return jsonify({'error': 'Patient not found'})
     elif request.method == 'POST':
-        print(request.json)
         try:
             new_diagnoza = insert_new_diagnoza(
                 diagnoza_kod=request.json['diagnoza_kod'],
@@ -315,17 +309,41 @@ def add_diagnoza(id_poistenca):
             return jsonify({'message': 'Diagnosis created'}), 201
         except Exception as e:
             return jsonify({'error': str(e)}), 500
+    elif request.method == 'PUT':
+        try:
+            updated_diagnoza = update_diagnosis(
+                diagnoza_kod=request.json['id'],
+                datum_vysetrenia=datetime.strptime(request.json['datum_vysetrenia'], '%Y-%m-%d'),
+                pacient=id_poistenca,
+                popis=request.json['popis'])
+            return jsonify({'message': 'Diagnosis updated'}), 200
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+
+# @views.route('/pacient/<id_poistenca>/zaznam/<id_zaznamu>', methods=['GET'])
+# @login_required
+# def get_zaznam(id_poistenca, id_zaznamu):
+#     try:
+#         zaznam = ZdravotnyZaznam.query.filter_by(id_zaznamu=id_zaznamu).first()
+#         if zaznam:
+#             return jsonify(zaznam.to_dic())
+#         return jsonify({'error': 'Record not found'})
+#     except Exception as e:
+#         print("Error:", str(e))
+#         return jsonify({'error': 'An internal error occurred'}), 500
+
 
 @views.route('/staff', methods=['GET'])
 @login_required
 def get_zamestnanci():
     try:
-        print("Fetching employees...")  # Debug log
+        print("Fetching employees...")
         zamestnanci = select_zamestnanci()
-        print(f"Found {len(zamestnanci)} employees")  # Debug log
+        print(f"Found {len(zamestnanci)} employees")
         return jsonify({'zamestnanci': zamestnanci})
     except Exception as e:
-        print("Error in get_zamestnanci:", str(e))  # Detailed error
+        print("Error in get_zamestnanci:", str(e))
         return jsonify({'error': str(e)}), 500
 
 @views.route('/room_list', methods=['GET'])
