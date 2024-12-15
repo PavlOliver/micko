@@ -108,3 +108,65 @@ def employees_not_users():
     except Exception as e:
         print("Error executing query:", str(e))
         return jsonify({'error': 'Failed to load employees'}), 500
+
+@api.route('/add-employee', methods=['POST'])
+@login_required
+def add_employee():
+    current_user = select_current_user()
+    if not current_user or current_user.rola != 'A':
+        return jsonify({'error': 'Nepovolený prístup'}), 403
+
+    data = request.json
+    try:
+        rodne_cislo = data.get('rodne_cislo')
+        meno = data.get('meno')
+        priezvisko = data.get('priezvisko')
+        id_zamestnanca = data.get('id_zamestnanca')
+        id_specializacie = data.get('id_specializacie')
+
+        existing_osoba = Osoba.query.filter_by(rod_cislo=rodne_cislo).first()
+        if existing_osoba:
+            return jsonify({'error': 'Osoba s daným rodným číslom už existuje'}), 400
+
+        new_osoba = Osoba(
+            rod_cislo=rodne_cislo,
+            meno=meno,
+            priezvisko=priezvisko,
+            adresa='null'
+        )
+        db.session.add(new_osoba)
+
+        existing_zamestnanec = Zamestnanec.query.filter_by(id_zamestnanca=id_zamestnanca).first()
+        if existing_zamestnanec:
+            return jsonify({'error': 'Zamestnanec s daným ID už existuje'}), 400
+
+        new_zamestnanec = Zamestnanec(
+            id_zamestnanca=id_zamestnanca,
+            rod_cislo=rodne_cislo,
+            specializacia=id_specializacie
+        )
+        db.session.add(new_zamestnanec)
+
+        db.session.commit()
+
+        return jsonify({'message': 'Nový zamestnanec bol úspešne pridaný'}), 201
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error adding new employee:", str(e))
+        return jsonify({'error': 'Pridanie nového zamestnanca zlyhalo'}), 500
+
+@api.route('/specializations', methods=['GET'])
+@login_required
+def get_specializations():
+    try:
+        specializations = Specializacia.query.all()
+        return jsonify({
+            'specializations': [
+                {'kod': spec.kod_specializacie, 'nazov': spec.nazov_specializacie}
+                for spec in specializations
+            ]
+        })
+    except Exception as e:
+        print("Error fetching specializations:", str(e))
+        return jsonify({'error': 'Nepodarilo sa načítať špecializácie'}), 500
