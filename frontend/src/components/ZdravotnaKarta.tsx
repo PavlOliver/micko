@@ -1,10 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import {Container, Row, Col, Card, Table, Button} from 'react-bootstrap';
+import {Container, Row, Col, Card, Table, Button, Modal, Form} from 'react-bootstrap';
 import SideBar from "./SideBar";
 import {useParams} from "react-router-dom";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
-
 
 interface Hospitalizacia {
     datum_od: string;
@@ -53,18 +52,22 @@ interface alergia {
     nazov_alergie: string;
 }
 
-
 const ZdravotnaKarta: React.FC = () => {
     const {id_poistenca} = useParams<{ id_poistenca: string }>();
     const [Pacient, setPacient] = useState<os_udaje | null>(null);
     const [isSideBarOpen, setIsSideBarOpen] = useState(true);
     const [username, setUsername] = useState('');
     const [alergie, setAlergie] = useState<alergia[]>([]);
-
-
     const navigate = useNavigate();
+    const [showEditModal, setShowEditModal] = useState(false);
 
-
+    const [formData, setFormData] = useState({
+        krvnaSkupina: '',
+        telefon: '',
+        psc: '',
+        mesto: '',
+        ulica: ''
+    });
     const toggleSidebar = () => {
         setIsSideBarOpen(!isSideBarOpen);
     };
@@ -73,6 +76,28 @@ const ZdravotnaKarta: React.FC = () => {
         navigate(`/pacient/${id_poistenca}/zaznam/${recordId}`);
     }
 
+    const handleShowEditModal = () => {
+        setFormData({
+            krvnaSkupina: Pacient?.krvna_skupina || '',
+            telefon: Pacient?.telefon || '',
+            psc: Pacient?.adresa.psc || '',
+            mesto: Pacient?.adresa.mesto || '',
+            ulica: Pacient?.adresa.ulica || ''
+        });
+        setShowEditModal(true);
+    };
+    const handleCloseEditModal = () => setShowEditModal(false);
+
+    const handleSaveChanges = () => {
+        axios.post(`/pacient/${id_poistenca}/zmenaUdajov`, formData, {withCredentials: true})
+            .then(response => {
+                setPacient(response.data.zdravotna_karta);
+                setShowEditModal(false);
+            })
+            .catch(error => {
+                console.error('Error updating patient data:', error);
+            });
+    };
     useEffect(() => {
         axios.get(`/pacient/${id_poistenca}/zdravotna-karta`, {withCredentials: true, params: {id_poistenca}})
             .then(response => {
@@ -108,8 +133,12 @@ const ZdravotnaKarta: React.FC = () => {
                 <Col md={isSideBarOpen ? 10 : 11} className="content-column">
                     <Row>
                         <Col md={12}>
-                            <h2 className="mt-2">Zdravotná karta: {Pacient.meno} {Pacient.priezvisko}</h2>
-
+                            <div className="d-flex align-items-center mt-2">
+                                <h2 className="">Zdravotná karta: {Pacient.meno} {Pacient.priezvisko}</h2>
+                                <Button variant="primary" className="mb-4 ms-auto me-1 mt-3"
+                                        onClick={handleShowEditModal}
+                                >Upraviť</Button>
+                            </div>
                         </Col>
                     </Row>
                     <Row>
@@ -248,13 +277,48 @@ const ZdravotnaKarta: React.FC = () => {
                         </Col>
                     </Row>
                     <Row>
-                        <Col className="d-flex justify-content-end">
-                            <Button variant="primary" className="me-2">Upraviť</Button>
-                            <Button variant="danger">Vymazať kartu</Button>
-                        </Col>
+
                     </Row>
                 </Col>
             </Row>
+            <Modal show={showEditModal} onHide={handleCloseEditModal}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Upraviť údaje</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group controlId="formKrvnaSkupina">
+                            <Form.Label>Krvná skupina</Form.Label>
+                            <Form.Control type="text" value={formData.krvnaSkupina}
+                                          onChange={e => setFormData({...formData, krvnaSkupina: e.target.value})}/>
+                        </Form.Group>
+                        <Form.Group controlId="formTelefon">
+                            <Form.Label>Telefón</Form.Label>
+                            <Form.Control type="text" value={formData.telefon}
+                                          onChange={e => setFormData({...formData, telefon: e.target.value})}/>
+                        </Form.Group>
+                        <Form.Group controlId="formUlica">
+                            <Form.Label>Ulica</Form.Label>
+                            <Form.Control type="text" value={formData.ulica}
+                                          onChange={e => setFormData({...formData, ulica: e.target.value})}/>
+                        </Form.Group>
+                        <Form.Group controlId="formMesto">
+                            <Form.Label>Mesto</Form.Label>
+                            <Form.Control type="text" value={formData.mesto}
+                                          onChange={e => setFormData({...formData, mesto: e.target.value})}/>
+                        </Form.Group>
+                        <Form.Group controlId="formPsc">
+                            <Form.Label>PSC</Form.Label>
+                            <Form.Control type="text" value={formData.psc}
+                                          onChange={e => setFormData({...formData, psc: e.target.value})}/>
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseEditModal}>Zrušiť</Button>
+                    <Button variant="primary" onClick={handleSaveChanges}>Uložiť zmeny</Button>
+                </Modal.Footer>
+            </Modal>
         </Container>
     );
 };

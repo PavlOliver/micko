@@ -1,6 +1,10 @@
+import json
 from datetime import datetime
 
+from eventlet.green.os import os_orig
 from flask_login import current_user
+from pytz import common_timezones
+
 from . import db
 from .models import Objednavka, Pouzivatel, Pacient, Recept, Hospitalizacia, Zamestnanec, ZdravotnyZaznam, Miestnost
 from .models import Objednavka, Pouzivatel, Pacient, Recept, Hospitalizacia, Zamestnanec, Osoba, Specializacia
@@ -227,3 +231,14 @@ def insert_new_hospitalizacia(datum_od, datum_do, pacient, lekar, miestnost, dov
     db.session.add(new_hospitalizacia)
     db.session.commit()
     return new_hospitalizacia
+
+def update_patient_info_in_database(id_poistenca, updated_data):
+    print('daco')
+    pacient = Pacient.query.filter_by(id_poistenca=id_poistenca).first()
+    rodnecislo = pacient.rod_cislo
+    print(rodnecislo)
+    osoba = Osoba.query.filter_by(rod_cislo=rodnecislo).first()
+    osoba.tel_cislo = updated_data['telefon']
+    db.session.commit()
+
+    pass

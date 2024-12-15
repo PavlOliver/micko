@@ -50,7 +50,7 @@ def orders():
                                      request.json['room'],
                                      request.json['blocks'], request.json['date'], request.json['time'])
         return jsonify({
-                           'last_order': new_order.to_dic()}) if new_order.datum_objednavky.isocalendar().week == datetime.now().isocalendar().week else jsonify(
+            'last_order': new_order.to_dic()}) if new_order.datum_objednavky.isocalendar().week == datetime.now().isocalendar().week else jsonify(
             {'message': 'Order created'})
     elif request.method == 'PUT':
         edited_order = update_order(request.json['id'], request.json['reason'], request.json['patient'],
@@ -316,6 +316,7 @@ def add_diagnoza(id_poistenca, id_zaznamu):
         except Exception as e:
             return jsonify({'error': str(e)}), 500
 
+
 @views.route('/user-management/<login>', methods=['PUT', 'DELETE'])
 @login_required
 def manage_user(login):
@@ -354,6 +355,7 @@ def manage_user(login):
         except Exception as e:
             print("Error deleting user:", str(e))
             return jsonify({'error': 'Failed to delete user'}), 500
+
 
 # @views.route('/pacient/<id_poistenca>/zaznam/<id_zaznamu>', methods=['GET'])
 # @login_required
@@ -422,3 +424,24 @@ def get_hospitalizacia(id_poistenca):
         except Exception as e:
             return jsonify({'error': str(e)}), 500
     return jsonify({'error': 'Invalid request method'})
+
+
+@views.route('/pacient/<id_poistenca>/zmenaUdajov', methods=['POST'])
+@login_required
+def update_patient_info(id_poistenca):
+    try:
+        updated_data = request.get_json()
+        print(f"Received updated data: {updated_data}")
+        print(id_poistenca)
+
+        update_patient_info_in_database(id_poistenca, updated_data)
+
+       # updated_patient = update_patient_in_database(id_poistenca, updated_data)
+
+        #if updated_patient:
+         #   return jsonify({'zdravotna_karta': updated_patient}), 200
+        #else:
+        return jsonify({'error': 'Patient not found'}), 404
+    except Exception as e:
+        print(f'Error updating patient data: {e}')
+        return jsonify({'error': 'Internal server error'}), 500
