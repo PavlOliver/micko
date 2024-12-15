@@ -2,7 +2,7 @@ import os
 from datetime import timedelta
 from io import BytesIO
 
-from dns.e164 import query
+
 from flask import Blueprint, jsonify, request, send_file, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_required
@@ -151,32 +151,29 @@ def user_management():
     elif request.method == 'GET':
         try:
             users = db.session.query(
-                Pouzivatel.id_zamestnanca,
                 Pouzivatel.login,
-                Pouzivatel.rola,
+                Pouzivatel.id_zamestnanca,
                 Osoba.meno,
                 Osoba.priezvisko,
-                Osoba.rod_cislo
+                Pouzivatel.rola
             ).join(
-                Zamestnanec,
-                Pouzivatel.id_zamestnanca == Zamestnanec.id_zamestnanca
+                Zamestnanec, Pouzivatel.id_zamestnanca == Zamestnanec.id_zamestnanca
             ).join(
-                Osoba,
-                Zamestnanec.rod_cislo == Osoba.rod_cislo
+                Osoba, Zamestnanec.rod_cislo == Osoba.rod_cislo
             ).all()
-            return jsonify({
-                'users': [{
-                    'id': u.id_zamestnanca.strip(),
-                    'login': u.login,
-                    'rola': u.rola,
-                    'meno': u.meno,
-                    'priezvisko': u.priezvisko
-                } for u in users]
-            })
 
+            user_list = [{
+                'login': user.login,
+                'id_zamestnanca': user.id_zamestnanca,
+                'meno': user.meno,
+                'priezvisko': user.priezvisko,
+                'rola': user.rola
+            } for user in users]
+
+            return jsonify({'users': user_list})
         except Exception as e:
-            print("Database error:", str(e))
-            return jsonify({'error': str(e)}), 500
+            print("Error fetching users:", str(e))
+            return jsonify({'error': 'Failed to load users'}), 500
 
 
 @views.route('/patients', methods=['GET'])
