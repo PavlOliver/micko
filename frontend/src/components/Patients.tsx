@@ -85,14 +85,14 @@ const Patients: React.FC = () => {
                         <SideBar isOpen={isSideBarOpen} toggleSidebar={toggleSidebar} username={username}/>
                     </Col>
                     <Col md={isSideBarOpen ? 10 : 11} className="content-column">
-                        <Row className="mb-4">
+                        <Row className="my-2">
                             <Form>
                                 <Row>
                                     <Col md={6}>
                                         <Form.Group controlId="formName">
                                             <Form.Label>ID Poistenca</Form.Label>
                                             <FormControl type="text"
-                                                         placeholder="Zadajte meno"
+                                                         placeholder="Zadajte cislo poistenca"
                                                          value={ID_Poistenca}
                                                          onChange={(e) => setID_Poistenca(e.target.value)}/>
                                         </Form.Group>
@@ -138,7 +138,7 @@ const Patients: React.FC = () => {
                                     </Col>
                                 </Row>
                                 <Button variant="primary" type="button" className="mt-3" onClick={handleSearch}>
-                                    Odoslať
+                                    Vyhľadať
                                 </Button>
                             </Form>
                         </Row>

@@ -6,6 +6,7 @@ from flask import Blueprint, jsonify, request, send_file, url_for
 
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_required
+from .models import Liek, SkladLiekov
 
 from .queries import *
 
@@ -188,6 +189,14 @@ def patients():
 @views.route('/search_patients', methods=['GET'])
 @login_required
 def search_patients():
+    def to_dict(row):
+        return {
+            'id_poistenca': row[0],
+            'rodne_cislo': row[1],
+            'meno': row[2],
+            'priezvisko': row[3],
+        }
+
     try:
         ID_Poistenca = request.args.get('ID_Poistenca')
         rodne_cislo = request.args.get('rodne_cislo')
@@ -200,11 +209,19 @@ def search_patients():
         if ID_Poistenca:
             query = query.filter(Pacient.id_poistenca.ilike(f'%{ID_Poistenca}%'))
         if rodne_cislo:
-            query = query.filter(Pacient.rod_cislo.ilike(f'%{rodne_cislo}%'))
+            query = query.filter_by(rod_cislo=rodne_cislo)
         if adresa:
-            query = query.join(Osoba).filter(Osoba.adresa.ilike(f'%{adresa}%'))
+            from sqlalchemy import text
+            query = text(
+                '''select ID_POISTENCA,ROD_CISLO, MENO, PRIEZVISKO  from PAVLANIN2.M_PACIENT join PAVLANIN2.M_OSOBA o using(rod_cislo)
+                 where o.adresa.ulica like :adr or o.adresa.mesto like :adr or o.adresa.psc like :adr
+                 fetch first 100 rows only''')
+            query = query.bindparams(adr=f'%{adresa}%')
+            result = db.session.execute(query).fetchall()
+            print(to_dict(result[0]))
+            return jsonify({'patients': [to_dict(row) for row in result]})
 
-        patients = query.all()
+        patients = query.limit(100).all()
         if vek:
             vek = int(vek)
             patients = [
@@ -424,6 +441,48 @@ def get_hospitalizacia(id_poistenca):
         except Exception as e:
             return jsonify({'error': str(e)}), 500
     return jsonify({'error': 'Invalid request method'})
+
+
+@views.route('/sklad-liekov', methods=['GET', 'POST'])
+@login_required
+def sklad_liekov():
+    if request.method == 'GET':
+        try:
+            print("Fetching inventory from database...")
+            inventory = db.session.query(
+                SkladLiekov.sarza,
+                Liek.nazov.label('nazov'),
+                SkladLiekov.pocet,
+                SkladLiekov.datum_dodania,
+                SkladLiekov.expiracia,
+                SkladLiekov.pohyb
+            ).join(
+                Liek, SkladLiekov.liek == Liek.kod
+            ).all()
+            print(f"Number of inventory items fetched: {len(inventory)}")
+
+            inventory_list = [{
+                'sarza': item.sarza,
+                'nazov': item.nazov,
+                'pocet': item.pocet,
+                'datum_dodania': item.datum_dodania.strftime('%Y-%m-%d'),
+                'expiracia': item.expiracia.strftime('%Y-%m-%d'),
+                'pohyb': item.pohyb
+            } for item in inventory]
+
+            if not inventory_list:
+                print("Sklad je prázdny.")
+
+            return jsonify({
+                'username': select_current_user().login,
+                'inventory': inventory_list
+            })
+        except Exception as e:
+            print("Error fetching inventory:", str(e))
+            return jsonify({'error': 'Failed to load inventory'}), 500
+
+
+
 
 
 @views.route('/pacient/<id_poistenca>/zmenaUdajov', methods=['POST'])

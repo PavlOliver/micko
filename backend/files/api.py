@@ -93,16 +93,12 @@ def employees_not_users():
             ~Zamestnanec.id_zamestnanca.in_(subquery)
         ).all()
 
-        print("Query executed successfully. Number of employees found:", len(employees))
-
         employee_list = [{
             'id_zamestnanca': emp.id_zamestnanca,
             'meno': emp.meno,
             'priezvisko': emp.priezvisko,
             'specializacia': emp.nazov_specializacie
         } for emp in employees]
-
-        print("Employee list prepared:", employee_list)
 
         return jsonify({'employees': employee_list})
     except Exception as e:
@@ -128,13 +124,11 @@ def add_employee():
         if existing_osoba:
             return jsonify({'error': 'Osoba s daným rodným číslom už existuje'}), 400
 
-        new_osoba = Osoba(
-            rod_cislo=rodne_cislo,
-            meno=meno,
-            priezvisko=priezvisko,
-            adresa='null'
-        )
-        db.session.add(new_osoba)
+        from sqlalchemy import text
+        db.session.execute(text(
+            f"INSERT INTO m_osoba (rod_cislo, meno, priezvisko) VALUES ('{rodne_cislo}', '{meno}', '{priezvisko}')"
+        ))
+        db.session.commit()
 
         existing_zamestnanec = Zamestnanec.query.filter_by(id_zamestnanca=id_zamestnanca).first()
         if existing_zamestnanec:

@@ -33,6 +33,22 @@ const Zamestnanci: React.FC = () => {
         id_specializacie: ''
     });
     const [message, setMessage] = useState<string>('');
+    const [formError, setFormError] = useState<string | null>(null);
+
+    // Funkcia na načítanie zamestnancov
+    const fetchZamestnanci = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get('/staff', { withCredentials: true });
+            console.log('Response:', response.data);
+            setZamestnanci(response.data.zamestnanci);
+        } catch (err) {
+            console.error('Fetch error:', err);
+            setError('Nepodarilo sa načítať zamestnancov');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         axios.get('/home', { withCredentials: true })
@@ -59,26 +75,13 @@ const Zamestnanci: React.FC = () => {
                 console.error('Error fetching specializations:', error);
             });
 
-        const fetchZamestnanci = async () => {
-            try {
-                const response = await axios.get('/staff', { withCredentials: true });
-                console.log('Response:', response.data);
-                setZamestnanci(response.data.zamestnanci);
-            } catch (err) {
-                console.error('Fetch error:', err);
-                setError('Failed to load employees');
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchZamestnanci();
     }, []);
 
     useEffect(() => {
         if (zamestnanci.length > 0) {
-            const specializacie = [...new Set(zamestnanci.map(z => z.specializacia))];
-            setUniqueSpecializacie(specializacie);
+            const specializacieSet = new Set(zamestnanci.map(z => z.specializacia));
+            setUniqueSpecializacie(Array.from(specializacieSet));
         }
     }, [zamestnanci]);
 
@@ -98,20 +101,9 @@ const Zamestnanci: React.FC = () => {
     });
 
     const handleShowModal = () => setShowModal(true);
-    const handleCloseModal = () => setShowModal(false);
-
-    const fetchZamestnanci = async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get('/staff', { withCredentials: true });
-            console.log('Response:', response.data);
-            setZamestnanci(response.data.zamestnanci);
-        } catch (err) {
-            console.error('Fetch error:', err);
-            setError('Nepodarilo sa načítať zamestnancov');
-        } finally {
-            setLoading(false);
-        }
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setFormError(null);
     };
 
     const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -130,7 +122,7 @@ const Zamestnanci: React.FC = () => {
                 fetchZamestnanci();
             })
             .catch(error => {
-                setError('Pridanie nového zamestnanca zlyhalo.');
+                setFormError('Pridanie nového zamestnanca zlyhalo.');
                 console.error('Error adding new employee:', error);
             });
     };
@@ -138,23 +130,24 @@ const Zamestnanci: React.FC = () => {
     return (
         <Container fluid>
             <Row>
-                <Col md={3} className="p-0">
-                    <SideBar
-                        isOpen={isSideBarOpen}
-                        toggleSidebar={toggleSidebar}
-                        username={username}
-                    />
+                <Col md={isSideBarOpen ? 2 : 1} className="p-0">
+                    <SideBar isOpen={isSideBarOpen} toggleSidebar={toggleSidebar} username={username}/>
                 </Col>
-                <Col md={9} className="p-4" style={{
-                    marginLeft: isSideBarOpen ? '250px' : '60px',
-                    transition: 'margin-left 0.3s'
-                }}>
-                    <h2>Zamestnanci nemocnice</h2>
-                    {userRole === 'A' && (
-                        <Button variant="primary" onClick={handleShowModal}>
-                            + Pridať zamestnanca
-                        </Button>
-                    )}
+
+                <Col md={isSideBarOpen ? 10 : 11} className="p-4">
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                        <h2>Zamestnanci nemocnice</h2>
+                        {userRole === 'A' && (
+                            <Button variant="primary" onClick={handleShowModal}>
+                                Pridať zamestnanca
+                            </Button>
+                        )}
+                    </div>
+
+                    {message && <Alert variant="success" className="mt-3">{message}</Alert>}
+                    {formError && <Alert variant="danger" className="mt-3">{formError}</Alert>}
+                    {error && <Alert variant="danger" className="mt-3">{error}</Alert>}
+
                     <div className="mb-4 row">
                         <div className="col-md-6 mb-3">
                             <input
@@ -181,34 +174,41 @@ const Zamestnanci: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="row g-4">
-                        {filteredZamestnanci.map((zamestnanec) => (
-                            <div key={zamestnanec.id} className="col-12 col-md-6 col-lg-4">
-                                <div className="card h-100 shadow-sm">
-                                    <div className="card-body">
-                                        <h5 className="card-title">
-                                            {zamestnanec.meno} {zamestnanec.priezvisko}
-                                        </h5>
-                                        <h6 className="card-subtitle mb-2 text-muted">
-                                            {zamestnanec.specializacia}
-                                        </h6>
-                                        {zamestnanec.popis_specializacie && (
-                                            <p className="card-text">
-                                                {zamestnanec.popis_specializacie}
-                                            </p>
-                                        )}
+                    {loading ? (
+                        <p>Načítava sa zoznam zamestnancov...</p>
+                    ) : (
+                        <div className="row g-4">
+                            {filteredZamestnanci.map((zamestnanec) => (
+                                <div key={zamestnanec.id} className="col-12 col-md-6 col-lg-4">
+                                    <div className="card h-100 shadow-sm">
+                                        <div className="card-body">
+                                            <h5 className="card-title">
+                                                {zamestnanec.meno} {zamestnanec.priezvisko}
+                                            </h5>
+                                            <h6 className="card-subtitle mb-2 text-muted">
+                                                {zamestnanec.specializacia}
+                                            </h6>
+                                            {zamestnanec.popis_specializacie && (
+                                                <p className="card-text">
+                                                    {zamestnanec.popis_specializacie}
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
                 </Col>
             </Row>
+
+            {/* Modal pre pridanie nového zamestnanca */}
             <Modal show={showModal} onHide={handleCloseModal}>
                 <Modal.Header closeButton>
                     <Modal.Title>Pridať nového zamestnanca</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
+                    {formError && <Alert variant="danger">{formError}</Alert>}
                     <Form onSubmit={handleFormSubmit}>
                         <Form.Group controlId="formRodneCislo">
                             <Form.Label>Rodné číslo</Form.Label>
@@ -273,6 +273,7 @@ const Zamestnanci: React.FC = () => {
             </Modal>
         </Container>
     );
+
 };
 
 export default Zamestnanci;

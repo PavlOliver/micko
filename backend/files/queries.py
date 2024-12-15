@@ -146,6 +146,7 @@ def select_patient_and_doctor_data(id_poistenca, id_zaznamu):
         }
     return None
 
+
 def select_patient_and_doctor_data2(id_poistenca):
     if select_current_user():
         pacient = Pacient.query.filter_by(id_poistenca=id_poistenca).first()
@@ -162,6 +163,7 @@ def select_patient_and_doctor_data2(id_poistenca):
             'lekar_meno': lekar_meno,
         }
     return None
+
 
 def insert_new_diagnoza(diagnoza_kod, datum_vysetrenia, pacient, popis):
     """this creates a new diagnosis"""
@@ -211,6 +213,7 @@ def select_zamestnanci():
         'popis_specializacie': specializacia.popis
     } for zamestnanec, osoba, specializacia in zamestnanci]
 
+
 def select_rooms(query):
     """this returns all rooms"""
     rooms = Miestnost.query.filter(
@@ -218,6 +221,7 @@ def select_rooms(query):
         Miestnost.typ.ilike(f'%{query}%')
     ).all()
     return [room.to_dic() for room in rooms]
+
 
 def insert_new_hospitalizacia(datum_od, datum_do, pacient, lekar, miestnost, dovod):
     new_hospitalizacia = Hospitalizacia(
@@ -242,3 +246,4 @@ def update_patient_info_in_database(id_poistenca, updated_data):
     db.session.commit()
 
     pass
+

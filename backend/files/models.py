@@ -202,7 +202,6 @@ class Pacient(db.Model):
         return None
 
 
-
 class Specializacia(db.Model):
     __tablename__ = 'm_specializacia'
 
