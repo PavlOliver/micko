@@ -54,8 +54,7 @@ const Home: React.FC = () => {
                                 <Card className="mb-3 shadow-sm">
                                     <Card.Body>
                                         <Card.Title>Pacienti</Card.Title>
-                                        <Card.Text>Spravujte údaje o pacientoch, vrátane ich anamnézy, diagnóz a
-                                            kontaktov.</Card.Text>
+                                        <Card.Text>Spravujte údaje o pacientoch, vrátane ich anamnézy, diagnóz a kontaktov.</Card.Text>
                                         <Button variant="primary" href="/patients">Prejsť na pacientov</Button>
                                     </Card.Body>
                                 </Card>
@@ -64,20 +63,17 @@ const Home: React.FC = () => {
                                 <Card className="mb-3 shadow-sm">
                                     <Card.Body>
                                         <Card.Title>Hospitalizácie</Card.Title>
-                                        <Card.Text>Prehľad hospitalizácií, aktuálny stav pacientov a záznamy o
-                                            liečbe.</Card.Text>
-                                        <Button variant="primary" href="/hospitalizations">Prejsť na
-                                            hospitalizácie</Button>
+                                        <Card.Text>Prehľad hospitalizácií, aktuálny stav pacientov a záznamy o liečbe.</Card.Text>
+                                        <Button variant="primary" href="/hospitalizations">Prejsť na hospitalizácie</Button>
                                     </Card.Body>
                                 </Card>
                             </Col>
                             <Col md={4}>
                                 <Card className="mb-3 shadow-sm">
                                     <Card.Body>
-                                        <Card.Title>Vyšetrenia</Card.Title>
-                                        <Card.Text>Plánujte a sledujte vyšetrenia pacientov, vrátane objednávok a
-                                            výsledkov.</Card.Text>
-                                        <Button variant="primary" href="/examinations">Prejsť na vyšetrenia</Button>
+                                        <Card.Title>Zamestnanci</Card.Title>
+                                        <Card.Text>Informácie o zamestnancoch vrátane kvalifikácií, služieb a kontaktov.</Card.Text>
+                                        <Button variant="primary" href="/staff">Prejsť na zamestnancov</Button>
                                     </Card.Body>
                                 </Card>
                             </Col>
@@ -86,19 +82,8 @@ const Home: React.FC = () => {
                             <Col md={4}>
                                 <Card className="mb-3 shadow-sm">
                                     <Card.Body>
-                                        <Card.Title>Zamestnanci</Card.Title>
-                                        <Card.Text>Informácie o zamestnancoch vrátane kvalifikácií, služieb a
-                                            kontaktov.</Card.Text>
-                                        <Button variant="primary" href="/staff">Prejsť na zamestnancov</Button>
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                            <Col md={4}>
-                                <Card className="mb-3 shadow-sm">
-                                    <Card.Body>
                                         <Card.Title>Rozvrh miestností</Card.Title>
-                                        <Card.Text>Kontrola dostupnosti miestností, rezervácie a upravovanie
-                                            rozvrhov.</Card.Text>
+                                        <Card.Text>Kontrola dostupnosti miestností, rezervácie a upravovanie rozvrhov.</Card.Text>
                                         <Button variant="primary" href="/schedule">Prejsť na rozvrh</Button>
                                     </Card.Body>
                                 </Card>
