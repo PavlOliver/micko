@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col, Button, Modal, Form, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import SideBar from './SideBar';
 
@@ -21,6 +21,18 @@ const Zamestnanci: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [specializaciaFilter, setSpecializaciaFilter] = useState('');
     const [uniqueSpecializacie, setUniqueSpecializacie] = useState<string[]>([]);
+    const [specializacie, setSpecializacie] = useState<{ kod: string; nazov: string; }[]>([]);
+
+    const [userRole, setUserRole] = useState<string>('');
+    const [showModal, setShowModal] = useState<boolean>(false);
+    const [formData, setFormData] = useState({
+        rodne_cislo: '',
+        meno: '',
+        priezvisko: '',
+        id_zamestnanca: '',
+        id_specializacie: ''
+    });
+    const [message, setMessage] = useState<string>('');
 
     useEffect(() => {
         axios.get('/home', { withCredentials: true })
@@ -29,6 +41,22 @@ const Zamestnanci: React.FC = () => {
             })
             .catch(error => {
                 console.error('Error fetching username:', error);
+            });
+
+        axios.get('/user-role', { withCredentials: true })
+            .then(response => {
+                setUserRole(response.data.rola);
+            })
+            .catch(error => {
+                console.error('Error fetching user role:', error);
+            });
+
+        axios.get('/specializations', { withCredentials: true })
+            .then(response => {
+                setSpecializacie(response.data.specializations);
+            })
+            .catch(error => {
+                console.error('Error fetching specializations:', error);
             });
 
         const fetchZamestnanci = async () => {
@@ -69,6 +97,44 @@ const Zamestnanci: React.FC = () => {
         return matchesSearch && matchesSpecializacia;
     });
 
+    const handleShowModal = () => setShowModal(true);
+    const handleCloseModal = () => setShowModal(false);
+
+    const fetchZamestnanci = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get('/staff', { withCredentials: true });
+            console.log('Response:', response.data);
+            setZamestnanci(response.data.zamestnanci);
+        } catch (err) {
+            console.error('Fetch error:', err);
+            setError('Nepodarilo sa načítať zamestnancov');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        axios.post('/add-employee', formData, { withCredentials: true })
+            .then(response => {
+                setMessage('Nový zamestnanec bol úspešne pridaný.');
+                setShowModal(false);
+                setFormData({
+                    rodne_cislo: '',
+                    meno: '',
+                    priezvisko: '',
+                    id_zamestnanca: '',
+                    id_specializacie: ''
+                });
+                fetchZamestnanci();
+            })
+            .catch(error => {
+                setError('Pridanie nového zamestnanca zlyhalo.');
+                console.error('Error adding new employee:', error);
+            });
+    };
+
     return (
         <Container fluid>
             <Row>
@@ -84,7 +150,11 @@ const Zamestnanci: React.FC = () => {
                     transition: 'margin-left 0.3s'
                 }}>
                     <h2>Zamestnanci nemocnice</h2>
-
+                    {userRole === 'A' && (
+                        <Button variant="primary" onClick={handleShowModal}>
+                            + Pridať zamestnanca
+                        </Button>
+                    )}
                     <div className="mb-4 row">
                         <div className="col-md-6 mb-3">
                             <input
@@ -134,6 +204,73 @@ const Zamestnanci: React.FC = () => {
                     </div>
                 </Col>
             </Row>
+            <Modal show={showModal} onHide={handleCloseModal}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Pridať nového zamestnanca</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={handleFormSubmit}>
+                        <Form.Group controlId="formRodneCislo">
+                            <Form.Label>Rodné číslo</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={formData.rodne_cislo}
+                                onChange={(e) => setFormData({ ...formData, rodne_cislo: e.target.value })}
+                                maxLength={10}
+                                pattern="\d{1,10}"
+                                required
+                            />
+                        </Form.Group>
+                        <Form.Group controlId="formMeno">
+                            <Form.Label>Meno</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={formData.meno}
+                                onChange={(e) => setFormData({ ...formData, meno: e.target.value })}
+                                required
+                            />
+                        </Form.Group>
+                        <Form.Group controlId="formPriezvisko">
+                            <Form.Label>Priezvisko</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={formData.priezvisko}
+                                onChange={(e) => setFormData({ ...formData, priezvisko: e.target.value })}
+                                required
+                            />
+                        </Form.Group>
+                        <Form.Group controlId="formIdZamestnanca">
+                            <Form.Label>ID Zamestnanca</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={formData.id_zamestnanca}
+                                onChange={(e) => setFormData({ ...formData, id_zamestnanca: e.target.value })}
+                                maxLength={4}
+                                required
+                            />
+                        </Form.Group>
+                        <Form.Group controlId="formIdSpecializacie">
+                            <Form.Label>Špecializácia</Form.Label>
+                            <Form.Control
+                                as="select"
+                                value={formData.id_specializacie}
+                                onChange={(e) => setFormData({ ...formData, id_specializacie: e.target.value })}
+                                required
+                            >
+                                <option value="">Vyberte špecializáciu</option>
+                                {specializacie.map(spec => (
+                                    <option key={spec.kod} value={spec.kod}>
+                                        {spec.nazov}
+                                    </option>
+                                ))}
+                            </Form.Control>
+                        </Form.Group>
+                        <Button variant="primary" type="submit" className="mt-3">
+                            Pridať
+                        </Button>
+                    </Form>
+                </Modal.Body>
+            </Modal>
         </Container>
     );
 };

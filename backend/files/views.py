@@ -371,9 +371,7 @@ def manage_user(login):
 @login_required
 def get_zamestnanci():
     try:
-        print("Fetching employees...")
         zamestnanci = select_zamestnanci()
-        print(f"Found {len(zamestnanci)} employees")
         return jsonify({'zamestnanci': zamestnanci})
     except Exception as e:
         print("Error in get_zamestnanci:", str(e))
@@ -387,12 +385,10 @@ def get_rooms():
         query = request.args.get('query')
         print(f"Fetching rooms for query: '{query}'")  # Debug log
         if not query:
-            return jsonify({'rooms': []}), 200  # Return empty list if query is empty
+            return jsonify({'rooms': []}), 200
 
-            # Predpokladáme, že select_rooms() akceptuje filter
         rooms = select_rooms(query=query)
-        print(f"Found {len(rooms)} rooms matching query '{query}'")  # Debug log
-
+        print(f"Found {len(rooms)} rooms matching query '{query}'")
         return jsonify({'rooms': rooms}), 200
 
     except Exception as e:
