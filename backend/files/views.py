@@ -261,6 +261,7 @@ def get_zdravotna_karta(id_poistenca):
         print('meno:', osoba.to_dic())
         print (zdrav_zaznamy)
 
+
         if pacient:
             datum_narodenia = extract_date_of_birth(pacient.rod_cislo)
             zdravotna_karta = {
@@ -272,7 +273,8 @@ def get_zdravotna_karta(id_poistenca):
                 'telefon': osoba.to_dic()['tel_cislo'],
                 'hospitalizacie': hospitalizacie,
                 'vysledkyVysetreni': zdrav_zaznamy,
-                'recepty': rec
+                'recepty': rec,
+                'alergie': pacient.alergie()
             }
             return jsonify({'zdravotna_karta': zdravotna_karta, 'username': select_current_user().login})
         return jsonify({'error': 'Pacient not found'})

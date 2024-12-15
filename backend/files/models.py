@@ -79,6 +79,28 @@ class TAtc(UserDefinedType):
 
         return process
 
+class TAlergia(UserDefinedType):
+    def get_col_spec(self):
+        return "m_t_alergie"
+
+    def bind_processor(self, dialect):
+        def process(value):
+            if value is not None:
+                return f"{value['kod_alergie ']},{value['nazov_alergie ']}"
+            return value
+
+        return process
+
+    def result_processor(self, dialect, coltype):
+        def process(value):
+            if value is not None:
+                return {
+                    'kod_alergie': value.KOD_ALERGIE,
+                    'nazov_alergie ': value.nazov_alergie,
+                }
+            return value
+
+        return process
 
 class Diagnoza(db.Model):
     __tablename__ = 'm_diagnoza'
@@ -120,7 +142,7 @@ class Pacient(db.Model):
     rod_cislo = db.Column(VARCHAR2(10), db.ForeignKey('m_osoba.rod_cislo'), nullable=False)
     datum_od = db.Column(DATE, nullable=False)
     nudzovy_kontakt = db.Column(TNudzovyKontakt, nullable=True)
-
+    alergie = db.Column(TAlergia, nullable=True)
     def get_full_name(self):
         osoba = Osoba.query.filter(Osoba.rod_cislo == self.rod_cislo).first()
         return f"{osoba.meno} {osoba.priezvisko}" if osoba else None
@@ -145,6 +167,13 @@ class Pacient(db.Model):
             'meno': osoba.meno,
             'priezvisko': osoba.priezvisko,
         }
+    def alergie_dict(self):
+        if self.alergie:
+            return {
+                'kod_alergie': self.alergie.kod_alergie,
+                'nazov_alergie': self.alergie.nazov_alergie
+            }
+        return None
 
 
 class Specializacia(db.Model):

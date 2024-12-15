@@ -43,6 +43,9 @@ interface os_udaje {
     hospitalizacie: Hospitalizacia[];
     recepty: Recept[];
     vysledkyVysetreni: VysledokVysetrenia[];
+    krvnaSkupina: string;
+    alergie: string[];
+
 }
 
 
@@ -109,6 +112,14 @@ const ZdravotnaKarta: React.FC = () => {
                                         <strong>Adresa:</strong> {Pacient.adresa.ulica}, {Pacient.adresa.mesto} {Pacient.adresa.psc}
                                     </p>
                                     <p><strong>Telefón:</strong> {Pacient.telefon}</p>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                        <Col md={6}>
+                            <Card className="mb-4">
+                                <Card.Body>
+                                    <Card.Title>Zdravotné údaje</Card.Title>
+                                    <p><strong>Alergie:</strong> {Pacient.alergie.join(', ')}</p>
                                 </Card.Body>
                             </Card>
                         </Col>
