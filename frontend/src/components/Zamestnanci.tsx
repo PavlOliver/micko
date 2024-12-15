@@ -149,12 +149,14 @@ const Zamestnanci: React.FC = () => {
                     marginLeft: isSideBarOpen ? '250px' : '60px',
                     transition: 'margin-left 0.3s'
                 }}>
-                    <h2>Zamestnanci nemocnice</h2>
-                    {userRole === 'A' && (
-                        <Button variant="primary" onClick={handleShowModal}>
-                            + Pridať zamestnanca
-                        </Button>
-                    )}
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                        <h2>Zamestnanci nemocnice</h2>
+                        {userRole === 'A' && (
+                            <Button variant="primary" onClick={handleShowModal}>
+                                + Pridať zamestnanca
+                            </Button>
+                        )}
+                    </div>
                     <div className="mb-4 row">
                         <div className="col-md-6 mb-3">
                             <input
@@ -209,7 +211,7 @@ const Zamestnanci: React.FC = () => {
                     <Modal.Title>Pridať nového zamestnanca</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form onSubmit={handleFormSubmit}>
+                <Form onSubmit={handleFormSubmit}>
                         <Form.Group controlId="formRodneCislo">
                             <Form.Label>Rodné číslo</Form.Label>
                             <Form.Control
