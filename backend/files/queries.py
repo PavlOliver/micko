@@ -82,6 +82,16 @@ def update_order(id, reason, patient, doctor, room, blocks, date, time):
     db.session.commit()
     return order
 
+
+def select_hospitalisations():
+    """this returns all hospitalisations"""
+    hospitalisations = Hospitalizacia.query.all()
+    to_return = []
+    for hospitalisation in hospitalisations:
+        to_return.append(hospitalisation.to_dic())
+    return to_return
+
+
 def insert_new_recept(liek, pacient, lekar, pocet, poznamka, vystavenie):
     """creates a new recept"""
     if pocet <= 0:
@@ -229,14 +239,4 @@ def select_hospitalized():
     print(hospitalized)
     return [hospitalizacia.to_dic() for hospitalizacia in hospitalized]
 
-def update_patient_info_in_database(id_poistenca, updated_data):
-    print('daco')
-    pacient = Pacient.query.filter_by(id_poistenca=id_poistenca).first()
-    rodnecislo = pacient.rod_cislo
-    print(rodnecislo)
-    osoba = Osoba.query.filter_by(rod_cislo=rodnecislo).first()
-    osoba.tel_cislo = updated_data['telefon']
-    db.session.commit()
-
-    pass
 
