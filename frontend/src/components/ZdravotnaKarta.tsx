@@ -89,7 +89,12 @@ const ZdravotnaKarta: React.FC = () => {
     const handleCloseEditModal = () => setShowEditModal(false);
 
     const handleSaveChanges = () => {
-        axios.post(`/pacient/${id_poistenca}/zmenaUdajov`, formData, {withCredentials: true})
+        axios.put(`/pacient/${id_poistenca}/zmenaUdajov`, formData, {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            withCredentials: true
+        })
             .then(response => {
                 setPacient(response.data.zdravotna_karta);
                 setShowEditModal(false);

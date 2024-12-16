@@ -489,6 +489,7 @@ def sklad_liekov():
             print("Error creating inventory item:", str(e))
             return jsonify({'error': str(e)}), 500
 
+
 @views.route('/hosp', methods=['GET'])
 @login_required
 def host():
@@ -501,24 +502,28 @@ def host():
         return jsonify({'error': str(e)}), 500
 
 
-
-
-@views.route('/pacient/<id_poistenca>/zmenaUdajov', methods=['POST'])
+@views.route('/pacient/<id_poistenca>/zmenaUdajov', methods=['POST', 'PUT', 'GET'])
 @login_required
 def update_patient_info(id_poistenca):
-    try:
+    if request.method == 'PUT':
+        print(request.get_json())
+        from sqlalchemy import text
+        query = text("""
+            UPDATE PAVLANIN2.M_OSOBA 
+            SET TEL_CISLO = :tel_cislo 
+            WHERE ROD_CISLO = '5410284816'
+        """)
+        query = query.bindparams(tel_cislo=request.get_json()['telefon'])
+        db.session.execute(query)
+        db.session.commit()
+
+        return '', 201
+    else:
         updated_data = request.get_json()
         print(f"Received updated data: {updated_data}")
         print(id_poistenca)
-
-        update_patient_info_in_database(id_poistenca, updated_data)
-
-       # updated_patient = update_patient_in_database(id_poistenca, updated_data)
-
-        #if updated_patient:
-         #   return jsonify({'zdravotna_karta': updated_patient}), 200
-        #else:
-        return jsonify({'error': 'Patient not found'}), 404
-    except Exception as e:
-        print(f'Error updating patient data: {e}')
-        return jsonify({'error': 'Internal server error'}), 500
+        pacient = Pacient.query.filter_by(id_poistenca=id_poistenca).first().rod_cislo
+        o = Osoba.query.filter_by(rod_cislo=pacient).first()
+        print(o.meno)
+        o.tel_cislo = updated_data['telefon']
+        return '', 200
