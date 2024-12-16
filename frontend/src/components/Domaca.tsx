@@ -36,7 +36,8 @@ const Home: React.FC = () => {
                         <Row className="mb-4">
                             <Col className="mt-3">
                                 <h1>Vitajte v Nemocničnom Informačnom Systéme</h1>
-                                <p className="mt-5">Nemocničný informačný systém poskytuje kompletnú správu pacientov, zamestnancov,
+                                <p className="mt-5">Nemocničný informačný systém poskytuje kompletnú správu pacientov,
+                                    zamestnancov,
                                     vyšetrení, hospitalizácií a rozvrhov lekárov. Zjednodušuje správu nemocnice a
                                     pomáha efektívne organizovať prácu všetkým pracovníkom.</p>
                             </Col>
@@ -46,7 +47,8 @@ const Home: React.FC = () => {
                                 <Card className="mb-3 shadow-sm">
                                     <Card.Body>
                                         <Card.Title>Pacienti</Card.Title>
-                                        <Card.Text>Spravujte údaje o pacientoch, vrátane ich anamnézy, diagnóz a kontaktov.</Card.Text>
+                                        <Card.Text>Spravujte údaje o pacientoch vrátane ich anamnézy, diagnóz a
+                                            kontaktov.</Card.Text>
                                         <Button variant="primary" href="/patients">Prejsť na pacientov</Button>
                                     </Card.Body>
                                 </Card>
@@ -54,9 +56,10 @@ const Home: React.FC = () => {
                             <Col md={4}>
                                 <Card className="mb-3 shadow-sm">
                                     <Card.Body>
-                                        <Card.Title>Hospitalizácie</Card.Title>
-                                        <Card.Text>Prehľad hospitalizácií, aktuálny stav pacientov a záznamy o liečbe.</Card.Text>
-                                        <Button variant="primary" href="/hospitalizations">Prejsť na hospitalizácie</Button>
+                                        <Card.Title>Sklad Liekov</Card.Title>
+                                        <Card.Text>Spravujte zásoby liekov, záznamy o pohybe liekov a kontrolujte ich
+                                            dostupnosť.</Card.Text>
+                                        <Button variant="primary" href="/sklad-liekov">Prejsť na sklad liekov</Button>
                                     </Card.Body>
                                 </Card>
                             </Col>
@@ -64,7 +67,8 @@ const Home: React.FC = () => {
                                 <Card className="mb-3 shadow-sm">
                                     <Card.Body>
                                         <Card.Title>Zamestnanci</Card.Title>
-                                        <Card.Text>Informácie o zamestnancoch vrátane kvalifikácií, služieb a kontaktov.</Card.Text>
+                                        <Card.Text>Informácie o zamestnancoch vrátane kvalifikácií, služieb a
+                                            kontaktov.</Card.Text>
                                         <Button variant="primary" href="/staff">Prejsť na zamestnancov</Button>
                                     </Card.Body>
                                 </Card>
@@ -74,17 +78,41 @@ const Home: React.FC = () => {
                             <Col md={4}>
                                 <Card className="mb-3 shadow-sm">
                                     <Card.Body>
-                                        <Card.Title>Rozvrh miestností</Card.Title>
-                                        <Card.Text>Kontrola dostupnosti miestností, rezervácie a upravovanie rozvrhov.</Card.Text>
-                                        <Button variant="primary" href="/schedule">Prejsť na rozvrh</Button>
+                                        <Card.Title>Objednávky</Card.Title>
+                                        <Card.Text>Spravujte dostupnosť miestností, rezervácie a upravovanie
+                                            rozvrhov.</Card.Text>
+                                        <Button variant="primary" href="/orders">Prejsť na objednávky</Button>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                            <Col md={4}>
+                                <Card className="mb-3 shadow-sm">
+                                    <Card.Body>
+                                        <Card.Title>Analýza</Card.Title>
+                                        <Card.Text>Prehľadajte a analyzujte hospitalizácie, zdravotné záznamy a ďalšie
+                                            údaje.</Card.Text>
+                                        <Button variant="primary" href="/analysis">Prejsť na analýzu</Button>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                            <Col md={4}>
+                                <Card className="mb-3 shadow-sm">
+                                    <Card.Body>
+                                        <Card.Title>Správa používateľov</Card.Title>
+                                            <Card.Text style={{ marginBottom: '2.5rem' }}>Spravujte používateľov, ich prístupy a povolenia v systéme.</Card.Text>
+
+                                        <Button variant="primary" href="/user-management">Prejsť na správu
+                                            používateľov</Button>
                                     </Card.Body>
                                 </Card>
                             </Col>
                         </Row>
+
                     </Col>
                 </Row>
             </Container>
-        );
+        )
+            ;
     } else {
         return null;
     }

@@ -1,13 +1,11 @@
-import os
 from datetime import timedelta
 from io import BytesIO
 
-from flask import Blueprint, jsonify, request, send_file, url_for
-
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask import Blueprint, jsonify, request, send_file
 from flask_login import login_required
-from .models import Liek, SkladLiekov
+from werkzeug.security import generate_password_hash, check_password_hash
 
+from .models import Liek, SkladLiekov
 from .queries import *
 
 views = Blueprint('views', __name__)
@@ -502,28 +500,6 @@ def host():
         return jsonify({'error': str(e)}), 500
 
 
-@views.route('/pacient/<id_poistenca>/zmenaUdajov', methods=['POST', 'PUT', 'GET'])
-@login_required
-def update_patient_info(id_poistenca):
-    if request.method == 'PUT':
-        print(request.get_json())
-        from sqlalchemy import text
-        query = text("""
-            UPDATE PAVLANIN2.M_OSOBA 
-            SET TEL_CISLO = :tel_cislo 
-            WHERE ROD_CISLO = '5410284816'
-        """)
-        query = query.bindparams(tel_cislo=request.get_json()['telefon'])
-        db.session.execute(query)
-        db.session.commit()
 
-        return '', 201
-    else:
-        updated_data = request.get_json()
-        print(f"Received updated data: {updated_data}")
-        print(id_poistenca)
-        pacient = Pacient.query.filter_by(id_poistenca=id_poistenca).first().rod_cislo
-        o = Osoba.query.filter_by(rod_cislo=pacient).first()
-        print(o.meno)
-        o.tel_cislo = updated_data['telefon']
-        return '', 200
+
+
